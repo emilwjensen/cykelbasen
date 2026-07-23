@@ -44,6 +44,8 @@ export default async function MyBikesPage() {
                 <span>
                   {bike.ownership_ended_on
                     ? "Tidligere cykel"
+                    : bike.retired_on
+                      ? "Pensioneret cykel"
                     : categoryLabel(bike.category)}
                 </span>
                 <strong>{bike.current_odometer_km.toLocaleString("da-DK")} km</strong>
@@ -54,7 +56,9 @@ export default async function MyBikesPage() {
                 {bike.model_year ? ` · ${bike.model_year}` : ""}
                 {bike.frame_size_label ? ` · str. ${bike.frame_size_label}` : ""}
               </p>
-              {!bike.ownership_ended_on && bike.due_reminder_count > 0 && (
+              {!bike.ownership_ended_on &&
+                !bike.retired_on &&
+                bike.due_reminder_count > 0 && (
                 <div className="garage-card__maintenance is-due">
                   {bike.due_reminder_count}{" "}
                   {bike.due_reminder_count === 1
@@ -63,6 +67,7 @@ export default async function MyBikesPage() {
                 </div>
               )}
               {!bike.ownership_ended_on &&
+                !bike.retired_on &&
                 bike.due_reminder_count === 0 &&
                 bike.open_reminder_count > 0 && (
                   <div className="garage-card__maintenance">

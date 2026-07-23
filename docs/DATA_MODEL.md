@@ -17,6 +17,11 @@ cover both published and reserved listings. Private date- and odometer-based
 maintenance reminders with atomic log completion are added by migration `020`.
 Migration `021` adds upload metadata, editable-state storage policies,
 database-backed upload limits and atomic image management functions.
+Migration `022` expands the private bike passport and adds private bike
+documents. Migration `023` adds bike retirement plus append-only revisions for
+logs and maintenance plans. Migration `024` adds in-app notifications,
+preferences and the verified account-deletion/anonymization workflow.
+Migration `025` prevents retired bikes from being attached to new listings.
 
 ## Public data
 
@@ -111,7 +116,9 @@ shared history of the physical bike.
 ### bike_log_entries
 
 Private ride, service, inspection, note and component-change history belonging
-to a garage bike.
+to a garage bike. Incorrect entries are corrected or voided through
+security-definer functions; `bike_log_revisions` stores the complete prior
+version and the owner's reason.
 
 ### bike_maintenance_reminders
 
@@ -119,6 +126,26 @@ Private maintenance plan for one owner's bike registration. A reminder requires
 a due date, an odometer target or both. Owners can insert reminders through
 RLS, but completion fields are writable only by a security-definer function
 that creates and links a maintenance log in the same transaction.
+Editing, snoozing and cancellation use audited functions and
+`bike_reminder_revisions`.
+
+### bike_documents
+
+Private immutable metadata for purchase receipts, sales agreements, service
+receipts, warranty, insurance and appraisals. Files live only in the private
+Blob store and are never transferred to a later owner.
+
+### bike_lifecycle_events
+
+Append-only retirement and reactivation history. Retirement preserves the bike
+passport and ownership chain while blocking new logs, reminders, listings and
+ownership-transfer invites.
+
+### notifications and notification_preferences
+
+Private in-app events and per-user delivery choices. Due maintenance is
+calculated from current reminder and odometer data instead of being copied into
+stale notification rows.
 
 ### listing_status_events
 

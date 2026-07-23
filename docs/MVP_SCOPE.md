@@ -41,6 +41,18 @@
 - Add ride, service, inspection, note and component-change logs
 - Plan maintenance by date or odometer and complete it into the bike log
 - Prefill a sales listing from a registered bike
+- Standardized brand, specs, acquisition source and private purchase data
+- Private receipt, warranty, insurance and service-document uploads
+- Retire/reactivate a bike without erasing its ownership chain
+- Audit-friendly log correction and reminder edit/snooze/cancellation
+
+### Account and operations
+
+- Self-service JSON account export
+- Password-verified Neon Auth deletion with application-data anonymization
+- In-app notifications and maintenance-due overview
+- Authenticated Playwright journey with an isolated test account
+- Health endpoint plus monitoring and restore rehearsal runbooks
 
 ### Forum
 

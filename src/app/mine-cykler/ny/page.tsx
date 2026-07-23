@@ -46,7 +46,7 @@ export default async function NewBikePage({
 
       <form action={createGarageBikeAction} className="listing-form garage-form">
         <fieldset>
-          <legend>1. Identitet</legend>
+          <legend>Identitet</legend>
           <div className="form-grid form-grid--two">
             <label className="form-field form-field--wide">
               Kaldenavn
@@ -104,7 +104,7 @@ export default async function NewBikePage({
         </fieldset>
 
         <fieldset>
-          <legend>2. Tekniske specifikationer</legend>
+          <legend>Tekniske specifikationer</legend>
           <p className="form-help">
             Strukturerede data gør service, senere salg og sammenligning mere
             præcis. Du kan altid rette dem senere.
@@ -166,7 +166,7 @@ export default async function NewBikePage({
         </fieldset>
 
         <fieldset>
-          <legend>3. Køb og ejerskab</legend>
+          <legend>Køb og ejerskab</legend>
           <div className="form-grid form-grid--three">
             <label className="form-field">
               Anskaffelsesdato
@@ -228,7 +228,7 @@ export default async function NewBikePage({
         </fieldset>
 
         <fieldset>
-          <legend>4. Private noter</legend>
+          <legend>Private noter</legend>
           <label className="form-field">
             Det du vil huske om cyklen
             <textarea maxLength={5_000} name="notes" rows={6} />

@@ -1,0 +1,126 @@
+.bike-passport-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  margin-top: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--line);
+}
+
+.bike-passport-grid > div {
+  min-width: 0;
+  padding: 18px;
+  background: var(--white);
+}
+
+.bike-passport-grid dt {
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 760;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bike-passport-grid dd {
+  margin: 0;
+  color: var(--forest-deep);
+  font-weight: 680;
+  overflow-wrap: anywhere;
+}
+
+.bike-documents,
+.bike-lifecycle {
+  margin-top: 34px;
+}
+
+.bike-documents__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.bike-documents__list,
+.notification-list,
+.audit-list {
+  display: grid;
+  gap: 12px;
+}
+
+.bike-documents__list article,
+.notification-list > article,
+.notification-list > a {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  color: inherit;
+  text-decoration: none;
+}
+
+.bike-documents__list article > div:first-child,
+.notification-list > article > div:first-child {
+  min-width: 0;
+}
+
+.bike-documents__list h3 {
+  margin: 3px 0;
+}
+
+.bike-documents__list p,
+.notification-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.notification-list > article.is-unread {
+  border-left: 4px solid var(--accent);
+  background: color-mix(in srgb, var(--mint) 34%, var(--white));
+}
+
+.notification-list > a {
+  flex-direction: column;
+}
+
+.audit-list {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.audit-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.audit-list span {
+  color: var(--muted);
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .bike-passport-grid,
+  .bike-documents__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .bike-documents__list article,
+  .notification-list > article,
+  .audit-list li {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .audit-list span {
+    text-align: left;
+  }
+}

@@ -12,8 +12,11 @@ seller-to-moderator test, but is not ready for a public launch yet.
 
 The complete application workflow now includes validated image/document
 uploads, image ordering, private short-lived previews, atomic review/publication
-and audit. The remaining P0 work is external provisioning and evidence from the
-first full browser journey against those real stores.
+and audit. Private bike passports now include structured specs, receipts,
+lifecycle status and audited corrections. Account export/deletion,
+notifications, an authenticated browser journey and operational runbooks are
+implemented. The remaining P0 work is external provisioning and evidence from
+the first full browser journey against those real stores.
 
 ## Implemented
 
@@ -90,6 +93,19 @@ first full browser journey against those real stores.
 - Show privacy-safe ownership periods on connected public listings.
 - Edit the identity and private notes of an active registered bike while
   retaining log-based odometer history.
+- Standardized brand selection and reusable technical/acquisition data.
+- Private receipts, purchase agreements, warranty, insurance and service files.
+- Retirement/reactivation without deleting ownership history.
+- Append-only before-versions for log corrections and reminder changes.
+- Reminder edit, cancel and 30-day snooze.
+
+### Account and operations
+
+- Self-service JSON export without object paths or frame-number hashes.
+- Password-verified Neon Auth deletion plus application anonymization.
+- In-app contact/review notifications and live maintenance-due overview.
+- Health endpoint, monitoring baseline and restore rehearsal.
+- Environment-gated authenticated Playwright bike-pass journey.
 
 ### Forum and moderation
 
@@ -123,21 +139,20 @@ images use CDN URLs, and private evidence uses scoped short-lived access.
 
 ### Mine cykler
 
-- Retire a registered bike without erasing its ownership chain.
-- Edit or remove incorrect log entries with an audit-friendly policy.
-- Upload private receipts and service documents after storage is selected.
 - Select which bike-log component changes should be copied into a listing.
-- Edit/cancel/snooze maintenance reminders and add recurring intervals.
+- Add recurring maintenance intervals.
 
 ### Reliability and operations
 
 - Extend rate limits to authentication-sensitive actions.
-- Browser-level tests for signup, profile, draft, favorite and authenticated
-  forum writes. Public browse/forum smoke tests now pass.
+- Browser-level tests for signup, profile, listing media/moderation, favorite
+  and authenticated forum writes. Public browse/forum and authenticated
+  bike-pass/export journeys are present.
 - Browser-level test for the seller-to-moderator publication path.
-- Error tracking, product analytics and database monitoring.
-- Finalize retention rules and a self-service user deletion/export process.
-- Backup/restore rehearsal and orphaned Blob cleanup.
+- Activate Vercel/Neon alerts and select privacy-safe error tracking/analytics.
+- Finalize legal retention rules.
+- Execute and record the documented backup/restore rehearsal and add orphaned
+  Blob cleanup.
 
 ## Recommended sequence
 

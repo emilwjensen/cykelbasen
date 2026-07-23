@@ -95,6 +95,10 @@ is private and supports:
 - ride, service, inspection and component-change logs
 - date- and odometer-based maintenance reminders
 - documentation-presence markers without exposing files
+- structured frame, groupset, brake, wheel and acquisition data
+- private receipts, agreements, warranty, insurance and service documents
+- retirement/reactivation without erasing the ownership chain
+- audit-preserving log corrections and maintenance-plan changes
 - connected ownership periods when a seller hands the registration to a buyer
 
 A registered bike can prefill a later listing. Public listing history remains an

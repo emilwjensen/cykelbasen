@@ -92,6 +92,9 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <Link className="text-link account-aside__link" href="/mine-cykler">
             Eller registrér din egen cykel <span aria-hidden="true">→</span>
           </Link>
+          <Link className="text-link account-aside__link" href="/konto">
+            Dataeksport og kontosletning <span aria-hidden="true">→</span>
+          </Link>
         </aside>
       </div>
     </div>

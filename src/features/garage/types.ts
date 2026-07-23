@@ -26,6 +26,7 @@ export type GarageBikeSummary = {
   frame_size_label: string | null;
   acquired_on: string;
   ownership_ended_on: string | null;
+  retired_on: string | null;
   current_odometer_km: number;
   log_count: number;
   open_reminder_count: number;
@@ -54,7 +55,9 @@ export type BikeLogEntry = {
   component_brand: string | null;
   component_model: string | null;
   documentation_available: boolean;
+  revision_count: number;
   created_at: string;
+  updated_at: string;
 };
 
 export type BikeMaintenanceReminder = {
@@ -66,7 +69,9 @@ export type BikeMaintenanceReminder = {
   notes: string | null;
   completed_at: string | null;
   completed_log_id: string | null;
+  revision_count: number;
   created_at: string;
+  updated_at: string;
 };
 
 export type GarageBikeDetail = GarageBikeSummary & {
@@ -88,6 +93,14 @@ export type GarageBikeDetail = GarageBikeSummary & {
     | null;
   purchase_price_dkk: number | null;
   purchase_location: string | null;
+  retirement_reason:
+    | "worn-out"
+    | "crashed"
+    | "stolen"
+    | "lost"
+    | "other"
+    | null;
+  retirement_note: string | null;
   acquired_used: boolean;
   owner_count_at_acquisition: number;
   has_serial_number: boolean;
@@ -96,6 +109,15 @@ export type GarageBikeDetail = GarageBikeSummary & {
   reminders: BikeMaintenanceReminder[];
   ownership_history: BikeOwnershipPeriod[];
   documents: BikeDocument[];
+  lifecycle_events: BikeLifecycleEvent[];
+};
+
+export type BikeLifecycleEvent = {
+  id: string;
+  event_type: "retired" | "reactivated";
+  reason: string | null;
+  occurred_on: string;
+  created_at: string;
 };
 
 export type BikeDocument = {

@@ -124,6 +124,10 @@ export const bikeLogSchema = z.object({
   documentationAvailable: z.boolean(),
 });
 
+export const bikeLogCorrectionSchema = bikeLogSchema.extend({
+  correctionReason: z.string().trim().min(3).max(500),
+});
+
 export const bikeMaintenanceReminderSchema = z
   .object({
     title: z.string().trim().min(3).max(120),
@@ -143,6 +147,19 @@ export const bikeMaintenanceReminderSchema = z
       path: ["dueOn"],
     },
   );
+
+export const bikeMaintenanceReminderEditSchema =
+  bikeMaintenanceReminderSchema.and(
+    z.object({
+      changeReason: z.string().trim().min(3).max(500),
+    }),
+  );
+
+export const retireBikeSchema = z.object({
+  retiredOn: pastDate,
+  reason: z.enum(["worn-out", "crashed", "stolen", "lost", "other"]),
+  note: optionalText(1_000),
+});
 
 export const acceptBikeTransferSchema = z.object({
   token: z.string().trim().min(24).max(200),

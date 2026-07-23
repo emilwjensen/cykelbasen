@@ -9,7 +9,7 @@ Use Vercel Blob as the external object-storage provider.
 Create two stores with separate credentials:
 
 - a public store for listing images
-- a private store for ownership evidence
+- a private store for ownership evidence and bike-pass documents
 
 Neon stores only object references, public image URLs and file metadata. It does
 not store uploaded bytes.
@@ -23,8 +23,9 @@ short-lived, object-scoped read URL.
 ## Security boundaries
 
 - `LISTING_IMAGES_BLOB_READ_WRITE_TOKEN` can access only the public image store.
-- `OWNERSHIP_DOCUMENTS_BLOB_READ_WRITE_TOKEN` can access only the private
-  document store.
+- `PRIVATE_DOCUMENTS_BLOB_READ_WRITE_TOKEN` can access only the private
+  document store. The older ownership-specific variable remains a temporary
+  compatibility fallback.
 - Tokens are server-only and never included in browser bundles.
 - Image uploads allow JPEG, PNG and WebP up to 5 MB.
 - Document uploads allow PDF, JPEG, PNG and WebP up to 10 MB.
@@ -48,4 +49,3 @@ that listing images and ownership documents have different exposure.
   limit. A later client-upload slice can be added if larger files become a real
   requirement.
 - Blob lifecycle and backup procedures remain an operations responsibility.
-

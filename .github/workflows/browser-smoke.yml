@@ -7,6 +7,11 @@ on:
         description: "Fuldt URL til et deployet preview eller production"
         required: true
         type: string
+      run_authenticated:
+        description: "Kør også login og cykelregistrering mod testkontoen"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   public-browser-smoke:
@@ -37,3 +42,13 @@ jobs:
           PLAYWRIGHT_BASE_URL: ${{ inputs.base_url }}
         run: pnpm test:e2e
 
+      - name: Run authenticated browser journey
+        if: ${{ inputs.run_authenticated }}
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ inputs.base_url }}
+          E2E_USER_EMAIL: ${{ secrets.E2E_USER_EMAIL }}
+          E2E_USER_PASSWORD: ${{ secrets.E2E_USER_PASSWORD }}
+        run: |
+          test -n "$E2E_USER_EMAIL"
+          test -n "$E2E_USER_PASSWORD"
+          pnpm exec playwright test e2e/authenticated.spec.ts

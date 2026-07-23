@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 const supportEmail =
-  process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "kontakt@cykelbasen.dk";
+  process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim() || "kontakt@cykelbasen.dk";
 
 export default function TermsPage() {
   return (
@@ -65,4 +65,3 @@ export default function TermsPage() {
     </article>
   );
 }
-

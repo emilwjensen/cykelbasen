@@ -37,6 +37,7 @@ export async function getGarageBikes(
         bike.purchase_price_dkk,
         bike.purchase_location,
         bike.ownership_ended_on,
+        bike.retired_on,
         bike.current_odometer_km,
         bike.updated_at,
         coalesce(log_stats.log_count, 0)::int as log_count,
@@ -58,14 +59,17 @@ export async function getGarageBikes(
           max(log.occurred_on) as last_log_on
         from public.bike_log_entries log
         where log.bike_id = bike.id
+          and log.voided_at is null
       ) log_stats on true
       left join lateral (
         select
           count(*) filter (
             where reminder.completed_at is null
+              and reminder.cancelled_at is null
           )::int as open_count,
           count(*) filter (
             where reminder.completed_at is null
+              and reminder.cancelled_at is null
               and (
                 reminder.due_on <= current_date
                 or reminder.due_odometer_km <= bike.current_odometer_km
@@ -112,6 +116,9 @@ export async function getGarageBike(
         bike.purchase_price_dkk,
         bike.purchase_location,
         bike.ownership_ended_on,
+        bike.retired_on,
+        bike.retirement_reason,
+        bike.retirement_note,
         bike.acquired_used,
         bike.owner_count_at_acquisition,
         bike.current_odometer_km,
@@ -137,14 +144,17 @@ export async function getGarageBike(
           max(log.occurred_on) as last_log_on
         from public.bike_log_entries log
         where log.bike_id = bike.id
+          and log.voided_at is null
       ) log_stats on true
       left join lateral (
         select
           count(*) filter (
             where reminder.completed_at is null
+              and reminder.cancelled_at is null
           )::int as open_count,
           count(*) filter (
             where reminder.completed_at is null
+              and reminder.cancelled_at is null
               and (
                 reminder.due_on <= current_date
                 or reminder.due_odometer_km <= bike.current_odometer_km
@@ -170,10 +180,18 @@ export async function getGarageBike(
         component_category,
         component_brand,
         component_model,
-        documentation_available,
-        created_at
-      from public.bike_log_entries
+        log.documentation_available,
+        log.created_at,
+        log.updated_at,
+        coalesce(revisions.revision_count, 0)::int as revision_count
+      from public.bike_log_entries log
+      left join lateral (
+        select count(*)::int as revision_count
+        from public.bike_log_revisions revision
+        where revision.log_entry_id = log.id
+      ) revisions on true
       where bike_id = ${bikeId}::uuid
+        and log.voided_at is null
       order by occurred_on desc, created_at desc
     `,
     transaction`
@@ -198,10 +216,18 @@ export async function getGarageBike(
         reminder.notes,
         reminder.completed_at,
         reminder.completed_log_id,
-        reminder.created_at
+        reminder.created_at,
+        reminder.updated_at,
+        coalesce(revisions.revision_count, 0)::int as revision_count
       from public.bike_maintenance_reminders reminder
+      left join lateral (
+        select count(*)::int as revision_count
+        from public.bike_reminder_revisions revision
+        where revision.reminder_id = reminder.id
+      ) revisions on true
       where reminder.bike_id = ${bikeId}::uuid
         and reminder.owner_id = ${userId}
+        and reminder.cancelled_at is null
       order by
         (reminder.completed_at is not null),
         reminder.due_on nulls last,
@@ -225,12 +251,24 @@ export async function getGarageBike(
         document.document_date desc nulls last,
         document.created_at desc
     `,
+    transaction`
+      select
+        event.id,
+        event.event_type,
+        event.reason,
+        event.occurred_on,
+        event.created_at
+      from public.bike_lifecycle_events event
+      where event.bike_id = ${bikeId}::uuid
+        and event.owner_id = ${userId}
+      order by event.created_at desc
+    `,
   ]);
 
   const bikes = results[1] as unknown as Array<
     Omit<
       GarageBikeDetail,
-      "logs" | "reminders" | "ownership_history" | "documents"
+      "logs" | "reminders" | "ownership_history" | "documents" | "lifecycle_events"
     >
   >;
   const bike = bikes[0];
@@ -242,5 +280,6 @@ export async function getGarageBike(
     ownership_history: results[3] as unknown as BikeOwnershipPeriod[],
     reminders: results[4] as unknown as GarageBikeDetail["reminders"],
     documents: results[5] as unknown as GarageBikeDetail["documents"],
+    lifecycle_events: results[6] as unknown as GarageBikeDetail["lifecycle_events"],
   };
 }

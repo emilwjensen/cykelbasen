@@ -88,6 +88,11 @@ Deadlines may use a date, an odometer target or both. Completing a reminder
 through the database function creates the corresponding maintenance log and
 links it back atomically. Reminders do not transfer to the next owner.
 
+Receipts and service evidence use `bike_documents` metadata and the same
+private Blob store as ownership evidence, under a separate `bike-documents/`
+namespace. The files never follow a public listing or ownership transfer.
+Corrections append a before-snapshot and reason to dedicated revision tables.
+
 ## Data access
 
 - Server components run read queries.

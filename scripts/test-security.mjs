@@ -1750,6 +1750,198 @@ try {
   await storagePolicyClient.end();
 }
 
+const bikePassportClient = createDatabaseClient();
+
+try {
+  await bikePassportClient.connect();
+  await bikePassportClient.query("begin");
+  await bikePassportClient.query("set local role cykelbasen_app");
+  await bikePassportClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+
+  const bikeDocument = await bikePassportClient.query(
+    `
+      insert into public.bike_documents (
+        bike_id,
+        owner_id,
+        document_type,
+        title,
+        object_key,
+        original_filename,
+        content_type,
+        size_bytes
+      )
+      values ($1::uuid, $2, 'purchase-receipt', $3, $4, $5, $6, $7)
+      returning id
+    `,
+    [
+      "70000000-0000-4000-8000-000000000001",
+      "seed-seller-anna",
+      "Midlertidig sikkerhedskvittering",
+      "security-test/bike/receipt.pdf",
+      "receipt.pdf",
+      "application/pdf",
+      200,
+    ],
+  );
+  assert(
+    Boolean(bikeDocument.rows[0]?.id),
+    "Ejeren kunne ikke oprette et privat cykeldokument.",
+  );
+
+  const ownerLog = await bikePassportClient.query(
+    `
+      select id, log_type, title, details, occurred_on, distance_km,
+        odometer_km, cost_dkk, component_category, component_brand,
+        component_model, documentation_available
+      from public.bike_log_entries
+      where bike_id = $1::uuid and voided_at is null
+      order by created_at
+      limit 1
+    `,
+    ["70000000-0000-4000-8000-000000000001"],
+  );
+  const log = ownerLog.rows[0];
+  const corrected = await bikePassportClient.query(
+    `
+      select public.correct_bike_log_entry(
+        $1::uuid,
+        $2::public.bike_log_type,
+        $3,
+        $4,
+        $5::date,
+        $6,
+        $7,
+        $8,
+        $9::public.component_category,
+        $10,
+        $11,
+        $12,
+        $13
+      ) as corrected
+    `,
+    [
+      log.id,
+      log.log_type,
+      `${log.title} rettet`,
+      log.details ?? "",
+      log.occurred_on,
+      log.distance_km,
+      log.odometer_km,
+      log.cost_dkk,
+      log.component_category,
+      log.component_brand ?? "",
+      log.component_model ?? "",
+      log.documentation_available,
+      "Sikkerhedstest af revisionsspor",
+    ],
+  );
+  const logAudit = await bikePassportClient.query(
+    `
+      select count(*)::int as count
+      from public.bike_log_revisions
+      where log_entry_id = $1::uuid
+        and revision_type = 'corrected'
+    `,
+    [log.id],
+  );
+  assert(
+    corrected.rows[0]?.corrected === true &&
+      logAudit.rows[0]?.count === 1,
+    "En logrettelse bevarede ikke præcis én før-version.",
+  );
+
+  const reminder = await bikePassportClient.query(
+    `
+      select id, due_on
+      from public.bike_maintenance_reminders
+      where owner_id = $1
+        and completed_at is null
+        and cancelled_at is null
+      order by created_at
+      limit 1
+    `,
+    ["seed-seller-anna"],
+  );
+  const reminderId = reminder.rows[0]?.id;
+  const snoozed = await bikePassportClient.query(
+    "select public.snooze_bike_maintenance_reminder($1::uuid, 30) as snoozed",
+    [reminderId],
+  );
+  const reminderAudit = await bikePassportClient.query(
+    `
+      select count(*)::int as count
+      from public.bike_reminder_revisions
+      where reminder_id = $1::uuid
+        and revision_type = 'snoozed'
+    `,
+    [reminderId],
+  );
+  assert(
+    snoozed.rows[0]?.snoozed === true &&
+      reminderAudit.rows[0]?.count === 1,
+    "Udsættelse af en påmindelse fik ikke et auditspor.",
+  );
+
+  const retired = await bikePassportClient.query(
+    `
+      select public.retire_garage_bike(
+        $1::uuid,
+        current_date,
+        'worn-out'::public.bike_retirement_reason,
+        'Sikkerhedstest'
+      ) as retired
+    `,
+    ["70000000-0000-4000-8000-000000000001"],
+  );
+  const reactivated = await bikePassportClient.query(
+    "select public.reactivate_garage_bike($1::uuid, $2) as reactivated",
+    [
+      "70000000-0000-4000-8000-000000000001",
+      "Sikkerhedstesten genaktiverer cyklen",
+    ],
+  );
+  const lifecycleAudit = await bikePassportClient.query(
+    `
+      select count(*)::int as count
+      from public.bike_lifecycle_events
+      where bike_id = $1::uuid
+    `,
+    ["70000000-0000-4000-8000-000000000001"],
+  );
+  assert(
+    retired.rows[0]?.retired === true &&
+      reactivated.rows[0]?.reactivated === true &&
+      lifecycleAudit.rows[0]?.count === 2,
+    "Pensionering og genaktivering bevarede ikke livscyklussen.",
+  );
+
+  await bikePassportClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const privateDocumentLeak = await bikePassportClient.query(
+    "select count(*)::int as count from public.bike_documents",
+  );
+  const privateRevisionLeak = await bikePassportClient.query(
+    "select count(*)::int as count from public.bike_log_revisions",
+  );
+  assert(
+    privateDocumentLeak.rows[0]?.count === 0 &&
+      privateRevisionLeak.rows[0]?.count === 0,
+    "En anden bruger kunne læse cykeldokumenter eller private revisionsspor.",
+  );
+
+  await bikePassportClient.query("rollback");
+} catch (error) {
+  await bikePassportClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await bikePassportClient.end();
+}
+
 console.log(
-  "Security tests passed: storage policies/reordering, bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: private bike documents, bike/log/reminder audits, storage policies/reordering, bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

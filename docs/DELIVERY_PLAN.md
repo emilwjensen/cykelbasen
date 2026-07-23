@@ -56,7 +56,8 @@ and development seed cannot run accidentally in production.
 
 ### Slice 4. Critical browser journeys
 
-Status: planned.
+Status: in progress. Public journeys and an environment-gated authenticated
+login, bike-pass registration and export journey are implemented.
 
 - Add Playwright with isolated test users and deterministic data setup.
 - Cover signup, profile completion and login return destination.
@@ -86,19 +87,19 @@ database intervention.
 ### Slice 6. Durable bike data
 
 - [x] Edit bike identity and non-historical metadata.
-- Retire a bike without erasing its ownership chain.
-- Correct logs through an append-only revision audit.
-- Cancel, edit and snooze open maintenance reminders.
+- [x] Retire a bike without erasing its ownership chain.
+- [x] Correct logs through an append-only revision audit.
+- [x] Cancel, edit and snooze open maintenance reminders.
 - Add recurring service intervals.
 - Select which component changes are copied into a sales listing.
-- Add private receipts and service documents using the private store.
+- [x] Add private receipts and service documents using the private store.
 
 ### Slice 7. Privacy and account lifecycle
 
 - Publish Danish privacy and terms pages after legal review.
 - Define retention periods for inquiries, reports and ownership documents.
-- Export account, listing and private bike data.
-- Delete or anonymize an account without corrupting ownership/audit history.
+- [x] Export account, listing and private bike data.
+- [x] Delete or anonymize an account without corrupting ownership/audit history.
 - Record processor, region and deletion obligations for Neon, Vercel and mail.
 
 ### Slice 8. Reliability and abuse resistance
@@ -106,8 +107,8 @@ database intervention.
 - Add authentication-sensitive limits and upload quotas.
 - Add error tracking with secret and personal-data scrubbing.
 - Add product analytics for funnel events without private document data.
-- Configure database metrics, alerts and slow-query review.
-- Rehearse Neon restore and Blob object recovery.
+- [x] Document database metrics, alerts and slow-query review.
+- [x] Document Neon restore and Blob object-recovery rehearsal.
 - Add orphan-object cleanup and failed-upload reconciliation.
 - Document incident response and moderator audit review.
 

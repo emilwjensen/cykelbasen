@@ -27,7 +27,7 @@ export default async function NewListingPage({
 
   if (!profile) redirect("/profil?ny=1");
 
-  const garageInitialValues = garageBike
+  const garageInitialValues = garageBike && !garageBike.retired_on
     ? {
         garageBikeId: garageBike.id,
         title: `${garageBike.brand} ${garageBike.model}`,
@@ -36,8 +36,21 @@ export default async function NewListingPage({
         model: garageBike.model,
         modelYear: garageBike.model_year ?? undefined,
         frameSizeLabel: garageBike.frame_size_label ?? undefined,
+        frameSizeCm: garageBike.frame_size_cm ?? undefined,
+        material: garageBike.material ?? undefined,
+        groupsetBrand: garageBike.groupset_brand ?? undefined,
+        groupsetModel: garageBike.groupset_model ?? undefined,
+        drivetrain: garageBike.drivetrain ?? undefined,
+        brakes: garageBike.brakes ?? undefined,
+        wheelSize: garageBike.wheel_size ?? undefined,
+        electronicShifting: garageBike.electronic_shifting,
         purchaseDate: garageBike.acquired_on,
         ownerCount: garageBike.owner_count_at_acquisition,
+        purchaseProofAvailable: garageBike.documents.some((document) =>
+          ["purchase-receipt", "sales-agreement"].includes(
+            document.document_type,
+          ),
+        ),
         serviceHistoryAvailable: garageBike.log_count > 0,
       }
     : {};

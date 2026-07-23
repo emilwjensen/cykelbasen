@@ -17,9 +17,12 @@ import {
   acceptBikeTransferSchema,
   bikeDocumentSchema,
   bikeLogSchema,
+  bikeLogCorrectionSchema,
   bikeMaintenanceReminderSchema,
+  bikeMaintenanceReminderEditSchema,
   garageBikeEditSchema,
   garageBikeSchema,
+  retireBikeSchema,
 } from "./schema";
 import type { BikeTransferState } from "./types";
 
@@ -405,6 +408,106 @@ export async function createBikeLogAction(
   redirect(`/mine-cykler/${bikeId}?logget=1#historik`);
 }
 
+function bikeLogFormData(formData: FormData) {
+  return {
+    logType: formData.get("logType"),
+    title: formData.get("title"),
+    details: formData.get("details"),
+    occurredOn: formData.get("occurredOn"),
+    distanceKm: formData.get("distanceKm"),
+    odometerKm: formData.get("odometerKm"),
+    costDkk: formData.get("costDkk"),
+    componentCategory: formData.get("componentCategory"),
+    componentBrand: formData.get("componentBrand"),
+    componentModel: formData.get("componentModel"),
+    documentationAvailable: formData.get("documentationAvailable") === "on",
+  };
+}
+
+export async function correctBikeLogAction(
+  bikeId: string,
+  logId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const ids = z
+    .object({ bikeId: z.string().uuid(), logId: z.string().uuid() })
+    .safeParse({ bikeId, logId });
+  const parsed = bikeLogCorrectionSchema.safeParse({
+    ...bikeLogFormData(formData),
+    correctionReason: formData.get("correctionReason"),
+  });
+  if (!ids.success || !parsed.success) {
+    redirect(`/mine-cykler/${bikeId}/logs/${logId}/rediger?fejl=felter`);
+  }
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.correct_bike_log_entry(
+        ${ids.data.logId}::uuid,
+        ${parsed.data.logType}::public.bike_log_type,
+        ${parsed.data.title},
+        ${parsed.data.details ?? ""},
+        ${parsed.data.occurredOn}::date,
+        ${parsed.data.distanceKm ?? null},
+        ${parsed.data.odometerKm ?? null},
+        ${parsed.data.costDkk ?? null},
+        ${parsed.data.componentCategory ?? null}::public.component_category,
+        ${parsed.data.componentBrand ?? ""},
+        ${parsed.data.componentModel ?? ""},
+        ${parsed.data.documentationAvailable},
+        ${parsed.data.correctionReason}
+      ) as updated
+    `,
+  ]);
+  const updated = (results[1] as unknown as Array<{ updated: boolean }>)[0];
+  if (!updated?.updated) {
+    redirect(`/mine-cykler/${bikeId}/logs/${logId}/rediger?fejl=laast`);
+  }
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?log=rettet#historik`);
+}
+
+export async function voidBikeLogAction(
+  bikeId: string,
+  logId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const parsed = z
+    .object({
+      bikeId: z.string().uuid(),
+      logId: z.string().uuid(),
+      correctionReason: z.string().trim().min(3).max(500),
+    })
+    .safeParse({
+      bikeId,
+      logId,
+      correctionReason: formData.get("correctionReason"),
+    });
+  if (!parsed.success) {
+    redirect(`/mine-cykler/${bikeId}/logs/${logId}/rediger?fejl=grund`);
+  }
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.void_bike_log_entry(
+        ${parsed.data.logId}::uuid,
+        ${parsed.data.correctionReason}
+      ) as voided
+    `,
+  ]);
+  const result = (results[1] as unknown as Array<{ voided: boolean }>)[0];
+  if (!result?.voided) {
+    redirect(`/mine-cykler/${bikeId}/logs/${logId}/rediger?fejl=laast`);
+  }
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?log=annulleret#historik`);
+}
+
 export async function createBikeMaintenanceReminderAction(
   bikeId: string,
   formData: FormData,
@@ -508,6 +611,194 @@ export async function completeBikeMaintenanceReminderAction(
   redirect(
     `/mine-cykler/${parsed.data.bikeId}?paamindelse=udfoert#vedligehold`,
   );
+}
+
+export async function updateBikeMaintenanceReminderAction(
+  bikeId: string,
+  reminderId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const ids = z
+    .object({ bikeId: z.string().uuid(), reminderId: z.string().uuid() })
+    .safeParse({ bikeId, reminderId });
+  const parsed = bikeMaintenanceReminderEditSchema.safeParse({
+    title: formData.get("title"),
+    componentCategory: formData.get("componentCategory"),
+    dueOn: formData.get("dueOn"),
+    dueOdometerKm: formData.get("dueOdometerKm"),
+    notes: formData.get("notes"),
+    changeReason: formData.get("changeReason"),
+  });
+  if (!ids.success || !parsed.success) {
+    redirect(
+      `/mine-cykler/${bikeId}/paamindelser/${reminderId}/rediger?fejl=felter`,
+    );
+  }
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.update_bike_maintenance_reminder(
+        ${ids.data.reminderId}::uuid,
+        ${parsed.data.title},
+        ${parsed.data.componentCategory ?? null}::public.component_category,
+        ${parsed.data.dueOn ?? null}::date,
+        ${parsed.data.dueOdometerKm ?? null},
+        ${parsed.data.notes ?? ""},
+        ${parsed.data.changeReason},
+        'edited'
+      ) as updated
+    `,
+  ]);
+  const updated = (results[1] as unknown as Array<{ updated: boolean }>)[0];
+  if (!updated?.updated) {
+    redirect(
+      `/mine-cykler/${bikeId}/paamindelser/${reminderId}/rediger?fejl=laast`,
+    );
+  }
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?paamindelse=opdateret#vedligehold`);
+}
+
+export async function snoozeBikeMaintenanceReminderAction(
+  bikeId: string,
+  reminderId: string,
+) {
+  const user = await requireUser();
+  const ids = z
+    .object({ bikeId: z.string().uuid(), reminderId: z.string().uuid() })
+    .safeParse({ bikeId, reminderId });
+  if (!ids.success) redirect("/mine-cykler?fejl=paamindelse");
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.snooze_bike_maintenance_reminder(
+        ${ids.data.reminderId}::uuid,
+        30
+      ) as updated
+    `,
+  ]);
+  const updated = (results[1] as unknown as Array<{ updated: boolean }>)[0];
+  if (!updated?.updated) {
+    redirect(`/mine-cykler/${bikeId}?fejl=paamindelse#vedligehold`);
+  }
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?paamindelse=udsat#vedligehold`);
+}
+
+export async function cancelBikeMaintenanceReminderAction(
+  bikeId: string,
+  reminderId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const parsed = z
+    .object({
+      bikeId: z.string().uuid(),
+      reminderId: z.string().uuid(),
+      changeReason: z.string().trim().min(3).max(500),
+    })
+    .safeParse({
+      bikeId,
+      reminderId,
+      changeReason: formData.get("changeReason"),
+    });
+  if (!parsed.success) {
+    redirect(
+      `/mine-cykler/${bikeId}/paamindelser/${reminderId}/rediger?fejl=grund`,
+    );
+  }
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.cancel_bike_maintenance_reminder(
+        ${parsed.data.reminderId}::uuid,
+        ${parsed.data.changeReason}
+      ) as cancelled
+    `,
+  ]);
+  const result = (results[1] as unknown as Array<{ cancelled: boolean }>)[0];
+  if (!result?.cancelled) {
+    redirect(
+      `/mine-cykler/${bikeId}/paamindelser/${reminderId}/rediger?fejl=laast`,
+    );
+  }
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?paamindelse=annulleret#vedligehold`);
+}
+
+export async function retireGarageBikeAction(
+  bikeId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const validBikeId = z.string().uuid().safeParse(bikeId);
+  const parsed = retireBikeSchema.safeParse({
+    retiredOn: formData.get("retiredOn"),
+    reason: formData.get("reason"),
+    note: formData.get("note"),
+  });
+  if (!validBikeId.success || !parsed.success) {
+    redirect(`/mine-cykler/${bikeId}?fejl=pensionering#livscyklus`);
+  }
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.retire_garage_bike(
+        ${validBikeId.data}::uuid,
+        ${parsed.data.retiredOn}::date,
+        ${parsed.data.reason}::public.bike_retirement_reason,
+        ${parsed.data.note ?? ""}
+      ) as retired
+    `,
+  ]);
+  const result = (results[1] as unknown as Array<{ retired: boolean }>)[0];
+  if (!result?.retired) {
+    redirect(`/mine-cykler/${bikeId}?fejl=pensionering#livscyklus`);
+  }
+  revalidatePath("/mine-cykler");
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?cykel=pensioneret#livscyklus`);
+}
+
+export async function reactivateGarageBikeAction(
+  bikeId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const parsed = z
+    .object({
+      bikeId: z.string().uuid(),
+      reason: z.string().trim().min(3).max(500),
+    })
+    .safeParse({ bikeId, reason: formData.get("reason") });
+  if (!parsed.success) {
+    redirect(`/mine-cykler/${bikeId}?fejl=genaktivering#livscyklus`);
+  }
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select public.reactivate_garage_bike(
+        ${parsed.data.bikeId}::uuid,
+        ${parsed.data.reason}
+      ) as reactivated
+    `,
+  ]);
+  const result = (results[1] as unknown as Array<{ reactivated: boolean }>)[0];
+  if (!result?.reactivated) {
+    redirect(`/mine-cykler/${bikeId}?fejl=genaktivering#livscyklus`);
+  }
+  revalidatePath("/mine-cykler");
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?cykel=genaktiveret#livscyklus`);
 }
 
 export async function createBikeTransferAction(

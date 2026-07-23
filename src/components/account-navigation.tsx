@@ -26,9 +26,19 @@ const accountItems = [
     matches: (pathname: string) => pathname.startsWith("/henvendelser"),
   },
   {
+    href: "/notifikationer",
+    label: "Notifikationer",
+    matches: (pathname: string) => pathname.startsWith("/notifikationer"),
+  },
+  {
     href: "/profil",
     label: "Profil",
     matches: (pathname: string) => pathname.startsWith("/profil"),
+  },
+  {
+    href: "/konto",
+    label: "Data og konto",
+    matches: (pathname: string) => pathname.startsWith("/konto"),
   },
 ] as const;
 

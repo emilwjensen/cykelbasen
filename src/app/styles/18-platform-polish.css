@@ -329,6 +329,35 @@
   border-radius: 16px;
 }
 
+.garage-form .form-grid {
+  align-items: start;
+}
+
+.garage-form .form-grid > .form-field,
+.garage-form .form-grid > .brand-select {
+  align-self: start;
+}
+
+.garage-form .form-field {
+  align-content: start;
+}
+
+.garage-form .brand-select {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.garage-form .form-field > input:not([type="checkbox"]),
+.garage-form .form-field > select {
+  height: 52px;
+  min-height: 52px;
+}
+
+.garage-form .check-grid {
+  align-items: start;
+}
+
 .form-field input,
 .form-field select,
 .form-field textarea,

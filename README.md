@@ -98,8 +98,12 @@ godkendt udviklings-dokumentpost.
 - Købsdato, ejerantal og dokumentationssignaler på annoncer
 - Struktureret historik for udskiftede komponenter
 - Privat “Mine cykler” med hash af stelnummer
+- Standardiseret mærkevalg, tekniske specs og private købsdata i cykelpasset
+- Private kvitteringer, købsaftaler, garanti-, forsikrings- og servicebilag
 - Kilometer-, service-, tur- og komponentlogs
+- Auditvenlige logrettelser samt pensionering uden tab af ejerhistorik
 - Vedligeholdelsesplaner efter dato eller kilometer med automatisk logning
+- Redigering, annullering og 30-dages udsættelse af påmindelser
 - Forudfyld salgsannonce fra en registreret cykel
 - Sammenhængende ejerperioder via sikker overdragelseskode
 - Adskilte private logs for hver ejer efter videresalg
@@ -121,6 +125,8 @@ godkendt udviklings-dokumentpost.
 - Sikker moderator-provisionering uden ad hoc SQL
 - Billedgalleri, sitemap, robots, structured data og beta-legal-sider
 - Playwright browser-smoke og automatiske accessibility-kontroller
+- Kontoeksport, verificeret kontosletning og in-app notifikationscenter
 
-Provisionering af de to Blob stores, browsertests og resterende
+Følg `docs/VERCEL_BLOB_SETUP.md` for de to stores og
+`docs/OPERATIONS_RUNBOOK.md` for monitoring og restoreøvelser. Resterende
 launch-hardening følger i `docs/DELIVERY_PLAN.md`.

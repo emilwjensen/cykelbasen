@@ -11,6 +11,9 @@ import {
   createBikeLogAction,
   createBikeMaintenanceReminderAction,
   deleteBikeDocumentAction,
+  reactivateGarageBikeAction,
+  retireGarageBikeAction,
+  snoozeBikeMaintenanceReminderAction,
   uploadBikeDocumentAction,
 } from "@/features/garage/actions";
 import { BikeTransferForm } from "@/features/garage/components/bike-transfer-form";
@@ -86,6 +89,7 @@ type MyBikePageProps = {
     paamindelse?: string;
     cykel?: string;
     dokument?: string;
+    log?: string;
     fejl?: string;
   }>;
 };
@@ -103,6 +107,25 @@ export default async function MyBikePage({
 
   const bike = await getGarageBike(user.id, id);
   if (!bike) notFound();
+  const isEditable = !bike.ownership_ended_on && !bike.retired_on;
+  const passportDataPoints = [
+    bike.model_year,
+    bike.frame_size_label,
+    bike.frame_size_cm,
+    bike.color,
+    bike.material,
+    bike.groupset_brand,
+    bike.groupset_model,
+    bike.drivetrain,
+    bike.brakes,
+    bike.wheel_size,
+    bike.acquisition_source,
+    bike.purchase_location,
+    bike.purchase_price_dkk,
+  ];
+  const passportCompleted = passportDataPoints.filter(
+    (value) => value !== null && value !== "",
+  ).length;
 
   return (
     <div className="garage-detail shell">
@@ -126,6 +149,8 @@ export default async function MyBikePage({
           <span>registrerede km</span>
           {bike.ownership_ended_on ? (
             <span className="status">Tidligere ejerperiode</span>
+          ) : bike.retired_on ? (
+            <span className="status">Pensioneret {formatDate(bike.retired_on)}</span>
           ) : (
             <>
               <Link
@@ -150,13 +175,22 @@ export default async function MyBikePage({
         query.overtaget ||
         query.paamindelse ||
         query.cykel ||
-        query.dokument) && (
+        query.dokument ||
+        query.log) && (
         <p className="form-message form-message--success">
-          {query.dokument === "uploadet"
+          {query.log === "rettet"
+            ? "Logposten er rettet, og den tidligere version er bevaret."
+            : query.log === "annulleret"
+              ? "Logposten er annulleret og bevaret i auditsporet."
+              : query.dokument === "uploadet"
             ? "Dokumentet er gemt privat på cykelpasset."
             : query.dokument === "slettet"
               ? "Dokumentet er slettet."
-              : query.cykel === "opdateret"
+              : query.cykel === "pensioneret"
+                ? "Cyklen er pensioneret. Data og historik er bevaret."
+                : query.cykel === "genaktiveret"
+                  ? "Cyklen er genaktiveret."
+                  : query.cykel === "opdateret"
             ? "Cykeldata er opdateret."
             : query.overtaget
             ? "Cyklen er overtaget, og ejerhistorikken er forbundet."
@@ -164,6 +198,12 @@ export default async function MyBikePage({
               ? "Vedligeholdelsen er planlagt."
               : query.paamindelse === "udfoert"
                 ? "Opgaven er afsluttet og gemt i cykelloggen."
+                : query.paamindelse === "udsat"
+                  ? "Påmindelsen er udsat 30 dage."
+                  : query.paamindelse === "opdateret"
+                    ? "Påmindelsen er opdateret med revisionsspor."
+                    : query.paamindelse === "annulleret"
+                      ? "Påmindelsen er annulleret og bevaret i auditsporet."
             : query.oprettet
               ? "Cyklen er registreret."
               : "Logposten er tilføjet."}
@@ -175,6 +215,8 @@ export default async function MyBikePage({
             ? query.fejl === "dokument-fil"
               ? "Dokumentet skal være PDF, JPG, PNG eller WebP og højst 10 MB."
               : "Dokumentet kunne ikke gemmes. Kontrollér den private Blob-store og prøv igen."
+            : query.fejl === "pensionering" || query.fejl === "genaktivering"
+              ? "Cyklens status kunne ikke ændres. Kontrollér dato og begrundelse."
             : query.fejl === "paamindelse"
             ? "Vedligeholdelsesplanen kunne ikke gemmes. Vælg en dato eller kilometerstand."
             : "Logposten kunne ikke gemmes. Kontrollér felterne."}
@@ -212,6 +254,15 @@ export default async function MyBikePage({
           </p>
         </div>
         <dl className="bike-passport-grid">
+          <div>
+            <dt>Datadækning</dt>
+            <dd>
+              {passportCompleted} af {passportDataPoints.length} datapunkter
+              {bike.documents.length
+                ? ` · ${bike.documents.length} private bilag`
+                : " · intet bilag endnu"}
+            </dd>
+          </div>
           <div><dt>Stel</dt><dd>{[
             bike.material ? materialLabels[bike.material] : null,
             bike.frame_size_cm ? `${bike.frame_size_cm} cm` : bike.frame_size_label,
@@ -302,7 +353,7 @@ export default async function MyBikePage({
               </div>
             )}
           </div>
-          {!bike.ownership_ended_on && (
+          {isEditable && (
             <form action={uploadBikeDocumentAction} className="stacked-form">
               <input name="bikeId" type="hidden" value={bike.id} />
               <label>
@@ -405,17 +456,41 @@ export default async function MyBikePage({
                         Afsluttet {formatDate(reminder.completed_at)}
                       </small>
                     ) : bike.ownership_ended_on ? null : (
-                      <form
-                        action={completeBikeMaintenanceReminderAction.bind(
-                          null,
-                          bike.id,
-                          reminder.id,
-                        )}
-                      >
-                        <button className="button button--quiet" type="submit">
-                          Markér udført og log
-                        </button>
-                      </form>
+                      isEditable && (
+                        <div className="form-actions">
+                          <form
+                            action={completeBikeMaintenanceReminderAction.bind(
+                              null,
+                              bike.id,
+                              reminder.id,
+                            )}
+                          >
+                            <button className="button button--quiet" type="submit">
+                              Markér udført og log
+                            </button>
+                          </form>
+                          <form
+                            action={snoozeBikeMaintenanceReminderAction.bind(
+                              null,
+                              bike.id,
+                              reminder.id,
+                            )}
+                          >
+                            <button className="button button--quiet" type="submit">
+                              Udsæt 30 dage
+                            </button>
+                          </form>
+                          <Link
+                            className="text-link"
+                            href={`/mine-cykler/${bike.id}/paamindelser/${reminder.id}/rediger`}
+                          >
+                            Redigér
+                          </Link>
+                        </div>
+                      )
+                    )}
+                    {reminder.revision_count > 0 && (
+                      <small>{reminder.revision_count} ændringer gemt i auditspor</small>
                     )}
                   </article>
                 );
@@ -431,7 +506,7 @@ export default async function MyBikePage({
             )}
           </div>
 
-          {!bike.ownership_ended_on && (
+          {isEditable && (
             <aside className="maintenance-reminder-form">
               <p className="eyebrow">Planlæg fremad</p>
               <h3>Ny påmindelse</h3>
@@ -499,6 +574,77 @@ export default async function MyBikePage({
             </aside>
           )}
         </div>
+      </section>
+
+      <section className="account-card bike-lifecycle" id="livscyklus">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Livscyklus</p>
+            <h2>{bike.retired_on ? "Cyklen er pensioneret" : "Pensionér cyklen"}</h2>
+          </div>
+          <p>
+            Pensionering stopper nye logs, påmindelser, salg og overdragelse,
+            men bevarer cykelpas, dokumenter og historik.
+          </p>
+        </div>
+        {bike.retired_on ? (
+          <div>
+            <p>
+              Pensioneret {formatDate(bike.retired_on)}
+              {bike.retirement_note ? ` · ${bike.retirement_note}` : ""}
+            </p>
+            <form action={reactivateGarageBikeAction.bind(null, bike.id)} className="stacked-form">
+              <label>
+                Begrund genaktivering
+                <input maxLength={500} minLength={3} name="reason" required />
+              </label>
+              <button className="button button--quiet" type="submit">Genaktivér cyklen</button>
+            </form>
+          </div>
+        ) : !bike.ownership_ended_on ? (
+          <form action={retireGarageBikeAction.bind(null, bike.id)} className="stacked-form">
+            <div className="form-grid form-grid--two">
+              <label>
+                Dato
+                <input
+                  defaultValue={new Date().toISOString().slice(0, 10)}
+                  max={new Date().toISOString().slice(0, 10)}
+                  min={bike.acquired_on}
+                  name="retiredOn"
+                  required
+                  type="date"
+                />
+              </label>
+              <label>
+                Årsag
+                <select name="reason" required>
+                  <option value="worn-out">Udtjent</option>
+                  <option value="crashed">Totalskadet</option>
+                  <option value="stolen">Stjålet</option>
+                  <option value="lost">Bortkommet</option>
+                  <option value="other">Andet</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              Privat note
+              <textarea maxLength={1_000} name="note" rows={3} />
+            </label>
+            <button className="button button--quiet" type="submit">Pensionér og lås nye handlinger</button>
+          </form>
+        ) : (
+          <p>Denne ejerperiode er allerede afsluttet.</p>
+        )}
+        {bike.lifecycle_events.length > 0 && (
+          <ol className="audit-list">
+            {bike.lifecycle_events.map((event) => (
+              <li key={event.id}>
+                <strong>{event.event_type === "retired" ? "Pensioneret" : "Genaktiveret"}</strong>
+                <span>{formatDate(event.occurred_on)} · {event.reason}</span>
+              </li>
+            ))}
+          </ol>
+        )}
       </section>
 
       <section className="ownership-chain">
@@ -572,7 +718,18 @@ export default async function MyBikePage({
                         </span>
                       )}
                       {log.documentation_available && <strong>Bilag findes</strong>}
+                      {log.revision_count > 0 && (
+                        <strong>{log.revision_count} rettelser bevaret</strong>
+                      )}
                     </div>
+                    {isEditable && (
+                      <Link
+                        className="text-link"
+                        href={`/mine-cykler/${bike.id}/logs/${log.id}/rediger`}
+                      >
+                        Ret med revisionsspor
+                      </Link>
+                    )}
                   </div>
                 </article>
               ))}
@@ -583,9 +740,11 @@ export default async function MyBikePage({
         </section>
 
         <div className="garage-side-stack">
-          {bike.ownership_ended_on ? (
+          {!isEditable ? (
             <aside className="garage-log-panel">
-              <p className="eyebrow">Afsluttet ejerperiode</p>
+              <p className="eyebrow">
+                {bike.retired_on ? "Pensioneret cykel" : "Afsluttet ejerperiode"}
+              </p>
               <h2>Historikken er låst</h2>
               <p>
                 Du beholder adgang til dine private data, men kan ikke tilføje
@@ -670,7 +829,7 @@ export default async function MyBikePage({
               </form>
             </aside>
           )}
-          {!bike.ownership_ended_on && <BikeTransferForm bikeId={bike.id} />}
+          {isEditable && <BikeTransferForm bikeId={bike.id} />}
         </div>
       </div>
     </div>
