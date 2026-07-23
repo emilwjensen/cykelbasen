@@ -20,7 +20,19 @@ const optionalNumber = (minimum: number, maximum: number) =>
     z.number().min(minimum).max(maximum).optional(),
   );
 
+const purchaseDate = z
+  .string()
+  .date()
+  .refine((value) => value <= new Date().toISOString().slice(0, 10), {
+    message: "Købsdatoen kan ikke ligge i fremtiden.",
+  });
+
 export const draftListingSchema = z.object({
+  garageBikeId: z
+    .string()
+    .uuid()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   title: z.string().trim().min(8).max(100),
   category: z.enum(bikeCategories.map(({ value }) => value)),
   brand: z.string().trim().min(1).max(60),
@@ -48,6 +60,13 @@ export const draftListingSchema = z.object({
   ),
   condition: z.enum(conditions.map(({ value }) => value)),
   city: z.string().trim().min(2).max(80),
+  purchaseDate,
+  ownerCount: z.preprocess(
+    (value) => Number(value),
+    z.number().int().min(1).max(20),
+  ),
+  purchaseProofAvailable: z.boolean(),
+  serviceHistoryAvailable: z.boolean(),
   description: z.string().trim().min(20).max(5000),
 });
 
@@ -55,6 +74,7 @@ export type DraftListingInput = z.infer<typeof draftListingSchema>;
 
 export function parseDraftListingForm(formData: FormData) {
   return draftListingSchema.safeParse({
+    garageBikeId: formData.get("garageBikeId"),
     title: formData.get("title"),
     category: formData.get("category"),
     brand: formData.get("brand"),
@@ -73,7 +93,10 @@ export function parseDraftListingForm(formData: FormData) {
     priceDkk: formData.get("priceDkk"),
     condition: formData.get("condition"),
     city: formData.get("city"),
+    purchaseDate: formData.get("purchaseDate"),
+    ownerCount: formData.get("ownerCount"),
+    purchaseProofAvailable: formData.get("purchaseProofAvailable") === "on",
+    serviceHistoryAvailable: formData.get("serviceHistoryAvailable") === "on",
     description: formData.get("description"),
   });
 }
-

@@ -32,6 +32,10 @@ insert into public.listings (
   condition,
   city,
   description,
+  purchase_date,
+  owner_count,
+  purchase_proof_available,
+  service_history_available,
   status,
   published_at
 )
@@ -58,6 +62,10 @@ values
     'excellent',
     'Aarhus',
     'Velholdt og hurtig allround-racer med elektronisk gearskifte. Cyklen er serviceret før sæsonen og sælges, fordi størrelsen ikke passer mig optimalt.',
+    '2022-05-14',
+    1,
+    true,
+    true,
     'draft',
     null
   ),
@@ -83,6 +91,10 @@ values
     'like-new',
     'København',
     'Let carbon-gravelcykel med få brugsspor og tubeless-hjul. Kvittering og stelnummer er dokumenteret, og cyklen kan sendes efter aftale.',
+    '2023-08-02',
+    1,
+    true,
+    true,
     'draft',
     null
   ),
@@ -108,6 +120,10 @@ values
     'good',
     'Aarhus',
     'Kvikk aluminiumscykel med carbonforgaffel. Normale kosmetiske brugsspor, men mekanisk i god stand med ny kæde og bremseklodser.',
+    '2023-03-18',
+    2,
+    false,
+    true,
     'draft',
     null
   ),
@@ -133,6 +149,10 @@ values
     'used',
     'Odense',
     'Klassisk italiensk stålramme med original lak og tidstypisk Campagnolo-gruppe. Patina efter alder, men ingen buler eller kendte strukturelle skader.',
+    '2018-06-10',
+    3,
+    false,
+    false,
     'draft',
     null
   )
@@ -140,7 +160,11 @@ on conflict (id) do update
 set
   title = excluded.title,
   price_dkk = excluded.price_dkk,
-  description = excluded.description;
+  description = excluded.description,
+  purchase_date = excluded.purchase_date,
+  owner_count = excluded.owner_count,
+  purchase_proof_available = excluded.purchase_proof_available,
+  service_history_available = excluded.service_history_available;
 
 insert into public.ownership_documents (
   id,
@@ -199,6 +223,163 @@ values
     now()
   )
 on conflict (id) do nothing;
+
+insert into public.listing_reports (
+  id,
+  reporter_id,
+  listing_id,
+  reason,
+  details
+)
+values (
+  'a0000000-0000-4000-8000-000000000001',
+  'seed-seller-anna',
+  '10000000-0000-4000-8000-000000000002',
+  'suspected-scam',
+  'Udviklingsrapport til test af moderatorens annoncekø.'
+)
+on conflict (id) do nothing;
+
+insert into public.listing_favorites (user_id, listing_id)
+values (
+  'seed-seller-anna',
+  '10000000-0000-4000-8000-000000000002'
+)
+on conflict (user_id, listing_id) do nothing;
+
+insert into public.listing_component_changes (
+  id,
+  listing_id,
+  category,
+  previous_component,
+  replacement_brand,
+  replacement_model,
+  changed_on,
+  notes,
+  documentation_available
+)
+values
+  (
+    '90000000-0000-4000-8000-000000000001',
+    '10000000-0000-4000-8000-000000000001',
+    'chain',
+    'Original Shimano-kæde',
+    'Shimano',
+    'CN-M8100 12-speed',
+    '2026-03-12',
+    'Udskiftet ved service og målt med kædemåler.',
+    true
+  ),
+  (
+    '90000000-0000-4000-8000-000000000002',
+    '10000000-0000-4000-8000-000000000003',
+    'tires',
+    'Continental Ultra Sport',
+    'Continental',
+    'Grand Prix 5000 28 mm',
+    '2026-04-05',
+    'Begge dæk udskiftet og monteret med nye slanger.',
+    false
+  )
+on conflict (id) do update
+set
+  replacement_brand = excluded.replacement_brand,
+  replacement_model = excluded.replacement_model,
+  notes = excluded.notes;
+
+insert into public.garage_bikes (
+  id,
+  owner_id,
+  nickname,
+  category,
+  brand,
+  model,
+  model_year,
+  frame_size_label,
+  serial_number_hash,
+  acquired_on,
+  acquired_used,
+  owner_count_at_acquisition,
+  current_odometer_km,
+  notes
+)
+values (
+  '70000000-0000-4000-8000-000000000001',
+  'seed-seller-anna',
+  'Sommer-raceren',
+  'road',
+  'Specialized',
+  'Tarmac SL7 Comp',
+  2022,
+  '56 / L',
+  encode(digest('development-garage-frame-1', 'sha256'), 'hex'),
+  '2022-05-14',
+  false,
+  1,
+  6840,
+  'Bruges primært til træning og længere sommerture.'
+)
+on conflict (id) do update
+set
+  nickname = excluded.nickname,
+  current_odometer_km = excluded.current_odometer_km,
+  notes = excluded.notes;
+
+update public.listings
+set garage_bike_id = '70000000-0000-4000-8000-000000000001'
+where id = '10000000-0000-4000-8000-000000000001';
+
+insert into public.bike_log_entries (
+  id,
+  bike_id,
+  log_type,
+  title,
+  details,
+  occurred_on,
+  distance_km,
+  odometer_km,
+  cost_dkk,
+  component_category,
+  component_brand,
+  component_model,
+  documentation_available
+)
+values
+  (
+    '80000000-0000-4000-8000-000000000001',
+    '70000000-0000-4000-8000-000000000001',
+    'maintenance',
+    'Forårsservice',
+    'Bremser kontrolleret, gear justeret og bolte efterspændt med momentnøgle.',
+    '2026-03-12',
+    null,
+    6410,
+    850,
+    null,
+    null,
+    null,
+    true
+  ),
+  (
+    '80000000-0000-4000-8000-000000000002',
+    '70000000-0000-4000-8000-000000000001',
+    'ride',
+    'Lang tur omkring Aarhus',
+    'Rolig træningstur i tørvejr.',
+    '2026-07-18',
+    94,
+    6840,
+    null,
+    null,
+    null,
+    null,
+    false
+  )
+on conflict (id) do update
+set
+  title = excluded.title,
+  details = excluded.details,
+  odometer_km = excluded.odometer_km;
 
 update public.listings
 set

@@ -631,12 +631,90 @@ select:focus-visible {
   margin-right: auto;
 }
 
+.price-range-filter {
+  grid-column: span 2;
+  padding: 12px 14px;
+  background: var(--paper);
+}
+
+.price-range-filter > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
+  color: var(--muted);
+  font-size: 0.69rem;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.price-range-filter output {
+  color: var(--forest);
+  font-weight: 800;
+  text-transform: none;
+}
+
+.price-range-filter label {
+  gap: 1px;
+  font-size: 0.6rem;
+}
+
+.price-range-filter input[type="range"] {
+  height: 28px;
+  padding: 0;
+  accent-color: var(--forest);
+}
+
+.filters__number-fallback {
+  align-self: end;
+}
+
 .results-heading {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 30px;
   margin: 46px 0 22px;
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: -34px 0 42px;
+}
+
+.active-filters > span {
+  margin-right: 3px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 780;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.active-filters a {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  padding: 7px 10px;
+  background: var(--mint);
+  color: var(--forest);
+  font-size: 0.69rem;
+  font-weight: 740;
+}
+
+.active-filters a:hover {
+  background: #c9e9d9;
+}
+
+.active-filters .active-filters__clear {
+  background: transparent;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .results-heading p {
@@ -850,6 +928,13 @@ select:focus-visible {
   color: var(--forest-deep);
 }
 
+.account-aside__link {
+  display: block;
+  margin-top: 18px;
+  color: var(--white);
+  font-size: 0.72rem;
+}
+
 .dashboard-heading {
   display: flex;
   justify-content: space-between;
@@ -948,6 +1033,19 @@ select:focus-visible {
 .seller-listing__locked {
   color: var(--muted);
   font-size: 0.72rem;
+}
+
+.seller-listing__actions {
+  display: grid;
+  min-width: 132px;
+  gap: 8px;
+  justify-items: stretch;
+}
+
+.seller-listing__actions .text-button {
+  width: 100%;
+  margin: 0;
+  text-align: center;
 }
 
 .editor-heading {
@@ -1161,6 +1259,35 @@ select:focus-visible {
   font-weight: 700;
 }
 
+.favorite-button {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--forest);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 760;
+}
+
+.favorite-button:hover,
+.favorite-button--active {
+  background: #fff1ec;
+  border-color: #d88468;
+  color: #8f351f;
+}
+
+.favorite-button span {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
 .seller-card {
   display: grid;
   gap: 5px;
@@ -1242,6 +1369,568 @@ select:focus-visible {
   margin: 0;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.trust-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 12px;
+  border: 1px solid var(--line);
+}
+
+.trust-facts span {
+  padding: 13px 10px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 750;
+  text-align: center;
+}
+
+.trust-facts span + span {
+  border-left: 1px solid var(--line);
+}
+
+.trust-facts span.is-positive {
+  color: var(--forest);
+  background: color-mix(in srgb, var(--mint) 40%, transparent);
+}
+
+.component-history {
+  margin-top: 100px;
+  padding-top: 70px;
+  border-top: 1px solid var(--line);
+}
+
+.component-history .section-heading > p {
+  max-width: 380px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.component-history__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.component-history__list article {
+  padding: 25px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.component-history__list article > div,
+.component-editor-list article > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.component-history__list h3,
+.component-editor-list h3 {
+  margin: 14px 0 9px;
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+.component-history__list p,
+.component-editor-list p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.component-history__list strong {
+  display: inline-block;
+  margin-top: 15px;
+  color: var(--forest);
+  font-size: 0.68rem;
+}
+
+.component-history__empty {
+  padding: 30px;
+  background: var(--paper-deep);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.ownership-chain {
+  margin: 70px 0;
+  padding: 38px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.ownership-chain--public {
+  margin-top: 70px;
+}
+
+.ownership-chain .section-heading > p {
+  max-width: 420px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.ownership-chain ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--line);
+  list-style: none;
+}
+
+.ownership-chain li {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 13px;
+  align-items: center;
+  padding: 20px;
+  background: var(--paper);
+}
+
+.ownership-chain li > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: var(--paper-deep);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.ownership-chain li.is-current-user {
+  background: var(--mint);
+}
+
+.ownership-chain li.is-current-user > span {
+  background: var(--forest);
+  color: var(--white);
+}
+
+.ownership-chain li strong {
+  font-size: 0.78rem;
+}
+
+.ownership-chain li p {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.69rem;
+}
+
+.garage-page,
+.garage-detail {
+  padding-block: 76px 120px;
+}
+
+.garage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.garage-card {
+  padding: 30px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.garage-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 45px rgba(20, 35, 29, 0.09);
+}
+
+.garage-card__top,
+.garage-card footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.garage-card__top strong {
+  color: var(--forest);
+}
+
+.garage-card h2 {
+  margin: 35px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.garage-card > p {
+  margin: 0 0 35px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.garage-card footer {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.garage-detail__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 45px;
+  margin: 28px 0 30px;
+  padding: 45px;
+  background: var(--forest);
+  color: var(--white);
+}
+
+.garage-detail__hero h1 {
+  margin: 10px 0 12px;
+  font-family: Georgia, serif;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+
+.garage-detail__hero > div > p:last-child {
+  margin: 0;
+  color: rgba(255, 254, 249, 0.65);
+}
+
+.garage-odometer {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+.garage-odometer strong {
+  font-family: Georgia, serif;
+  font-size: 3rem;
+  font-weight: 400;
+}
+
+.garage-odometer span {
+  color: var(--mint);
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.garage-sell-link {
+  margin-top: 18px;
+  color: var(--forest-deep);
+}
+
+.garage-facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 65px;
+  border: 1px solid var(--line);
+}
+
+.garage-facts > div {
+  display: grid;
+  gap: 7px;
+  padding: 20px;
+}
+
+.garage-facts > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.garage-facts span {
+  color: var(--muted);
+  font-size: 0.64rem;
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.garage-facts strong {
+  font-size: 0.82rem;
+}
+
+.garage-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.7fr);
+  gap: 55px;
+  align-items: start;
+}
+
+.dashboard-heading__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.garage-side-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.garage-side-stack .garage-log-panel {
+  position: static;
+}
+
+.bike-transfer-panel {
+  padding: 28px;
+  background: var(--mint);
+  border: 1px solid #b8ddca;
+}
+
+.bike-transfer-panel h2 {
+  margin: 8px 0 14px;
+  font-family: Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+}
+
+.bike-transfer-panel > p:not(.eyebrow, .form-message) {
+  color: rgba(13, 44, 34, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.bike-transfer-code {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.bike-transfer-code label {
+  display: grid;
+  gap: 7px;
+  color: var(--forest);
+  font-size: 0.69rem;
+  font-weight: 750;
+}
+
+.bike-transfer-code input {
+  width: 100%;
+  padding: 12px;
+  background: var(--white);
+  border: 1px solid #9ccbb5;
+  color: var(--forest-deep);
+  font: inherit;
+  font-size: 0.72rem;
+}
+
+.bike-transfer-code small {
+  color: rgba(13, 44, 34, 0.66);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.transfer-accept-form {
+  max-width: 850px;
+}
+
+.bike-log-list {
+  position: relative;
+}
+
+.bike-log-list::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 5px;
+  width: 1px;
+  background: var(--line);
+}
+
+.bike-log-list > article {
+  position: relative;
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 20px;
+  padding-bottom: 34px;
+}
+
+.bike-log-list__marker {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 6px;
+  background: var(--accent);
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.bike-log-list header,
+.bike-log-list__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 15px;
+  color: var(--muted);
+  font-size: 0.67rem;
+}
+
+.bike-log-list header span {
+  color: var(--accent-dark);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bike-log-list h3 {
+  margin: 8px 0;
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+.bike-log-list article p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.bike-log-list__facts strong {
+  color: var(--forest);
+}
+
+.garage-log-panel {
+  position: sticky;
+  top: 24px;
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.garage-log-panel h2,
+.component-change-form h2,
+.component-editor-grid > section > h2 {
+  margin: 8px 0 22px;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.garage-log-panel form,
+.component-change-form {
+  display: grid;
+  gap: 14px;
+}
+
+.garage-log-panel label,
+.component-change-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.garage-log-panel input,
+.garage-log-panel select,
+.garage-log-panel textarea,
+.component-change-form input,
+.component-change-form select,
+.component-change-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 11px;
+  background: var(--paper);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  text-transform: none;
+}
+
+.garage-log-panel__row,
+.component-change-form > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.garage-log-panel__row--two,
+.component-change-form > div {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.garage-log-check {
+  display: flex !important;
+  align-items: center;
+  grid-template-columns: auto 1fr;
+  flex-direction: row;
+  gap: 9px !important;
+  text-transform: none !important;
+}
+
+.garage-log-check input {
+  width: auto;
+  min-height: auto;
+}
+
+.component-editor-heading {
+  margin-top: 38px;
+}
+
+.component-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.7fr) minmax(0, 1fr);
+  gap: 45px;
+  align-items: start;
+}
+
+.component-change-form {
+  position: sticky;
+  top: 24px;
+}
+
+.component-editor-list {
+  display: grid;
+  gap: 12px;
+}
+
+.component-editor-list article {
+  padding: 22px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.text-button {
+  margin-top: 15px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: #9b351e;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 750;
 }
 
 .skeleton {
@@ -1808,6 +2497,11 @@ select:focus-visible {
   margin-top: 18px;
 }
 
+.listing-report-box {
+  margin-top: 24px;
+  text-align: left;
+}
+
 .forum-comment__tools .report-box {
   margin-top: 18px;
 }
@@ -2089,6 +2783,16 @@ select:focus-visible {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .garage-detail__grid,
+  .component-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garage-log-panel,
+  .component-change-form {
+    position: static;
+  }
 }
 
 @media (max-width: 700px) {
@@ -2172,6 +2876,10 @@ select:focus-visible {
 
   .filters__grid {
     grid-template-columns: 1fr;
+  }
+
+  .price-range-filter {
+    grid-column: auto;
   }
 
   .filters__actions {
@@ -2283,6 +2991,38 @@ select:focus-visible {
   .forum-comment--reply {
     margin-left: -35px;
     padding-inline: 15px;
+  }
+
+  .trust-facts,
+  .garage-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trust-facts span:nth-child(3),
+  .garage-facts > div:nth-child(3) {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .component-history__list,
+  .garage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garage-detail__hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 30px 24px;
+  }
+
+  .garage-odometer {
+    align-items: flex-start;
+  }
+
+  .garage-log-panel__row,
+  .garage-log-panel__row--two,
+  .component-change-form > div {
+    grid-template-columns: 1fr;
   }
 
   .moderation-page {

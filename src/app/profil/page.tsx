@@ -87,9 +87,11 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
           <Link className="button button--dark" href="/annoncer/ny">
             Opret annonce
           </Link>
+          <Link className="text-link account-aside__link" href="/mine-cykler">
+            Eller registrér din egen cykel <span aria-hidden="true">→</span>
+          </Link>
         </aside>
       </div>
     </div>
   );
 }
-

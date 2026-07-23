@@ -47,6 +47,7 @@ export async function getEditableListing(
       select
         id,
         status,
+        garage_bike_id as "garageBikeId",
         title,
         category,
         brand,
@@ -65,6 +66,10 @@ export async function getEditableListing(
         price_dkk as "priceDkk",
         condition,
         city,
+        purchase_date as "purchaseDate",
+        owner_count as "ownerCount",
+        purchase_proof_available as "purchaseProofAvailable",
+        service_history_available as "serviceHistoryAvailable",
         description
       from public.listings
       where id = ${listingId}::uuid
@@ -86,51 +91,64 @@ export async function createDraftListing(
   const results = await database.transaction((transaction) => [
     transaction`select set_config('app.user_id', ${userId}, true)`,
     transaction`
-      insert into public.listings (
-        seller_id,
-        title,
-        category,
-        brand,
-        model,
-        model_year,
-        frame_size_label,
-        frame_size_cm,
-        material,
-        groupset_brand,
-        groupset_model,
-        drivetrain,
-        brakes,
-        wheel_size,
-        electronic_shifting,
-        shipping_offered,
-        price_dkk,
-        condition,
-        city,
-        description
+      with new_listing as (
+        insert into public.listings (
+          garage_bike_id,
+          seller_id,
+          title,
+          category,
+          brand,
+          model,
+          model_year,
+          frame_size_label,
+          frame_size_cm,
+          material,
+          groupset_brand,
+          groupset_model,
+          drivetrain,
+          brakes,
+          wheel_size,
+          electronic_shifting,
+          shipping_offered,
+          price_dkk,
+          condition,
+          city,
+          purchase_date,
+          owner_count,
+          purchase_proof_available,
+          service_history_available,
+          description
+        )
+        values (
+          ${input.garageBikeId ?? null}::uuid,
+          ${userId},
+          ${input.title},
+          ${input.category}::public.bike_category,
+          ${input.brand},
+          ${input.model},
+          ${input.modelYear ?? null},
+          ${input.frameSizeLabel},
+          ${input.frameSizeCm ?? null},
+          ${input.material ?? null}::public.frame_material,
+          ${input.groupsetBrand ?? null},
+          ${input.groupsetModel ?? null},
+          ${input.drivetrain ?? null},
+          ${input.brakes ?? null}::public.brake_type,
+          ${input.wheelSize ?? null},
+          ${input.electronicShifting},
+          ${input.shippingOffered},
+          ${input.priceDkk},
+          ${input.condition}::public.listing_condition,
+          ${input.city},
+          ${input.purchaseDate}::date,
+          ${input.ownerCount},
+          ${input.purchaseProofAvailable},
+          ${input.serviceHistoryAvailable},
+          ${input.description}
+        )
+        returning id
       )
-      values (
-        ${userId},
-        ${input.title},
-        ${input.category}::public.bike_category,
-        ${input.brand},
-        ${input.model},
-        ${input.modelYear ?? null},
-        ${input.frameSizeLabel},
-        ${input.frameSizeCm ?? null},
-        ${input.material ?? null}::public.frame_material,
-        ${input.groupsetBrand ?? null},
-        ${input.groupsetModel ?? null},
-        ${input.drivetrain ?? null},
-        ${input.brakes ?? null}::public.brake_type,
-        ${input.wheelSize ?? null},
-        ${input.electronicShifting},
-        ${input.shippingOffered},
-        ${input.priceDkk},
-        ${input.condition}::public.listing_condition,
-        ${input.city},
-        ${input.description}
-      )
-      returning id
+      select id from new_listing
     `,
   ]);
 
@@ -149,6 +167,7 @@ export async function updateDraftListing(
     transaction`
       update public.listings
       set
+        garage_bike_id = ${input.garageBikeId ?? null}::uuid,
         title = ${input.title},
         category = ${input.category}::public.bike_category,
         brand = ${input.brand},
@@ -167,6 +186,10 @@ export async function updateDraftListing(
         price_dkk = ${input.priceDkk},
         condition = ${input.condition}::public.listing_condition,
         city = ${input.city},
+        purchase_date = ${input.purchaseDate}::date,
+        owner_count = ${input.ownerCount},
+        purchase_proof_available = ${input.purchaseProofAvailable},
+        service_history_available = ${input.serviceHistoryAvailable},
         description = ${input.description},
         status = 'draft'
       where id = ${listingId}::uuid
@@ -179,4 +202,3 @@ export async function updateDraftListing(
   const rows = results[1] as unknown as Array<{ id: string }>;
   return Boolean(rows[0]);
 }
-

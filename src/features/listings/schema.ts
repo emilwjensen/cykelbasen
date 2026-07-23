@@ -33,6 +33,7 @@ const listingFilterSchema = z.object({
     .enum(bikeCategories.map(({ value }) => value))
     .optional()
     .catch(undefined),
+  brand: optionalText,
   size: optionalText,
   minPrice: optionalPrice,
   maxPrice: optionalPrice,
@@ -61,6 +62,7 @@ export function parseListingFilters(
   return listingFilterSchema.parse({
     q: firstValue(searchParams.q),
     category: firstValue(searchParams.category),
+    brand: firstValue(searchParams.brand),
     size: firstValue(searchParams.size),
     minPrice: firstValue(searchParams.minPrice),
     maxPrice: firstValue(searchParams.maxPrice),
@@ -71,4 +73,3 @@ export function parseListingFilters(
     sort: firstValue(searchParams.sort),
   });
 }
-

@@ -36,6 +36,9 @@ app/
     signup/
   (account)/
     profil/
+    mine-cykler/
+    mine-cykler/overtag/
+    favoritter/
     mine-annoncer/
     annoncer/ny/
     annoncer/[id]/rediger/
@@ -50,6 +53,7 @@ Keep domain code close to each feature:
 
 ```text
 features/
+  garage/ # internal domain name; UI route is /mine-cykler
   listings/
     actions/
     components/
@@ -63,6 +67,19 @@ features/
 ```
 
 Shared code belongs in `lib/` only when multiple features use it.
+
+## Mine cykler and listing reuse
+
+`garage_bikes` and `bike_log_entries` are private owner data protected by RLS.
+A listing may reference a garage bike owned by the same seller. The database
+validates that relationship. Creating a listing from Mine cykler prefills safe
+structured fields; raw frame numbers and private notes are never copied.
+
+Each registered bike belongs to an opaque `bike_registry_records` identity.
+When a seller creates a transfer code and a buyer claims it, the buyer gets a
+new `garage_bikes` row connected to the same identity. Ownership periods are
+shared as a privacy-safe timeline. Logs and notes remain attached to the
+original owner's row and are never copied.
 
 ## Data access
 
@@ -124,7 +141,10 @@ Authenticated writes now use:
 
 ## Moderation
 
-Moderator access comes from the `moderators` table. Do not place an editable `is_admin` flag on user profiles.
+Moderator access comes from the `moderators` table. Do not place an editable
+`is_admin` flag on user profiles. Forum reports and marketplace listing reports
+use separate private tables but share the same moderator identity and atomic
+decision pattern.
 
 ## Quiz
 

@@ -20,6 +20,8 @@
 - Filters for category, price, size, frame material, brake type, condition and city
 - Sort by newest, price ascending, price descending and model year
 - Create and edit draft listing
+- Purchase date, known owner count and documentation-presence fields
+- Structured component replacement history
 - Upload, reorder and delete listing images
 - Submit ownership documentation
 - Moderator approval queue
@@ -27,6 +29,14 @@
 - Favorite listings
 - Report listing
 - Mark listing sold or archived
+
+### Mine cykler
+
+- Register an owned bike privately
+- Store only a hash of an optional frame number
+- Track current odometer
+- Add ride, service, inspection, note and component-change logs
+- Prefill a sales listing from a registered bike
 
 ### Forum
 

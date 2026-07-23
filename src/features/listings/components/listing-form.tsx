@@ -41,6 +41,13 @@ export function ListingForm({
 
   return (
     <form action={formAction} className="listing-form">
+      {initialValues.garageBikeId && (
+        <input
+          name="garageBikeId"
+          type="hidden"
+          value={initialValues.garageBikeId}
+        />
+      )}
       {state.message && (
         <p className="form-message form-message--error">{state.message}</p>
       )}
@@ -290,6 +297,68 @@ export function ListingForm({
       </fieldset>
 
       <fieldset>
+        <legend>Ejerskab og historik</legend>
+        <p className="fieldset-intro">
+          De synlige oplysninger hjælper køberen med at forstå cyklens historik.
+          Dokumenter og stelnummer forbliver private.
+        </p>
+        <div className="form-grid form-grid--two">
+          <label className="form-field">
+            Din købsdato
+            <input
+              defaultValue={initialValues.purchaseDate}
+              max={new Date().toISOString().slice(0, 10)}
+              name="purchaseDate"
+              required
+              type="date"
+            />
+            <FieldError errors={state.errors} name="purchaseDate" />
+          </label>
+
+          <label className="form-field">
+            Kendt antal ejere inkl. dig
+            <select
+              defaultValue={initialValues.ownerCount ?? 1}
+              name="ownerCount"
+              required
+            >
+              {Array.from({ length: 10 }, (_, index) => index + 1).map((count) => (
+                <option key={count} value={count}>
+                  {count}
+                </option>
+              ))}
+            </select>
+            <FieldError errors={state.errors} name="ownerCount" />
+          </label>
+        </div>
+
+        <div className="check-grid">
+          <label className="check-field">
+            <input
+              defaultChecked={initialValues.purchaseProofAvailable}
+              name="purchaseProofAvailable"
+              type="checkbox"
+            />
+            <span>
+              <strong>Købsdokumentation findes</strong>
+              <small>Kvittering, slutseddel eller tilsvarende</small>
+            </span>
+          </label>
+          <label className="check-field">
+            <input
+              defaultChecked={initialValues.serviceHistoryAvailable}
+              name="serviceHistoryAvailable"
+              type="checkbox"
+            />
+            <span>
+              <strong>Servicehistorik findes</strong>
+              <small>Værkstedsbilag eller egen vedligeholdelseslog</small>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend>Beskrivelse</legend>
         <label className="form-field">
           Fortæl om cyklens stand og historik
@@ -322,4 +391,3 @@ export function ListingForm({
     </form>
   );
 }
-

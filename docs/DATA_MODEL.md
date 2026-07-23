@@ -2,7 +2,12 @@
 
 The marketplace foundation starts in `db/migrations/001_initial_marketplace.sql`.
 Forum tables, least-privilege grants and reports are added by migrations `004`
-through `006`.
+through `006`. Listing trust fields, component history and private registered
+bikes are added by migration `007`. Favorites, seller lifecycle audit and
+active-listing update protection are added by migrations `008` and `009`.
+Connected bike identities, ownership periods and secure transfer invitations
+are added by migrations `010` through `014`.
+Marketplace reports and atomic listing moderation are added by migration `015`.
 
 ## Public data
 
@@ -30,6 +35,22 @@ Post title, body, category, author and denormalized score.
 
 Comments and one optional parent comment.
 
+### listing_component_changes
+
+Structured, public history for component replacements on a visible listing.
+Changes can only be edited while the listing is a draft or rejected.
+
+### listing_favorites
+
+Private user-to-listing relation with one favorite per user and listing. Only
+the owning user can read or change it.
+
+### listing_reports
+
+Private reports against public listings. A seller cannot report their own
+listing or read reports filed by others. Moderator decisions and optional
+listing removal are written atomically with a listing status audit event.
+
 ## Private data
 
 ### moderators
@@ -50,6 +71,38 @@ aggregate score, and the runtime role cannot update scores directly.
 Forum post and comment reports created by authenticated users. Reports are
 visible only to their reporter and moderators. A moderator decision stores the
 moderator, note and timestamp atomically with an optional content hide.
+
+### garage_bikes
+
+Private user-owned bikes. Optional frame numbers are stored only as hashes.
+Each row represents one owner's private registration period, not the complete
+shared history of the physical bike.
+
+### bike_log_entries
+
+Private ride, service, inspection, note and component-change history belonging
+to a garage bike.
+
+### listing_status_events
+
+Private audit trail for seller lifecycle actions. Sellers can read events for
+their own listings, while only the database lifecycle function writes them.
+
+### bike_registry_records
+
+Opaque identity connecting multiple private registrations of the same bike.
+It contains no owner profile, frame number or public metadata.
+
+### bike_ownership_periods
+
+Privacy-safe ownership sequence with start and end dates. Participants can read
+the chain, and public listings may expose the periods without owner identities.
+
+### bike_transfer_invites
+
+Single-use, expiring transfer invitations. Only a SHA-256 hash of the random
+token is stored. Claiming one atomically closes the seller's period and creates
+a separate private registration for the buyer.
 
 ## Listing state
 

@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ListingCard } from "@/features/listings/components/listing-card";
-import { ListingFilterForm } from "@/features/listings/components/listing-filters";
-import { getListings } from "@/features/listings/queries";
+import {
+  ActiveFilterChips,
+  ListingFilterForm,
+} from "@/features/listings/components/listing-filters";
+import {
+  getListingFilterOptions,
+  getListings,
+} from "@/features/listings/queries";
 import { parseListingFilters } from "@/features/listings/schema";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +26,10 @@ type BrowsePageProps = {
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const rawSearchParams = await searchParams;
   const filters = parseListingFilters(rawSearchParams);
-  const listings = await getListings(filters);
+  const [listings, filterOptions] = await Promise.all([
+    getListings(filters),
+    getListingFilterOptions(),
+  ]);
   const resultCount = listings[0]?.total_count ?? 0;
   const queryString = new URLSearchParams(
     Object.entries(rawSearchParams).flatMap(([key, value]) => {
@@ -42,7 +51,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         </p>
       </header>
 
-      <ListingFilterForm filters={filters} />
+      <ListingFilterForm filters={filters} options={filterOptions} />
+      <ActiveFilterChips filters={filters} />
 
       <div className="results-heading">
         <p>

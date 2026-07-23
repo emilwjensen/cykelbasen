@@ -3,8 +3,11 @@ import "server-only";
 import { getDatabase } from "@/lib/database";
 import type {
   ListingDetail,
+  ListingComponentChange,
+  ListingFilterOptions,
   ListingFilters,
   ListingImage,
+  ListingOwnershipPeriod,
   ListingSummary,
 } from "./types";
 
@@ -37,6 +40,10 @@ export async function getListings(
 
   if (filters.category) {
     clauses.push(`listing.category = ${addValue(filters.category)}::bike_category`);
+  }
+
+  if (filters.brand) {
+    clauses.push(`listing.brand = ${addValue(filters.brand)}`);
   }
 
   if (filters.size) {
@@ -117,6 +124,51 @@ export async function getFeaturedListings(limit = 3) {
   return getListings({ sort: "newest" }, limit);
 }
 
+export async function getListingFilterOptions(): Promise<ListingFilterOptions> {
+  const rows = await getDatabase().query(`
+    select
+      coalesce(
+        (
+          select json_agg(value order by value)
+          from (
+            select distinct brand as value
+            from public.listings
+            where status = 'published'
+          ) brands
+        ),
+        '[]'::json
+      ) as brands,
+      coalesce(
+        (
+          select json_agg(value order by numeric_size nulls last, value)
+          from (
+            select
+              frame_size_label as value,
+              min(frame_size_cm) as numeric_size
+            from public.listings
+            where status = 'published'
+            group by frame_size_label
+          ) sizes
+        ),
+        '[]'::json
+      ) as sizes,
+      coalesce(min(price_dkk), 0)::int as "minPrice",
+      coalesce(max(price_dkk), 100000)::int as "maxPrice"
+    from public.listings
+    where status = 'published'
+  `);
+
+  const options = rows as unknown as ListingFilterOptions[];
+  return (
+    options[0] ?? {
+      brands: [],
+      sizes: [],
+      minPrice: 0,
+      maxPrice: 100_000,
+    }
+  );
+}
+
 export async function getListingById(
   id: string,
 ): Promise<ListingDetail | null> {
@@ -124,6 +176,7 @@ export async function getListingById(
     `
       select
         listing.id,
+        listing.seller_id,
         listing.title,
         listing.category,
         listing.brand,
@@ -139,6 +192,10 @@ export async function getListingById(
         listing.wheel_size,
         listing.electronic_shifting,
         listing.shipping_offered,
+        listing.purchase_date,
+        listing.owner_count,
+        listing.purchase_proof_available,
+        listing.service_history_available,
         listing.price_dkk,
         listing.condition,
         listing.city,
@@ -146,6 +203,7 @@ export async function getListingById(
         listing.published_at,
         profile.display_name as seller_name,
         profile.city as seller_city,
+        true as ownership_verified,
         cover.image_url as cover_url,
         cover.alt_text as cover_alt,
         1::integer as total_count
@@ -163,7 +221,9 @@ export async function getListingById(
       limit 1
     `,
     [id],
-  )) as unknown as Array<Omit<ListingDetail, "images">>;
+  )) as unknown as Array<
+    Omit<ListingDetail, "images" | "component_changes" | "ownership_history">
+  >;
 
   const listing = listingRows[0];
   if (!listing) return null;
@@ -178,8 +238,40 @@ export async function getListingById(
     [id],
   );
 
+  const componentRows = await getDatabase().query(
+    `
+      select
+        id,
+        category,
+        previous_component,
+        replacement_brand,
+        replacement_model,
+        changed_on,
+        notes,
+        documentation_available
+      from public.listing_component_changes
+      where listing_id = $1::uuid
+      order by changed_on desc nulls last, created_at desc
+    `,
+    [id],
+  );
+
+  const ownershipRows = await getDatabase().query(
+    `
+      select
+        owner_sequence,
+        started_on,
+        ended_on,
+        is_current_listing_owner
+      from public.get_public_listing_ownership_history($1::uuid)
+    `,
+    [id],
+  );
+
   return {
     ...listing,
     images: imageRows as unknown as ListingImage[],
+    component_changes: componentRows as unknown as ListingComponentChange[],
+    ownership_history: ownershipRows as unknown as ListingOwnershipPeriod[],
   };
 }

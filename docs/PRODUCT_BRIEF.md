@@ -42,6 +42,8 @@ Private buyers and sellers of:
 - Forum comment
 - Vote
 - Report
+- Registered bike
+- Bike maintenance and ride log
 
 ## Simple listing specs
 
@@ -71,6 +73,26 @@ Optional but filterable:
 - Shipping offered
 
 Distance ridden is not requested.
+
+## Mine cykler
+
+Users can register bikes they own without putting them up for sale. Garage data
+is private and supports:
+
+- hashed frame-number registration
+- acquisition and known owner history
+- current odometer
+- ride, service, inspection and component-change logs
+- documentation-presence markers without exposing files
+- connected ownership periods when a seller hands the registration to a buyer
+
+A registered bike can prefill a later listing. Public listing history remains an
+explicit seller choice and never exposes the raw frame number or private notes.
+
+Ownership transfer uses a short-lived single-use code. The buyer receives a new
+private bike profile for the same platform identity. Public history shows only
+connected registration periods, never previous owners' names, private notes,
+documents or ride logs.
 
 ## Trust model
 

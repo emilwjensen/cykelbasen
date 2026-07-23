@@ -72,6 +72,20 @@ godkendt udviklings-dokumentpost.
 - Kommentarer, ét niveau af svar og private bruger-stemmer
 - Rapportér indlæg og kommentarer én gang per bruger
 - Moderator-kø med atomisk hide og auditspor
+- Brand- og størrelsesdropdowns samt interaktivt prisinterval
+- Købsdato, ejerantal og dokumentationssignaler på annoncer
+- Struktureret historik for udskiftede komponenter
+- Privat “Mine cykler” med hash af stelnummer
+- Kilometer-, service-, tur- og komponentlogs
+- Forudfyld salgsannonce fra en registreret cykel
+- Sammenhængende ejerperioder via sikker overdragelseskode
+- Adskilte private logs for hver ejer efter videresalg
+- Private favoritter med køberoverblik
+- Aktive filterchips med individuel fjernelse
+- Sælgerflow til solgt og arkiveret med auditspor
+- Rapportér mistænkelige annoncer til en privat moderator-kø
+- Moderatorfjernelse af annoncer med atomisk auditspor
 
-Billedupload, ejerskabsflow og resterende marketplace-polish følger som
-separate vertikale slices.
+Billedupload, dokument-review, kontakt og resterende launch-hardening følger
+som separate vertikale slices. Se `docs/PROJECT_STATUS.md` for den prioriterede
+scope-audit.

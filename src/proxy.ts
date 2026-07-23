@@ -9,8 +9,10 @@ export const config = {
     "/mine-annoncer/:path*",
     "/annoncer/:path*",
     "/profil/:path*",
+    "/favoritter/:path*",
     "/forum/nyt",
     "/forum/indlaeg/:path*/rediger",
     "/admin/:path*",
+    "/mine-cykler/:path*",
   ],
 };

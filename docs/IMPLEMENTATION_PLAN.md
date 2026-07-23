@@ -63,12 +63,27 @@ content; moderators process the queue without direct database access.
 
 ## Phase 5, marketplace polish
 
-- Favorites.
-- Better sort controls.
-- Filter chips and clear-all action.
+- [x] Favorites and buyer overview.
+- [x] Brand and frame-size dropdowns.
+- [x] Interactive price range.
+- [x] Filter chips and clear-all action.
 - Preserve return URL and filters.
 - Basic SEO metadata.
-- Listing reports.
+- [x] Listing reports and moderator removal flow.
+- [x] Purchase date, owner count and documentation indicators.
+- [x] Structured listing component history.
+- [x] Private “Mine cykler” area and bike logs.
+- [x] Prefill a listing from a registered bike.
+- [x] Seller sold/archive actions with lifecycle audit.
+- [x] Privacy-safe ownership chain and seller-to-buyer registration transfer.
+
+Current evidence: visitors filter on live Neon values and see structured trust
+history. Authenticated users can register a private bike, maintain odometer and
+service/component logs, and start a listing from that bike. RLS tests isolate
+registered-bike and log data. They also cover private favorites,
+active-listing immutability and audited seller status changes.
+Ownership-transfer tests also prove that ownership periods continue while
+private logs remain isolated between seller and buyer.
 
 ## Phase 6, guided quiz
 

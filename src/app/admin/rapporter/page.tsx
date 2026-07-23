@@ -52,8 +52,8 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             bryder fællesskabets rammer.
           </p>
         </div>
-        <Link className="button button--quiet" href="/forum">
-          Gå til forum
+        <Link className="button button--quiet" href="/admin/rapporter/annoncer">
+          Se annoncerapporter
         </Link>
       </header>
 

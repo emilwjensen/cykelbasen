@@ -24,6 +24,8 @@ export function HeaderActions() {
 
   return (
     <div className="header-actions">
+      <Link href="/favoritter">Favoritter</Link>
+      <Link href="/mine-cykler">Mine cykler</Link>
       <Link href="/mine-annoncer">Mine annoncer</Link>
       <form action={signOutAction}>
         <button className="header-signout" type="submit">
@@ -33,4 +35,3 @@ export function HeaderActions() {
     </div>
   );
 }
-

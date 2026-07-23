@@ -1,18 +1,142 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import {
   bikeCategories,
   brakeTypes,
   conditions,
   frameMaterials,
   sortOptions,
+  type ListingFilterOptions,
   type ListingFilters,
 } from "../types";
 
 type ListingFiltersProps = {
   filters: ListingFilters;
+  options: ListingFilterOptions;
 };
 
-export function ListingFilterForm({ filters }: ListingFiltersProps) {
+function formatSliderPrice(value: number) {
+  return new Intl.NumberFormat("da-DK").format(value);
+}
+
+const labelFor = <T extends readonly { value: string; label: string }[]>(
+  options: T,
+  value: string,
+) => options.find((option) => option.value === value)?.label ?? value;
+
+function filterSearchParams(
+  filters: ListingFilters,
+  omittedKeys: Array<keyof ListingFilters> = [],
+) {
+  const params = new URLSearchParams();
+  const omitted = new Set(omittedKeys);
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (
+      omitted.has(key as keyof ListingFilters) ||
+      value === undefined ||
+      value === "" ||
+      (key === "sort" && value === "newest")
+    ) {
+      continue;
+    }
+    params.set(key, String(value));
+  }
+
+  const query = params.toString();
+  return query ? `/cykler?${query}` : "/cykler";
+}
+
+export function ActiveFilterChips({ filters }: { filters: ListingFilters }) {
+  const chips: Array<{
+    keys: Array<keyof ListingFilters>;
+    label: string;
+  }> = [];
+
+  if (filters.q) chips.push({ keys: ["q"], label: `Søgning: ${filters.q}` });
+  if (filters.category) {
+    chips.push({
+      keys: ["category"],
+      label: labelFor(bikeCategories, filters.category),
+    });
+  }
+  if (filters.brand) chips.push({ keys: ["brand"], label: filters.brand });
+  if (filters.size) {
+    chips.push({ keys: ["size"], label: `Str. ${filters.size}` });
+  }
+  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+    const minimum = filters.minPrice !== undefined
+      ? `${formatSliderPrice(filters.minPrice)} kr.`
+      : "laveste pris";
+    const maximum = filters.maxPrice !== undefined
+      ? `${formatSliderPrice(filters.maxPrice)} kr.`
+      : "højeste pris";
+    chips.push({
+      keys: ["minPrice", "maxPrice"],
+      label: `Pris: ${minimum}–${maximum}`,
+    });
+  }
+  if (filters.material) {
+    chips.push({
+      keys: ["material"],
+      label: labelFor(frameMaterials, filters.material),
+    });
+  }
+  if (filters.brakes) {
+    chips.push({
+      keys: ["brakes"],
+      label: labelFor(brakeTypes, filters.brakes),
+    });
+  }
+  if (filters.condition) {
+    chips.push({
+      keys: ["condition"],
+      label: labelFor(conditions, filters.condition),
+    });
+  }
+  if (filters.city) {
+    chips.push({ keys: ["city"], label: `By: ${filters.city}` });
+  }
+
+  if (!chips.length) return null;
+
+  return (
+    <div className="active-filters" aria-label="Aktive filtre">
+      <span>Aktive filtre</span>
+      {chips.map((chip) => (
+        <Link
+          aria-label={`Fjern filter: ${chip.label}`}
+          href={filterSearchParams(filters, chip.keys)}
+          key={chip.keys.join("-")}
+        >
+          {chip.label} <span aria-hidden="true">×</span>
+        </Link>
+      ))}
+      <Link className="active-filters__clear" href="/cykler">
+        Ryd alle
+      </Link>
+    </div>
+  );
+}
+
+export function ListingFilterForm({ filters, options }: ListingFiltersProps) {
+  const rangeMinimum = Math.floor(options.minPrice / 500) * 500;
+  const rangeMaximum = Math.max(
+    Math.ceil(options.maxPrice / 500) * 500,
+    rangeMinimum + 1_000,
+  );
+  const [minimumPrice, setMinimumPrice] = useState(
+    Math.max(rangeMinimum, Math.min(filters.minPrice ?? rangeMinimum, rangeMaximum)),
+  );
+  const [maximumPrice, setMaximumPrice] = useState(
+    Math.max(rangeMinimum, Math.min(filters.maxPrice ?? rangeMaximum, rangeMaximum)),
+  );
+  const [priceTouched, setPriceTouched] = useState(
+    filters.minPrice !== undefined || filters.maxPrice !== undefined,
+  );
+
   return (
     <form action="/cykler" className="filters">
       <div className="filters__search">
@@ -40,35 +164,99 @@ export function ListingFilterForm({ filters }: ListingFiltersProps) {
         </label>
 
         <label>
+          Mærke
+          <select defaultValue={filters.brand ?? ""} name="brand">
+            <option value="">Alle mærker</option>
+            {options.brands.map((brand) => (
+              <option key={brand} value={brand}>
+                {brand}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
           Stelstørrelse
+          <select defaultValue={filters.size ?? ""} name="size">
+            <option value="">Alle størrelser</option>
+            {options.sizes.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <div className="price-range-filter">
+          <div>
+            <span>Prisinterval</span>
+            <output>
+              {formatSliderPrice(minimumPrice)}–{formatSliderPrice(maximumPrice)} kr.
+            </output>
+          </div>
+          <label>
+            Fra {formatSliderPrice(minimumPrice)} kr.
+            <input
+              max={rangeMaximum}
+              min={rangeMinimum}
+              onChange={(event) => {
+                setPriceTouched(true);
+                setMinimumPrice(
+                  Math.min(Number(event.target.value), maximumPrice),
+                );
+              }}
+              step={500}
+              type="range"
+              value={minimumPrice}
+            />
+          </label>
+          <label>
+            Til {formatSliderPrice(maximumPrice)} kr.
+            <input
+              max={rangeMaximum}
+              min={rangeMinimum}
+              onChange={(event) => {
+                setPriceTouched(true);
+                setMaximumPrice(
+                  Math.max(Number(event.target.value), minimumPrice),
+                );
+              }}
+              step={500}
+              type="range"
+              value={maximumPrice}
+            />
+          </label>
+        </div>
+
+        <label className="filters__number-fallback">
+          Pris fra, præcist
           <input
-            defaultValue={filters.size}
-            name="size"
-            placeholder="Fx 56 eller M"
+            inputMode="numeric"
+            max={rangeMaximum}
+            min={rangeMinimum}
+            name={priceTouched ? "minPrice" : undefined}
+            onChange={(event) => {
+              setPriceTouched(true);
+              setMinimumPrice(Number(event.target.value));
+            }}
+            type="number"
+            value={minimumPrice}
           />
         </label>
 
-        <label>
-          Pris fra
+        <label className="filters__number-fallback">
+          Pris til, præcist
           <input
-            defaultValue={filters.minPrice}
             inputMode="numeric"
-            min="0"
-            name="minPrice"
-            placeholder="5.000"
+            max={rangeMaximum}
+            min={rangeMinimum}
+            name={priceTouched ? "maxPrice" : undefined}
+            onChange={(event) => {
+              setPriceTouched(true);
+              setMaximumPrice(Number(event.target.value));
+            }}
             type="number"
-          />
-        </label>
-
-        <label>
-          Pris til
-          <input
-            defaultValue={filters.maxPrice}
-            inputMode="numeric"
-            min="0"
-            name="maxPrice"
-            placeholder="30.000"
-            type="number"
+            value={maximumPrice}
           />
         </label>
 
@@ -139,4 +327,3 @@ export function ListingFilterForm({ filters }: ListingFiltersProps) {
     </form>
   );
 }
-

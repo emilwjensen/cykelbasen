@@ -17,7 +17,9 @@ export function SiteFooter() {
         <div>
           <p className="site-footer__heading">Markedsplads</p>
           <Link href="/cykler">Se alle cykler</Link>
-          <span>Sælg din cykel - snart</span>
+          <Link href="/favoritter">Favoritter</Link>
+          <Link href="/annoncer/ny">Sælg din cykel</Link>
+          <Link href="/mine-cykler">Mine cykler</Link>
         </div>
         <div>
           <p className="site-footer__heading">Tryghed</p>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDate, formatPrice } from "@/features/listings/format";
 import { getSellerListings } from "@/features/listings/draft-queries";
+import { setSellerListingStatusAction } from "@/features/listings/status-actions";
 import { getProfile } from "@/features/profiles/queries";
 import { requireUser } from "@/lib/auth/server";
 
@@ -21,6 +22,8 @@ type SellerDashboardProps = {
   searchParams: Promise<{
     oprettet?: string;
     gemt?: string;
+    status?: string;
+    fejl?: string;
   }>;
 };
 
@@ -65,6 +68,18 @@ export default async function SellerDashboard({
           {params.oprettet ? "Kladde oprettet." : "Ændringerne er gemt."}
         </p>
       )}
+      {params.status && (
+        <p className="form-message form-message--success">
+          {params.status === "sold"
+            ? "Annoncen er markeret som solgt."
+            : "Annoncen er arkiveret."}
+        </p>
+      )}
+      {params.fejl && (
+        <p className="form-message form-message--error">
+          Status kunne ikke ændres. Genindlæs siden og prøv igen.
+        </p>
+      )}
 
       {listings.length ? (
         <div className="seller-list">
@@ -97,19 +112,65 @@ export default async function SellerDashboard({
               </div>
               <div className="seller-listing__actions">
                 {["draft", "rejected"].includes(listing.status) ? (
-                  <Link
-                    className="button button--quiet"
-                    href={`/annoncer/${listing.id}/rediger`}
+                  <>
+                    <Link
+                      className="button button--quiet"
+                      href={`/annoncer/${listing.id}/rediger`}
+                    >
+                      Redigér
+                    </Link>
+                    <Link
+                      className="text-link"
+                      href={`/annoncer/${listing.id}/komponenter`}
+                    >
+                      Komponenter
+                    </Link>
+                  </>
+                ) : ["published", "reserved"].includes(listing.status) ? (
+                  <>
+                    {listing.status === "published" && (
+                      <Link
+                        className="button button--quiet"
+                        href={`/cykler/${listing.id}`}
+                      >
+                        Se annonce
+                      </Link>
+                    )}
+                    <form
+                      action={setSellerListingStatusAction.bind(
+                        null,
+                        listing.id,
+                        "sold",
+                      )}
+                    >
+                      <button className="text-button" type="submit">
+                        Markér som solgt
+                      </button>
+                    </form>
+                    <form
+                      action={setSellerListingStatusAction.bind(
+                        null,
+                        listing.id,
+                        "archived",
+                      )}
+                    >
+                      <button className="text-button" type="submit">
+                        Arkivér annonce
+                      </button>
+                    </form>
+                  </>
+                ) : listing.status === "sold" ? (
+                  <form
+                    action={setSellerListingStatusAction.bind(
+                      null,
+                      listing.id,
+                      "archived",
+                    )}
                   >
-                    Redigér
-                  </Link>
-                ) : listing.status === "published" ? (
-                  <Link
-                    className="button button--quiet"
-                    href={`/cykler/${listing.id}`}
-                  >
-                    Se annonce
-                  </Link>
+                    <button className="button button--quiet" type="submit">
+                      Arkivér annonce
+                    </button>
+                  </form>
                 ) : (
                   <span className="seller-listing__locked">
                     Redigering er låst
@@ -135,4 +196,3 @@ export default async function SellerDashboard({
     </div>
   );
 }
-
