@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createGarageBikeAction } from "@/features/garage/actions";
 import { bikeCategories } from "@/features/listings/types";
 import { requireUser } from "@/lib/auth/server";
@@ -15,6 +16,9 @@ export default async function NewBikePage({
 
   return (
     <div className="editor-page shell">
+      <Link className="back-link" href="/mine-cykler">
+        <span aria-hidden="true">←</span> Mine cykler
+      </Link>
       <header className="editor-heading">
         <p className="eyebrow">Mine cykler</p>
         <h1>Registrér din cykel.</h1>

@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountNavigation } from "@/components/account-navigation";
+
 export default function FavoritesError({
   reset,
 }: {
@@ -7,6 +9,7 @@ export default function FavoritesError({
 }) {
   return (
     <div className="browse shell">
+      <AccountNavigation />
       <div className="empty-state">
         <p className="eyebrow">Noget gik galt</p>
         <h1>Favoritterne kunne ikke hentes.</h1>

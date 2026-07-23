@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { updateForumPostAction } from "@/features/forum/actions";
@@ -29,6 +30,9 @@ export default async function EditForumPostPage({
 
   return (
     <div className="editor-page shell">
+      <Link className="back-link" href={`/forum/indlaeg/${post.id}`}>
+        <span aria-hidden="true">←</span> Tilbage til indlægget
+      </Link>
       <header className="editor-heading">
         <p className="eyebrow">Redigér forumindlæg</p>
         <h1>Gør spørgsmålet tydeligere.</h1>

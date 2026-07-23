@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ModerationNavigation } from "@/components/moderation-navigation";
 import { requireUser } from "@/lib/auth/server";
 import { formatForumDate } from "@/features/forum/format";
 import { reportReasons } from "@/features/forum/types";
@@ -43,6 +44,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
   return (
     <div className="moderation-page shell">
+      <ModerationNavigation />
       <header className="dashboard-heading moderation-heading">
         <div>
           <p className="eyebrow">Moderation</p>
@@ -52,9 +54,6 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
             bryder fællesskabets rammer.
           </p>
         </div>
-        <Link className="button button--quiet" href="/admin/rapporter/annoncer">
-          Se annoncerapporter
-        </Link>
       </header>
 
       <nav aria-label="Filtrér rapporter" className="moderation-tabs">

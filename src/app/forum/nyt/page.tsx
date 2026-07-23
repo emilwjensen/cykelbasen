@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ForumPostForm } from "@/features/forum/components/forum-post-form";
 import { createForumPostAction } from "@/features/forum/actions";
 import { getForumCategories } from "@/features/forum/queries";
@@ -30,6 +31,9 @@ export default async function NewForumPostPage({
 
   return (
     <div className="editor-page shell">
+      <Link className="back-link" href="/forum">
+        <span aria-hidden="true">←</span> Forum
+      </Link>
       <header className="editor-heading">
         <p className="eyebrow">Nyt forumindlæg</p>
         <h1>Giv samtalen en god start.</h1>

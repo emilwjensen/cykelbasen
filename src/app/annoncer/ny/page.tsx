@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ListingForm } from "@/features/listings/components/listing-form";
 import { createDraftAction } from "@/features/listings/draft-actions";
@@ -43,6 +44,9 @@ export default async function NewListingPage({
 
   return (
     <div className="editor-page shell">
+      <Link className="back-link" href="/mine-annoncer">
+        <span aria-hidden="true">←</span> Mine annoncer
+      </Link>
       <header className="editor-heading">
         <p className="eyebrow">Ny annonce</p>
         <h1>Beskriv cyklen enkelt og præcist.</h1>

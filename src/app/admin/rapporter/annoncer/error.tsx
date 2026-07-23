@@ -1,5 +1,7 @@
 "use client";
 
+import { ModerationNavigation } from "@/components/moderation-navigation";
+
 export default function ListingReportsError({
   reset,
 }: {
@@ -7,6 +9,7 @@ export default function ListingReportsError({
 }) {
   return (
     <div className="moderation-page shell">
+      <ModerationNavigation />
       <div className="empty-state">
         <p className="eyebrow">Noget gik galt</p>
         <h1>Annoncerapporterne kunne ikke hentes.</h1>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { AccountNavigation } from "@/components/account-navigation";
 import {
   completeBikeMaintenanceReminderAction,
   createBikeLogAction,
@@ -81,6 +82,7 @@ export default async function MyBikePage({
 
   return (
     <div className="garage-detail shell">
+      <AccountNavigation />
       <Link className="back-link" href="/mine-cykler">
         ← Mine cykler
       </Link>

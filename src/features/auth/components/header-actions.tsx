@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { signOutAction } from "../actions";
 import { authClient } from "@/lib/auth/client";
 
 export function HeaderActions() {
   const { data: session, isPending } = authClient.useSession();
+  const pathname = usePathname();
 
   if (isPending) {
     return <span className="header-status header-status--loading">Henter…</span>;
@@ -24,16 +26,20 @@ export function HeaderActions() {
     );
   }
 
+  const accountActive =
+    pathname.startsWith("/mine-") ||
+    pathname.startsWith("/favoritter") ||
+    pathname.startsWith("/henvendelser") ||
+    pathname.startsWith("/profil");
+
   return (
     <div className="header-actions">
-      <Link className="header-actions__favorite" href="/favoritter">
-        Favoritter
-      </Link>
-      <Link className="header-actions__garage" href="/mine-cykler">
-        Mine cykler
-      </Link>
-      <Link className="header-actions__listings" href="/mine-annoncer">
-        Mine annoncer
+      <Link
+        aria-current={accountActive ? "page" : undefined}
+        className={`header-actions__account${accountActive ? " is-active" : ""}`}
+        href="/mine-cykler"
+      >
+        Min konto
       </Link>
       <form action={signOutAction}>
         <button className="header-signout" type="submit">

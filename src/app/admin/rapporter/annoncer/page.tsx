@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ModerationNavigation } from "@/components/moderation-navigation";
 import { formatForumDate } from "@/features/forum/format";
 import { moderateListingReportAction } from "@/features/listing-reports/actions";
 import { getListingModerationReports } from "@/features/listing-reports/queries";
@@ -43,6 +44,7 @@ export default async function ListingReportsPage({
 
   return (
     <div className="moderation-page shell">
+      <ModerationNavigation />
       <header className="dashboard-heading moderation-heading">
         <div>
           <p className="eyebrow">Markedspladsmoderation</p>
@@ -51,14 +53,6 @@ export default async function ListingReportsPage({
             Undersøg dokumentation og annonceoplysninger, før en annonce
             fjernes fra markedspladsen.
           </p>
-        </div>
-        <div className="dashboard-heading__actions">
-          <Link className="button button--quiet" href="/admin/dokumentation">
-            Dokumentkontrol
-          </Link>
-          <Link className="button button--quiet" href="/admin/rapporter">
-            Se forumrapporter
-          </Link>
         </div>
       </header>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { AccountNavigation } from "@/components/account-navigation";
+
 export default function ContactRequestsError({
   reset,
 }: {
@@ -7,6 +9,7 @@ export default function ContactRequestsError({
 }) {
   return (
     <div className="account-page shell">
+      <AccountNavigation />
       <div className="empty-state">
         <p className="eyebrow">Noget gik galt</p>
         <h1>Henvendelserne kunne ikke hentes.</h1>

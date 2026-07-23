@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AccountNavigation } from "@/components/account-navigation";
 import { formatDate, formatPrice } from "@/features/listings/format";
 import { getSellerListings } from "@/features/listings/draft-queries";
 import { setSellerListingStatusAction } from "@/features/listings/status-actions";
@@ -40,6 +41,7 @@ export default async function SellerDashboard({
 
   return (
     <div className="account-page shell">
+      <AccountNavigation />
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Sælgerområde</p>

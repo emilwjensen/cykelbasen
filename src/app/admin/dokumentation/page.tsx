@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ModerationNavigation } from "@/components/moderation-navigation";
 import { formatForumDate } from "@/features/forum/format";
 import { isModerator } from "@/features/moderation/queries";
 import { moderateOwnershipDocumentAction } from "@/features/ownership/actions";
@@ -38,6 +39,7 @@ export default async function OwnershipQueuePage({
 
   return (
     <div className="moderation-page shell">
+      <ModerationNavigation />
       <header className="dashboard-heading moderation-heading">
         <div>
           <p className="eyebrow">Ejerskabskontrol</p>
@@ -47,9 +49,6 @@ export default async function OwnershipQueuePage({
             godkendelse publicerer annoncen atomisk.
           </p>
         </div>
-        <Link className="button button--quiet" href="/admin/rapporter/annoncer">
-          Se annoncerapporter
-        </Link>
       </header>
 
       <nav aria-label="Filtrér dokumentation" className="moderation-tabs">

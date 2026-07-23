@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNavigation } from "@/components/account-navigation";
 import { saveProfileAction } from "@/features/profiles/actions";
 import { getProfile } from "@/features/profiles/queries";
 import { requireUser } from "@/lib/auth/server";
@@ -19,6 +20,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
   return (
     <div className="account-page shell">
+      <AccountNavigation />
       <header className="account-heading">
         <p className="eyebrow">Din konto</p>
         <h1>Profil</h1>

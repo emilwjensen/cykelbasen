@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ListingForm } from "@/features/listings/components/listing-form";
@@ -25,6 +26,9 @@ export default async function EditListingPage({
 
   return (
     <div className="editor-page shell">
+      <Link className="back-link" href="/mine-annoncer">
+        <span aria-hidden="true">←</span> Mine annoncer
+      </Link>
       <header className="editor-heading">
         <p className="eyebrow">Redigér kladde</p>
         <h1>{listing.title}</h1>
@@ -41,4 +45,3 @@ export default async function EditListingPage({
     </div>
   );
 }
-

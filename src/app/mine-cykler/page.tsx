@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNavigation } from "@/components/account-navigation";
 import { categoryLabel, formatDate } from "@/features/listings/format";
 import { getGarageBikes } from "@/features/garage/queries";
 import { requireUser } from "@/lib/auth/server";
@@ -11,6 +12,7 @@ export default async function MyBikesPage() {
 
   return (
     <div className="garage-page shell">
+      <AccountNavigation />
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Din cykeldata</p>

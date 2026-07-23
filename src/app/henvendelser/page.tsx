@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNavigation } from "@/components/account-navigation";
 import {
   cancelListingReservationAction,
   reserveListingForContactAction,
@@ -64,6 +65,7 @@ export default async function ContactRequestsPage({
 
   return (
     <div className="account-page shell">
+      <AccountNavigation />
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Handelsdialog</p>

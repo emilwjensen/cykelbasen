@@ -1,8 +1,11 @@
 "use client";
 
+import { ModerationNavigation } from "@/components/moderation-navigation";
+
 export default function ReportsError({ reset }: { reset: () => void }) {
   return (
-    <div className="account-page shell">
+    <div className="moderation-page shell">
+      <ModerationNavigation />
       <div className="empty-state">
         <p className="eyebrow">Moderator-køen svarede ikke</p>
         <h1>Rapporterne kunne ikke hentes.</h1>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNavigation } from "@/components/account-navigation";
 import { EmptyState } from "@/components/empty-state";
 import { getFavoriteListings } from "@/features/favorites/queries";
 import { ListingCard } from "@/features/listings/components/listing-card";
@@ -12,6 +13,7 @@ export default async function FavoritesPage() {
 
   return (
     <div className="browse shell">
+      <AccountNavigation />
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Køberoverblik</p>
