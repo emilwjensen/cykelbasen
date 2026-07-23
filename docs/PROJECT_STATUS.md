@@ -4,16 +4,16 @@ Last reviewed: 2026-07-23.
 
 ## Summary
 
-Cykelbasen is a coherent, Neon-only product prototype with a working public
-marketplace, authenticated seller area, private bike ownership area, forum and
-moderation. It is not launch-ready yet because the trust-critical image and
-private-document uploads still need an external object-storage provider.
+Cykelbasen is a coherent Neon product with a working public marketplace,
+authenticated seller area, private bike ownership area, forum and moderation.
+The trust-critical upload code now uses separate public and private Vercel Blob
+stores. The repo is ready for environment provisioning and a real
+seller-to-moderator test, but is not ready for a public launch yet.
 
-The application-side ownership workflow is complete: a seller submits a ready
-draft, a moderator approves or rejects the private document record, and the
-database atomically publishes or rejects the listing with an audit trail. The
-remaining P0 work is to attach real file bytes and signed document previews to
-that workflow.
+The complete application workflow now includes validated image/document
+uploads, image ordering, private short-lived previews, atomic review/publication
+and audit. The remaining P0 work is external provisioning and evidence from the
+first full browser journey against those real stores.
 
 ## Implemented
 
@@ -24,6 +24,9 @@ that workflow.
 - SQL migrations, development seed and RLS security test script.
 - GitHub Actions quality workflow and Vercel-compatible build.
 - Server components by default, server actions and Zod validation for writes.
+- Separate public/private Vercel Blob integration with server-only credentials.
+- Development-seed production guard and a moderator provisioning script/runbook.
+- Sitemap, robots rules, manifest, structured listing data and beta legal pages.
 
 ### Marketplace
 
@@ -59,6 +62,14 @@ that workflow.
   available listings.
 - Bike-registration transfers complete matching active reservations.
 - Database-enforced rolling rate limits for contact, forum and report writes.
+- Validated image upload, order, cover selection and deletion for up to eight
+  files.
+- Keyboard-accessible public image gallery.
+- Private ownership-document upload with optional frame-number hashing.
+- Two-minute owner/moderator previews without exposing object paths.
+- Upload rate limits and editable-state policies enforced in Postgres.
+- Explicit completed-sale confirmation and a direct registered-bike handoff
+  from reserved listings.
 
 ### Mine cykler
 
@@ -89,25 +100,22 @@ that workflow.
 
 | Priority | Missing capability | Why it blocks launch |
 | --- | --- | --- |
-| P0 | Public listing-image upload, order and deletion | Sellers cannot create a credible real listing without seeded image URLs. |
-| P0 | Private ownership-document upload and signed moderator preview | The review workflow exists, but a seller cannot attach real evidence and a moderator cannot inspect its bytes yet. |
-| P0 | Production moderation bootstrap and operating procedure | A real moderator must be provisioned without ad hoc production SQL. |
+| P0 | Provision separate public/private Blob stores and production tokens | Upload code is complete, but this external state cannot be created or verified from the repository alone. |
+| P0 | Run the real seller-to-moderator browser journey | The database and build tests pass, but no real file has yet crossed the configured production-like stores. |
+| P0 | Name the legal operator and review beta policies | The product pages exist, but company identity, processor terms and final retention periods require an owner/legal decision. |
 
-Object storage is intentionally not replaced by Neon: Postgres stores metadata,
-while image and document bytes require an external storage provider. Listing
-images must be public or CDN-delivered; ownership documents must remain private
-and use short-lived signed access.
+Object storage remains separate from Neon: Postgres stores metadata, public
+images use CDN URLs, and private evidence uses scoped short-lived access.
 
 ## Important follow-up work
 
 ### Marketplace quality
 
-- Listing image gallery when upload exists.
-- Preserve an intended destination through login.
 - Reporter-facing history or receipt page if testing shows a need beyond the
   current confirmation feedback.
-- Broader SEO: canonical URLs, social images, sitemap and robots rules.
-- Accessibility pass for sliders, forms, focus states and status messages.
+- Complete accessibility pass for sliders, all forms, focus states and status
+  messages.
+- Add generated social images and normalize brand/model suggestions.
 
 ### Mine cykler
 
@@ -115,26 +123,24 @@ and use short-lived signed access.
 - Edit or remove incorrect log entries with an audit-friendly policy.
 - Upload private receipts and service documents after storage is selected.
 - Select which bike-log component changes should be copied into a listing.
-- Add an explicit confirmation step tying a completed marketplace sale to the
-  registration-transfer action.
+- Edit/cancel/snooze maintenance reminders and add recurring intervals.
 
 ### Reliability and operations
 
-- Extend rate limits to uploads and authentication-sensitive actions when those
-  flows are implemented.
+- Extend rate limits to authentication-sensitive actions.
 - Browser-level tests for signup, profile, draft, favorite and forum flows.
 - Browser-level test for the seller-to-moderator publication path.
 - Error tracking, product analytics and database monitoring.
-- Privacy policy, terms, retention rules and a user deletion/export process.
-- Backup/restore rehearsal and production seed separation.
+- Finalize retention rules and a self-service user deletion/export process.
+- Backup/restore rehearsal and orphaned Blob cleanup.
 
 ## Recommended sequence
 
-1. Select object storage and build listing-image upload.
-2. Build private ownership-document upload and signed moderator previews.
-3. Provision production moderators and document the operating procedure.
-4. Add browser tests, accessibility and operational safeguards.
-5. Run a closed test with real sellers before adding quiz, chat or payments.
+1. Create and connect the two Vercel Blob stores.
+2. Run a real seller-to-moderator publication test and add it to Playwright.
+3. Add the remaining browser journeys and accessibility checks.
+4. Implement audit-friendly bike/log corrections and account lifecycle.
+5. Rehearse operations, then run a closed test with real sellers.
 
 Quiz, payments, escrow, shipping integrations, price estimation and real-time
 chat remain deliberately outside the MVP.

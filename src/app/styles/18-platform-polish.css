@@ -257,6 +257,7 @@
 
 .listing-form fieldset {
   overflow: clip;
+  padding: 0 34px 34px;
   border-color: color-mix(in srgb, var(--forest) 13%, var(--line));
   box-shadow: 0 10px 34px rgba(13, 45, 36, 0.035);
   transition:
@@ -264,9 +265,62 @@
     box-shadow 160ms ease;
 }
 
+.listing-form legend {
+  float: left;
+  width: calc(100% + 68px);
+  min-height: 78px;
+  margin: 0 -34px 30px;
+  padding: 20px 34px;
+  background: color-mix(in srgb, var(--paper) 62%, var(--white));
+  border-bottom: 1px solid var(--line);
+}
+
+.listing-form legend + * {
+  clear: both;
+}
+
+.listing-form legend::before {
+  flex: 0 0 auto;
+}
+
 .listing-form fieldset:focus-within {
   border-color: color-mix(in srgb, var(--forest) 30%, var(--line));
   box-shadow: 0 15px 44px rgba(13, 45, 36, 0.065);
+}
+
+.listing-filter-group {
+  overflow: clip;
+  padding: 0 20px 20px;
+}
+
+.listing-filter-group legend {
+  float: left;
+  width: calc(100% + 40px);
+  margin: 0 -20px 18px;
+  padding: 16px 20px 15px;
+  background: color-mix(in srgb, var(--mint) 25%, var(--white));
+  border-bottom: 1px solid var(--line);
+}
+
+.listing-filter-group legend > span:first-child {
+  display: block;
+  color: var(--forest-deep);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.08rem;
+}
+
+.listing-filter-group legend + * {
+  clear: both;
+}
+
+.listing-filter-group .listing-filter-group__description {
+  min-height: 0;
+  display: block;
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: var(--font-caption);
+  line-height: 1.45;
 }
 
 .listing-form__submit {
@@ -519,7 +573,15 @@
   }
 
   .listing-form fieldset {
-    overflow: visible;
+    overflow: clip;
+    padding: 0 20px 24px;
+  }
+
+  .listing-form legend {
+    width: calc(100% + 40px);
+    min-height: 68px;
+    margin: 0 -20px 24px;
+    padding: 16px 20px;
   }
 
   .listing-form__submit {

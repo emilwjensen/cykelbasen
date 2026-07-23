@@ -19,13 +19,15 @@ export async function getSellerListings(
         listing.price_dkk,
         listing.status,
         listing.updated_at,
+        listing.garage_bike_id,
         cover.image_url as cover_url,
         (
           select count(*)::int
           from public.listing_images image
           where image.listing_id = listing.id
         ) as image_count,
-        document.status as ownership_document_status
+        document.status as ownership_document_status,
+        reservation_buyer.display_name as reserved_buyer_name
       from public.listings listing
       left join lateral (
         select image.image_url
@@ -42,6 +44,15 @@ export async function getSellerListings(
         order by ownership.created_at desc
         limit 1
       ) document on true
+      left join lateral (
+        select reservation.buyer_id
+        from public.listing_reservations reservation
+        where reservation.listing_id = listing.id
+          and reservation.status = 'active'
+        limit 1
+      ) reservation on true
+      left join public.profiles reservation_buyer
+        on reservation_buyer.id = reservation.buyer_id
       where listing.seller_id = ${userId}
       order by listing.updated_at desc
     `,

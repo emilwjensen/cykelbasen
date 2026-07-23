@@ -11,6 +11,8 @@ export type SellerListing = {
   cover_url: string | null;
   image_count: number;
   ownership_document_status: "pending" | "approved" | "rejected" | null;
+  garage_bike_id: string | null;
+  reserved_buyer_name: string | null;
 };
 
 export type EditableListing = DraftListingInput & {

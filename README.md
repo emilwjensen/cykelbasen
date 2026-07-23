@@ -14,9 +14,9 @@ publicering.
 - Vercel og GitHub Actions
 - pnpm
 
-Neon Auth, profiler og sælgerkladder er integreret. Listing-billeder og private
-ejerskabsdokumenter kræver en separat object-storage integration; udbyderen er
-ikke valgt endnu.
+Neon Auth, profiler og sælgerkladder er integreret. Vercel Blob bruges som
+separate offentlige og private stores til listing-billeder og
+ejerskabsdokumenter.
 
 ## Lokal opstart
 
@@ -33,11 +33,28 @@ Tilføj den poolede Neon-forbindelse som `DATABASE_URL` i `.env`, og kør:
 ```bash
 pnpm db:migrate
 pnpm db:setup-app-role
-pnpm db:seed
+ALLOW_DEVELOPMENT_SEED=true pnpm db:seed
 pnpm dev
 ```
 
 Åbn `http://localhost:3000`.
+
+## Vercel Blob
+
+Opret to Blob stores i Vercel:
+
+1. En public store til annoncebilleder.
+2. En private store til ejerskabsdokumenter.
+
+Tilføj deres separate tokens i `.env`:
+
+```bash
+LISTING_IMAGES_BLOB_READ_WRITE_TOKEN="..."
+OWNERSHIP_DOCUMENTS_BLOB_READ_WRITE_TOKEN="..."
+```
+
+Tokens må ikke have adgang til hinandens store. Uploadformularerne viser en
+konfigurationsbesked, indtil de er sat.
 
 ## Kommandoer
 
@@ -50,9 +67,11 @@ pnpm test:security
 pnpm db:migrate
 pnpm db:setup-app-role
 pnpm db:seed
+pnpm db:moderator -- grant AUTH_USER_ID
 ```
 
-`db:seed` indeholder udelukkende udviklingsdata. De fire eksempelannoncer
+`db:seed` kræver `ALLOW_DEVELOPMENT_SEED=true` og afviser production-miljøer.
+Det indeholder udelukkende udviklingsdata. De fire eksempelannoncer
 publiceres gennem samme database-trigger som rigtige annoncer og har hver en
 godkendt udviklings-dokumentpost.
 
@@ -96,7 +115,10 @@ godkendt udviklings-dokumentpost.
 - Køberoverblik og privat reservation bundet til en konkret henvendelse
 - Frigivelse eller gennemført salg med atomisk annonce-audit
 - Databasebaserede rate limits for kontakt, forum og rapportering
+- Upload, rækkefølge og sletning af op til otte validerede annoncebilleder
+- Privat dokumentupload med filsignaturkontrol og kortlivet preview
+- Sikker moderator-provisionering uden ad hoc SQL
+- Billedgalleri, sitemap, robots, structured data og beta-legal-sider
 
-Billedupload, privat dokumentupload, signed previews og resterende
-launch-hardening følger som separate vertikale slices. Se
-`docs/PROJECT_STATUS.md` for den prioriterede scope-audit.
+Provisionering af de to Blob stores, browsertests og resterende
+launch-hardening følger i `docs/DELIVERY_PLAN.md`.

@@ -101,12 +101,19 @@ export default async function OwnershipQueuePage({
                 <p className="eyebrow">Sælger: {document.seller_name}</p>
                 <h2>{document.listing_title}</h2>
                 <div className="ownership-document-reference">
-                  <strong>Privat dokumentreference</strong>
-                  <code>{document.object_key}</code>
+                  <strong>Privat ejerskabsbevis</strong>
                   <p>
-                    Signed preview aktiveres først, når privat object storage
-                    er valgt. Referencen er kun synlig i moderatorområdet.
+                    Previewet åbnes med en kortlivet URL efter en ny
+                    moderator-kontrol. Dokumentstien vises ikke i brugerfladen.
                   </p>
+                  <a
+                    className="button button--quiet"
+                    href={`/api/ownership-documents/${document.id}/preview`}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    Åbn dokument sikkert
+                  </a>
                 </div>
               </div>
 

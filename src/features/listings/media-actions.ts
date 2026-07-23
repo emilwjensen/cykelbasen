@@ -72,7 +72,7 @@ export async function uploadListingImagesAction(
     );
   }
 
-  const blobs = [];
+  const blobs: Awaited<ReturnType<typeof uploadListingImage>>[] = [];
   try {
     for (const upload of verifiedUploads) {
       blobs.push(
@@ -113,9 +113,9 @@ export async function uploadListingImagesAction(
               from public.listing_images image
               where image.listing_id = ${validListingId.data}::uuid
             ),
-            ${verifiedUploads[index].originalFilename},
-            ${verifiedUploads[index].contentType},
-            ${verifiedUploads[index].sizeBytes}
+            ${verifiedUploads[index]!.originalFilename},
+            ${verifiedUploads[index]!.contentType},
+            ${verifiedUploads[index]!.sizeBytes}
           )
         `,
       ),
@@ -250,11 +250,12 @@ export async function uploadOwnershipDocumentAction(
 
   let blob: Awaited<ReturnType<typeof uploadOwnershipDocument>> | undefined;
   try {
-    blob = await uploadOwnershipDocument(
+    const uploadedBlob = await uploadOwnershipDocument(
       user.id,
       validListingId.data,
       verifiedUpload,
     );
+    blob = uploadedBlob;
     const database = getApplicationDatabase();
     await database.transaction((transaction) => [
       transaction`select set_config('app.user_id', ${user.id}, true)`,
@@ -271,7 +272,7 @@ export async function uploadOwnershipDocumentAction(
         values (
           ${validListingId.data}::uuid,
           ${user.id},
-          ${blob.pathname},
+          ${uploadedBlob.pathname},
           ${frameNumberHash},
           ${verifiedUpload.originalFilename},
           ${verifiedUpload.contentType},
@@ -330,4 +331,3 @@ export async function deleteOwnershipDocumentAction(
   revalidatePath("/admin/dokumentation");
   redirect(mediaUrl(parsed.data.listingId, "dokument-slettet"));
 }
-

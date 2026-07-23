@@ -13,7 +13,7 @@ export function BikeTransferForm({ bikeId }: { bikeId: string }) {
   );
 
   return (
-    <section className="bike-transfer-panel">
+    <section className="bike-transfer-panel" id="overdragelse">
       <p className="eyebrow">Ved videresalg</p>
       <h2>Overdrag registreringen</h2>
       <p>

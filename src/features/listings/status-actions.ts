@@ -14,12 +14,16 @@ const statusChangeSchema = z.object({
 export async function setSellerListingStatusAction(
   listingId: string,
   status: "sold" | "archived",
+  formData: FormData,
 ) {
   const user = await requireUser();
   const parsed = statusChangeSchema.safeParse({ listingId, status });
 
   if (!parsed.success) {
     redirect("/mine-annoncer?fejl=status");
+  }
+  if (parsed.data.status === "sold" && formData.get("saleConfirmed") !== "on") {
+    redirect("/mine-annoncer?fejl=bekraeft-salg");
   }
 
   let changed = false;

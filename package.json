@@ -12,7 +12,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm build",
     "db:migrate": "node --env-file=.env scripts/db-migrate.mjs",
     "db:setup-app-role": "node --env-file=.env scripts/setup-app-role.mjs",
-    "db:seed": "node --env-file=.env scripts/run-sql.mjs db/seed.sql"
+    "db:seed": "node --env-file=.env scripts/seed-development.mjs",
+    "db:moderator": "node --env-file=.env scripts/manage-moderator.mjs"
   },
   "dependencies": {
     "@neondatabase/auth": "0.4.2-beta",
@@ -24,6 +25,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

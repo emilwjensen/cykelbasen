@@ -14,9 +14,10 @@ export function HeaderActions() {
   }
 
   if (!session?.user) {
+    const returnTo = pathname.startsWith("/auth") ? "" : `?returnTo=${encodeURIComponent(pathname)}`;
     return (
       <div className="header-actions">
-        <Link className="header-actions__login" href="/auth/log-ind">
+        <Link className="header-actions__login" href={`/auth/log-ind${returnTo}`}>
           Log ind
         </Link>
         <Link className="header-status header-actions__signup" href="/auth/opret">

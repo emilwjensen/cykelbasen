@@ -14,7 +14,12 @@ export function FavoriteButton({
 }: FavoriteButtonProps) {
   if (!authenticated) {
     return (
-      <Link className="favorite-button" href="/auth/log-ind">
+      <Link
+        className="favorite-button"
+        href={`/auth/log-ind?returnTo=${encodeURIComponent(
+          `/cykler/${listingId}`,
+        )}`}
+      >
         <span aria-hidden="true">♡</span>
         Log ind for at gemme
       </Link>

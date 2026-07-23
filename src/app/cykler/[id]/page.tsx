@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContactRequestForm } from "@/features/contact-requests/components/contact-request-form";
@@ -7,6 +6,7 @@ import { FavoriteButton } from "@/features/favorites/components/favorite-button"
 import { isListingFavorite } from "@/features/favorites/queries";
 import { ListingReportForm } from "@/features/listing-reports/components/listing-report-form";
 import { CompareButton } from "@/features/listings/components/compare-controls";
+import { ListingGallery } from "@/features/listings/components/listing-gallery";
 import {
   brakeLabel,
   categoryLabel,
@@ -18,6 +18,7 @@ import {
 import { getListingById } from "@/features/listings/queries";
 import { componentCategories } from "@/features/listings/types";
 import { getCurrentUser } from "@/lib/auth/server";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +51,20 @@ export async function generateMetadata({
   return {
     title: listing.title,
     description: `${listing.brand} ${listing.model}, str. ${listing.frame_size_label}, i ${listing.city}.`,
+    alternates: { canonical: `/cykler/${listing.id}` },
+    openGraph: {
+      type: "website",
+      title: listing.title,
+      description: `${listing.brand} ${listing.model}, str. ${listing.frame_size_label}, i ${listing.city}.`,
+      images: listing.images[0]
+        ? [
+            {
+              url: listing.images[0].image_url,
+              alt: listing.images[0].alt_text,
+            },
+          ]
+        : undefined,
+    },
   };
 }
 
@@ -72,7 +87,6 @@ export default async function ListingPage({
     ? await isListingFavorite(user.id, listing.id)
     : false;
   const returnUrl = safeReturnUrl(resolvedSearchParams.tilbage);
-  const primaryImage = listing.images[0];
 
   const specs = [
     ["Type", categoryLabel(listing.category)],
@@ -103,9 +117,35 @@ export default async function ListingPage({
   const componentLabels = Object.fromEntries(
     componentCategories.map((category) => [category.value, category.label]),
   );
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.title,
+    image: listing.images.map((image) => image.image_url),
+    description: listing.description,
+    brand: { "@type": "Brand", name: listing.brand },
+    model: listing.model,
+    itemCondition: "https://schema.org/UsedCondition",
+    offers: {
+      "@type": "Offer",
+      price: listing.price_dkk,
+      priceCurrency: "DKK",
+      availability:
+        listing.status === "published"
+          ? "https://schema.org/InStock"
+          : "https://schema.org/LimitedAvailability",
+      url: `${getSiteUrl()}/cykler/${listing.id}`,
+    },
+  };
 
   return (
     <div className="shell detail">
+      <script
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+        type="application/ld+json"
+      />
       <Link className="back-link" href={returnUrl}>
         <span aria-hidden="true">←</span> Tilbage til søgeresultater
       </Link>
@@ -148,21 +188,7 @@ export default async function ListingPage({
 
       <div className="detail__grid">
         <div>
-          <div className="detail__image">
-            {primaryImage ? (
-              <Image
-                alt={primaryImage.alt_text}
-                fill
-                priority
-                sizes="(max-width: 900px) 100vw, 62vw"
-                src={primaryImage.image_url}
-              />
-            ) : (
-              <div className="listing-card__placeholder" aria-hidden="true">
-                CB
-              </div>
-            )}
-          </div>
+          <ListingGallery images={listing.images} title={listing.title} />
           <div className="detail__verified">
             <span className="verified-icon">✓</span>
             <div>
@@ -236,7 +262,9 @@ export default async function ListingPage({
           ) : (
             <Link
               className="button button--accent button--full"
-              href="/auth/log-ind"
+              href={`/auth/log-ind?returnTo=${encodeURIComponent(
+                `/cykler/${listing.id}?tilbage=${encodeURIComponent(returnUrl)}`,
+              )}`}
             >
               Log ind for at kontakte
             </Link>

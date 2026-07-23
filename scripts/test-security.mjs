@@ -1571,6 +1571,185 @@ try {
   await rateLimitClient.end();
 }
 
+const storagePolicyClient = createDatabaseClient();
+
+try {
+  await storagePolicyClient.connect();
+  await storagePolicyClient.query("begin");
+  await storagePolicyClient.query("set local role cykelbasen_app");
+  await storagePolicyClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+
+  const temporaryListing = await storagePolicyClient.query(
+    `
+      insert into public.listings (
+        seller_id,
+        title,
+        category,
+        brand,
+        model,
+        frame_size_label,
+        price_dkk,
+        condition,
+        city,
+        description,
+        purchase_date
+      )
+      values (
+        $1,
+        'Midlertidig storage-sikkerhedstest',
+        'road',
+        'Test',
+        'Storage',
+        '56',
+        10000,
+        'good',
+        'Aarhus',
+        'Midlertidig kladde til test af billed- og dokumentpolitikker.',
+        current_date
+      )
+      returning id
+    `,
+    ["seed-seller-anna"],
+  );
+  const temporaryListingId = temporaryListing.rows[0]?.id;
+  assert(temporaryListingId, "Storage-testen kunne ikke oprette en kladde.");
+
+  const firstImage = await storagePolicyClient.query(
+    `
+      insert into public.listing_images (
+        listing_id,
+        object_key,
+        image_url,
+        alt_text,
+        position,
+        content_type,
+        size_bytes
+      )
+      values ($1::uuid, $2, $3, 'Testbillede 1', 0, 'image/webp', 100)
+      returning id
+    `,
+    [
+      temporaryListingId,
+      `security-test/${temporaryListingId}/one.webp`,
+      `https://example.invalid/${temporaryListingId}/one.webp`,
+    ],
+  );
+  const secondImage = await storagePolicyClient.query(
+    `
+      insert into public.listing_images (
+        listing_id,
+        object_key,
+        image_url,
+        alt_text,
+        position,
+        content_type,
+        size_bytes
+      )
+      values ($1::uuid, $2, $3, 'Testbillede 2', 1, 'image/webp', 100)
+      returning id
+    `,
+    [
+      temporaryListingId,
+      `security-test/${temporaryListingId}/two.webp`,
+      `https://example.invalid/${temporaryListingId}/two.webp`,
+    ],
+  );
+  const firstImageId = firstImage.rows[0]?.id;
+  const secondImageId = secondImage.rows[0]?.id;
+
+  const movedImage = await storagePolicyClient.query(
+    "select public.move_listing_image($1::uuid, 'up') as moved",
+    [secondImageId],
+  );
+  const orderedImages = await storagePolicyClient.query(
+    `
+      select id
+      from public.listing_images
+      where listing_id = $1::uuid
+      order by position
+    `,
+    [temporaryListingId],
+  );
+  assert(
+    movedImage.rows[0]?.moved === true &&
+      orderedImages.rows[0]?.id === secondImageId,
+    "Ejeren kunne ikke ændre billedrækkefølgen atomisk.",
+  );
+
+  await storagePolicyClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const otherMove = await storagePolicyClient.query(
+    "select public.move_listing_image($1::uuid, 'down') as moved",
+    [secondImageId],
+  );
+  assert(
+    otherMove.rows[0]?.moved === false,
+    "En anden bruger kunne ændre billedrækkefølgen.",
+  );
+
+  await storagePolicyClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const deletedImage = await storagePolicyClient.query(
+    "select public.delete_listing_image($1::uuid) as object_key",
+    [firstImageId],
+  );
+  const remainingPosition = await storagePolicyClient.query(
+    `
+      select position
+      from public.listing_images
+      where listing_id = $1::uuid
+    `,
+    [temporaryListingId],
+  );
+  assert(
+    deletedImage.rows[0]?.object_key?.endsWith("/one.webp") &&
+      remainingPosition.rows[0]?.position === 0,
+    "Billedsletning bevarede ikke en sammenhængende rækkefølge.",
+  );
+
+  const document = await storagePolicyClient.query(
+    `
+      insert into public.ownership_documents (
+        listing_id,
+        owner_id,
+        object_key,
+        original_filename,
+        content_type,
+        size_bytes
+      )
+      values ($1::uuid, $2, $3, 'proof.pdf', 'application/pdf', 200)
+      returning id
+    `,
+    [
+      temporaryListingId,
+      "seed-seller-anna",
+      `security-test/${temporaryListingId}/proof.pdf`,
+    ],
+  );
+  const deletedDocument = await storagePolicyClient.query(
+    "select public.delete_ownership_document($1::uuid) as object_key",
+    [document.rows[0]?.id],
+  );
+  assert(
+    deletedDocument.rows[0]?.object_key?.endsWith("/proof.pdf"),
+    "Ejeren kunne ikke erstatte afventende privat dokumentation.",
+  );
+
+  await storagePolicyClient.query("rollback");
+} catch (error) {
+  await storagePolicyClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await storagePolicyClient.end();
+}
+
 console.log(
-  "Security tests passed: bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: storage policies/reordering, bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

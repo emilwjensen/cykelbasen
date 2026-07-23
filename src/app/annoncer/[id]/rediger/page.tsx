@@ -2,25 +2,36 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ListingForm } from "@/features/listings/components/listing-form";
+import { ListingMediaManager } from "@/features/listings/components/listing-media-manager";
 import { updateDraftAction } from "@/features/listings/draft-actions";
 import { getEditableListing } from "@/features/listings/draft-queries";
+import { getListingMedia } from "@/features/listings/media-queries";
 import { requireUser } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
 
 type EditListingPageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ media?: string }>;
 };
 
 export default async function EditListingPage({
   params,
+  searchParams,
 }: EditListingPageProps) {
-  const [user, { id }] = await Promise.all([requireUser(), params]);
+  const [user, { id }, query] = await Promise.all([
+    requireUser(),
+    params,
+    searchParams,
+  ]);
 
   if (!z.string().uuid().safeParse(id).success) notFound();
 
-  const listing = await getEditableListing(user.id, id);
-  if (!listing) notFound();
+  const [listing, media] = await Promise.all([
+    getEditableListing(user.id, id),
+    getListingMedia(user.id, id),
+  ]);
+  if (!listing || !media) notFound();
 
   const action = updateDraftAction.bind(null, listing.id);
 
@@ -41,6 +52,11 @@ export default async function EditListingPage({
         action={action}
         initialValues={listing}
         submitLabel="Gem ændringer"
+      />
+      <ListingMediaManager
+        listingId={listing.id}
+        media={media}
+        messageCode={query.media}
       />
     </div>
   );

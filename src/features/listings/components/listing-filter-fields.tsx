@@ -39,8 +39,12 @@ export function ListingFilterGroup({
     <fieldset
       className={`listing-filter-group listing-filter-group--${variant}`}
     >
-      <legend>{legend}</legend>
-      <p className="listing-filter-group__description">{description}</p>
+      <legend>
+        <span>{legend}</span>
+        <span className="listing-filter-group__description">
+          {description}
+        </span>
+      </legend>
       <div
         className={`listing-filter-group__grid listing-filter-group__grid--${variant}`}
       >

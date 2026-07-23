@@ -11,7 +11,7 @@ Browser
   -> TypeScript and Tailwind CSS
   -> Neon Auth
   -> Neon Postgres with RLS
-  -> external object storage (when uploads are implemented)
+  -> Vercel Blob (separate public image and private document stores)
 
 GitHub
   -> Vercel preview and production deployments
@@ -94,7 +94,8 @@ links it back atomically. Reminders do not transfer to the next owner.
 - Server actions perform authenticated writes.
 - Database queries run on the server through `@neondatabase/serverless`.
 - The database connection string is never available in the browser.
-- Direct browser uploads may be added later through short-lived, scoped upload URLs.
+- Authenticated server actions handle the current capped uploads. Direct client
+  uploads may be added later if larger files become a real requirement.
 
 ## Listing filters
 
@@ -121,8 +122,7 @@ another private data table.
 
 ## Images
 
-Use a public object-storage namespace for listing images. The provider is an
-open Phase 2 decision.
+Use a dedicated public Vercel Blob store for listing images.
 
 Path convention:
 
@@ -134,7 +134,7 @@ Store metadata in `listing_images`. The first image by `position` is the cover i
 
 ## Ownership documents
 
-Use a separate private object-storage namespace for ownership documents.
+Use a separate private Vercel Blob store for ownership documents.
 
 Path convention:
 
@@ -142,10 +142,9 @@ Path convention:
 <user-id>/<listing-id>/<uuid>.<extension>
 ```
 
-Only the owner and moderators get signed URLs. Never expose a public storage URL.
-Until an object-storage provider is selected, the application stores and shows
-only the private object reference to moderators; it does not pretend that Neon
-contains the file bytes.
+Only the owner and moderators get short-lived, object-scoped URLs. The
+application authorizes the request immediately before signing it and never
+exposes a public storage URL or raw object path in the UI.
 
 ## Neon authorization bridge
 

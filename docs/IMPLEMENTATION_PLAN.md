@@ -26,28 +26,31 @@ Exit criteria: visitors filter and open listings.
 - [x] Neon Auth, profile completion and seller dashboard.
 - [x] Create listing form with simple specs.
 - [x] Edit draft listing.
-- Direct image upload to the selected object-storage provider.
-- Image order and cover image.
+- [x] Direct image upload to a separate public Vercel Blob store.
+- [x] Image order, cover image and deletion.
 
-Current evidence: authenticated user creates and edits a structured draft.
+Current evidence: authenticated user creates and edits a structured draft,
+uploads up to eight validated images and controls cover order without database
+access. Real upload testing requires the public Blob token.
 
 Exit criteria: authenticated user creates a complete draft with images.
 
 ## Phase 3, ownership review
 
 - [x] Neon Auth and restricted RLS application role.
-- Private document upload.
+- [x] Private document upload.
 - [x] Submit listing for review.
 - [x] Moderator queue.
-- Signed document preview.
+- [x] Short-lived, object-scoped document preview.
 - [x] Approve and reject actions.
 - [x] Publish action after approval.
 
 Current evidence: sellers can submit only a draft with both an image record and
 a pending ownership-document record. Moderators process a private queue, and a
 single database function stores the decision, publishes or rejects the listing
-and writes its audit event. File upload and signed preview remain blocked on the
-external object-storage decision.
+and writes its audit event. Uploads, private previews and replacement policies
+are implemented; environment verification remains after the two Blob stores are
+provisioned.
 
 Exit criteria: the full trust flow works without the Neon console.
 
@@ -76,7 +79,8 @@ content; moderators process the queue without direct database access.
 - [x] Preserve return URL and filters.
 - [x] URL pagination with stable database ordering.
 - [x] Compare up to three public listings side by side.
-- Basic SEO metadata.
+- [x] Metadata, canonical marketplace/listing URLs, structured data, sitemap and
+  robots rules.
 - [x] Listing reports and moderator removal flow.
 - [x] Purchase date, owner count and documentation indicators.
 - [x] Structured listing component history.
@@ -107,7 +111,8 @@ private logs remain isolated between seller and buyer.
 - [x] Database-backed rate limits for contact, forum and report writes.
 - [x] Structured buyer contact request and private seller inbox.
 - [x] Buyer-linked reservation, release and completed-sale lifecycle.
-- Image file validation and size limits.
+- [x] Image/document media-type, signature and size validation.
 - Audit logs for moderation actions.
 - Error tracking and product analytics.
-- Terms, privacy and reporting process.
+- [x] Beta terms and privacy transparency pages; legal review and a complete
+  deletion/export workflow remain.

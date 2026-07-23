@@ -93,6 +93,8 @@ export default async function SellerDashboard({
         <p className="form-message form-message--error">
           {params.fejl === "kontrol"
             ? "Annoncen mangler et billede eller afventende dokumentation."
+            : params.fejl === "bekraeft-salg"
+              ? "Bekræft, at handlen er gennemført, før annoncen markeres som solgt."
             : "Status kunne ikke ændres. Genindlæs siden og prøv igen."}
         </p>
       )}
@@ -172,22 +174,48 @@ export default async function SellerDashboard({
                       </Link>
                     )}
                     {listing.status === "reserved" && (
-                      <Link
-                        className="button button--quiet"
-                        href="/henvendelser"
-                      >
-                        Håndtér reservation
-                      </Link>
+                      <>
+                        <Link
+                          className="button button--quiet"
+                          href="/henvendelser"
+                        >
+                          Håndtér reservation
+                        </Link>
+                        {listing.garage_bike_id && (
+                          <div className="sale-transfer-hint">
+                            <strong>
+                              Reserveret til{" "}
+                              {listing.reserved_buyer_name ?? "en registreret køber"}
+                            </strong>
+                            <span>
+                              Overdrag cykelregistreringen for at afslutte både
+                              ejerhistorik, reservation og annonce samlet.
+                            </span>
+                            <Link
+                              href={`/mine-cykler/${listing.garage_bike_id}#overdragelse`}
+                            >
+                              Opret overdragelseskode
+                            </Link>
+                          </div>
+                        )}
+                      </>
                     )}
                     <form
+                      className="sale-confirm-form"
                       action={setSellerListingStatusAction.bind(
                         null,
                         listing.id,
                         "sold",
                       )}
                     >
+                      <label>
+                        <input name="saleConfirmed" required type="checkbox" />
+                        Handlen er gennemført
+                      </label>
                       <button className="text-button" type="submit">
-                        Markér som solgt
+                        {listing.garage_bike_id && listing.status === "reserved"
+                          ? "Solgt uden digital overdragelse"
+                          : "Markér som solgt"}
                       </button>
                     </form>
                     <form

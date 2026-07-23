@@ -22,6 +22,7 @@ export const metadata: Metadata = {
   title: "Brugte racercykler",
   description:
     "Søg og filtrér brugte racercykler efter pris, størrelse, materiale, stand og placering.",
+  alternates: { canonical: "/cykler" },
 };
 
 type BrowsePageProps = {

@@ -15,6 +15,8 @@ listing transitions are added by migration `018`; migration `019` synchronizes
 reservations with registered-bike transfers and adds marketplace indexes that
 cover both published and reserved listings. Private date- and odometer-based
 maintenance reminders with atomic log completion are added by migration `020`.
+Migration `021` adds upload metadata, editable-state storage policies,
+database-backed upload limits and atomic image management functions.
 
 ## Public data
 
@@ -28,7 +30,9 @@ Contains searchable and filterable bike specs. Sensitive ownership data is not s
 
 ### listing_images
 
-Image metadata and order. Files will live in a public object-storage namespace.
+Image metadata and order. Files live in a dedicated public Vercel Blob store.
+The database limits editable listings to eight images and keeps positions
+unique and reorderable.
 
 ### forum_categories
 
@@ -80,10 +84,12 @@ Users allowed to review documents and moderate content. Only database administra
 
 ### ownership_documents
 
-Metadata for uploaded evidence and review state. Files will live in private
-object storage. Sellers cannot update review state directly. Migration `017`
+Metadata for uploaded evidence and review state. Files live in a separate
+private Vercel Blob store. Sellers cannot update review state directly. Migration `017`
 adds security-definer functions for draft submission and moderator decisions;
-approval publishes the associated listing in the same transaction.
+approval publishes the associated listing in the same transaction. Migration
+`021` permits replacement of pending/rejected files only while the listing
+remains editable and limits each listing to one pending document.
 
 ### post_votes and comment_votes
 

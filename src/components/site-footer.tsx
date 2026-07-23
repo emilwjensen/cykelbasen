@@ -37,7 +37,10 @@ export function SiteFooter() {
       </div>
       <div className="shell site-footer__bottom">
         <span>© {new Date().getFullYear()} Cykelbasen</span>
-        <span>Bygget til danske cykler og deres næste ejere</span>
+        <span className="site-footer__legal">
+          <Link href="/privatliv">Privatliv</Link>
+          <Link href="/vilkaar">Vilkår</Link>
+        </span>
       </div>
     </footer>
   );

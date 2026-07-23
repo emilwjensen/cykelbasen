@@ -35,9 +35,10 @@ export async function createDraftAction(
     };
   }
 
-  try {
-    const listingId = await createDraftListing(user.id, parsed.data);
+  let listingId: string | undefined;
 
+  try {
+    listingId = await createDraftListing(user.id, parsed.data);
     if (!listingId) {
       return { message: "Kladde kunne ikke oprettes." };
     }
@@ -46,7 +47,7 @@ export async function createDraftAction(
   }
 
   revalidatePath("/mine-annoncer");
-  redirect("/mine-annoncer?oprettet=1");
+  redirect(`/annoncer/${listingId}/rediger?media=kladde-oprettet#annoncefiler`);
 }
 
 export async function updateDraftAction(
@@ -86,4 +87,3 @@ export async function updateDraftAction(
   revalidatePath("/mine-annoncer");
   redirect("/mine-annoncer?gemt=1");
 }
-
