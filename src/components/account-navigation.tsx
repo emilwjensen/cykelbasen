@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOutAction } from "@/features/auth/actions";
 
 const accountItems = [
   {
@@ -52,6 +53,11 @@ export function AccountNavigation() {
             </Link>
           );
         })}
+        <form action={signOutAction}>
+          <button className="section-nav__signout" type="submit">
+            Log ud
+          </button>
+        </form>
       </div>
     </nav>
   );

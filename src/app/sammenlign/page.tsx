@@ -114,8 +114,13 @@ export default async function ComparisonPage({
       )}
 
       {listings.length ? (
-        <div className="comparison-scroll">
-          <div className="comparison-table" style={comparisonStyle}>
+        <>
+          <p className="comparison-scroll-hint">
+            Træk vandret for at se alle valgte cykler
+            <span aria-hidden="true">→</span>
+          </p>
+          <div className="comparison-scroll">
+            <div className="comparison-table" style={comparisonStyle}>
             <div className="comparison-row comparison-row--products">
               <strong>Cykel</strong>
               {listings.map((listing) => (
@@ -257,8 +262,9 @@ export default async function ComparisonPage({
                 listing.shipping_offered ? "Tilbydes" : "Kun afhentning"
               }
             />
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         <EmptyState
           action={

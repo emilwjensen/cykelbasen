@@ -42,6 +42,29 @@
     color 150ms ease;
 }
 
+.section-nav__links form {
+  display: none;
+}
+
+.section-nav__signout {
+  min-height: 36px;
+  padding-inline: 13px;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-caption);
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.section-nav__signout:hover {
+  background: var(--paper-deep);
+  color: var(--accent-dark);
+}
+
 .section-nav__links a:hover {
   background: var(--paper-deep);
   color: var(--forest);
@@ -339,11 +362,17 @@
   scrollbar-width: thin;
 }
 
+.comparison-scroll-hint {
+  display: none;
+}
+
 .comparison-row > strong {
   position: sticky;
   left: 0;
   z-index: 2;
   box-shadow: 1px 0 0 var(--line);
+  hyphens: auto;
+  overflow-wrap: anywhere;
 }
 
 .comparison-row--products > strong {
@@ -365,6 +394,17 @@
 .forum-loading {
   position: relative;
   overflow: hidden;
+}
+
+.empty-state__actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.empty-state__actions .button {
+  min-width: 150px;
 }
 
 .skeleton::after,
@@ -429,6 +469,11 @@
     padding-inline: 13px;
   }
 
+  .section-nav__links form {
+    display: block;
+    margin-left: auto;
+  }
+
   .header-actions__account {
     min-height: 34px;
     padding-inline: 13px;
@@ -490,6 +535,30 @@
     grid-template-columns:
       124px
       repeat(var(--comparison-columns), minmax(220px, 1fr));
+  }
+
+  .comparison-scroll-hint {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0 -12px;
+    padding: 10px 13px;
+    background: var(--mint);
+    border-radius: 9px;
+    color: var(--forest);
+    font-size: var(--font-caption);
+    font-weight: 760;
+  }
+
+  .empty-state__actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .empty-state__actions .button {
+    width: 100%;
   }
 }
 
