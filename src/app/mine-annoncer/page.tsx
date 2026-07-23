@@ -4,6 +4,7 @@ import { formatDate, formatPrice } from "@/features/listings/format";
 import { getSellerListings } from "@/features/listings/draft-queries";
 import { setSellerListingStatusAction } from "@/features/listings/status-actions";
 import { getProfile } from "@/features/profiles/queries";
+import { submitListingForReviewAction } from "@/features/ownership/actions";
 import { requireUser } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,7 @@ type SellerDashboardProps = {
     oprettet?: string;
     gemt?: string;
     status?: string;
+    indsendt?: string;
     fejl?: string;
   }>;
 };
@@ -46,9 +48,14 @@ export default async function SellerDashboard({
             Hold styr på kladder, dokumentation og publicerede cykler.
           </p>
         </div>
-        <Link className="button button--accent" href="/annoncer/ny">
-          Opret annonce
-        </Link>
+        <div className="dashboard-heading__actions">
+          <Link className="button button--quiet" href="/henvendelser">
+            Henvendelser
+          </Link>
+          <Link className="button button--accent" href="/annoncer/ny">
+            Opret annonce
+          </Link>
+        </div>
       </header>
 
       {!profile && (
@@ -75,9 +82,16 @@ export default async function SellerDashboard({
             : "Annoncen er arkiveret."}
         </p>
       )}
+      {params.indsendt && (
+        <p className="form-message form-message--success">
+          Annoncen er sendt til ejerskabskontrol.
+        </p>
+      )}
       {params.fejl && (
         <p className="form-message form-message--error">
-          Status kunne ikke ændres. Genindlæs siden og prøv igen.
+          {params.fejl === "kontrol"
+            ? "Annoncen mangler et billede eller afventende dokumentation."
+            : "Status kunne ikke ændres. Genindlæs siden og prøv igen."}
         </p>
       )}
 
@@ -125,6 +139,25 @@ export default async function SellerDashboard({
                     >
                       Komponenter
                     </Link>
+                    {listing.image_count > 0 &&
+                    listing.ownership_document_status === "pending" ? (
+                      <form
+                        action={submitListingForReviewAction.bind(
+                          null,
+                          listing.id,
+                        )}
+                      >
+                        <button className="button button--accent" type="submit">
+                          Send til kontrol
+                        </button>
+                      </form>
+                    ) : (
+                      <span className="seller-listing__locked">
+                        {!listing.image_count
+                          ? "Mangler billede"
+                          : "Mangler afventende dokumentation"}
+                      </span>
+                    )}
                   </>
                 ) : ["published", "reserved"].includes(listing.status) ? (
                   <>

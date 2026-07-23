@@ -52,9 +52,14 @@ export default async function ListingReportsPage({
             fjernes fra markedspladsen.
           </p>
         </div>
-        <Link className="button button--quiet" href="/admin/rapporter">
-          Se forumrapporter
-        </Link>
+        <div className="dashboard-heading__actions">
+          <Link className="button button--quiet" href="/admin/dokumentation">
+            Dokumentkontrol
+          </Link>
+          <Link className="button button--quiet" href="/admin/rapporter">
+            Se forumrapporter
+          </Link>
+        </div>
       </header>
 
       <nav aria-label="Filtrér annoncerapporter" className="moderation-tabs">

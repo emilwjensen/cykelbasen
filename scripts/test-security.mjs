@@ -196,6 +196,37 @@ assert(
   "Moderatoren kunne ikke læse annoncerapport-køen.",
 );
 
+const contactBuyerResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`select count(*)::int as count from public.contact_requests`,
+  ],
+);
+
+const contactSellerResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-mikkel"}, true)`,
+    transaction`select count(*)::int as count from public.contact_requests`,
+  ],
+);
+
+const contactOtherResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"security-test-other"}, true)`,
+    transaction`select count(*)::int as count from public.contact_requests`,
+  ],
+);
+
+assert(
+  contactBuyerResults[1][0]?.count === 1 &&
+    contactSellerResults[1][0]?.count === 1,
+  "Køber eller sælger kunne ikke læse den private henvendelse.",
+);
+assert(
+  contactOtherResults[1][0]?.count === 0,
+  "En uvedkommende bruger kunne læse en privat henvendelse.",
+);
+
 const garageOwnerResults = await applicationDatabase.transaction((transaction) => [
   transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
   transaction`select count(*)::int as count from public.garage_bikes`,
@@ -883,6 +914,99 @@ try {
   await listingModerationClient.end();
 }
 
+const contactStatusClient = createDatabaseClient();
+
+try {
+  await contactStatusClient.connect();
+  await contactStatusClient.query("begin");
+  await contactStatusClient.query("set local role cykelbasen_app");
+  await contactStatusClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const sellerStatusUpdate = await contactStatusClient.query(
+    `
+      update public.contact_requests
+      set status = 'read'
+      where id = $1::uuid
+      returning status, read_at is not null as has_read_at
+    `,
+    ["b0000000-0000-4000-8000-000000000001"],
+  );
+  await contactStatusClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const buyerStatusUpdate = await contactStatusClient.query(
+    `
+      update public.contact_requests
+      set status = 'closed'
+      where id = $1::uuid
+      returning id
+    `,
+    ["b0000000-0000-4000-8000-000000000001"],
+  );
+
+  assert(
+    sellerStatusUpdate.rows[0]?.status === "read" &&
+      sellerStatusUpdate.rows[0]?.has_read_at === true,
+    "Sælgeren kunne ikke markere henvendelsen som læst.",
+  );
+  assert(
+    buyerStatusUpdate.rows.length === 0,
+    "Køberen kunne ændre sælgerens indbakkestatus.",
+  );
+  await contactStatusClient.query("rollback");
+} catch (error) {
+  await contactStatusClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await contactStatusClient.end();
+}
+
+const rateLimitClient = createDatabaseClient();
+
+try {
+  await rateLimitClient.connect();
+  await rateLimitClient.query("begin");
+  await rateLimitClient.query("set local role cykelbasen_app");
+  await rateLimitClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+
+  for (let index = 0; index < 6; index += 1) {
+    await rateLimitClient.query(
+      `
+        insert into public.forum_posts (
+          category_slug,
+          author_id,
+          title,
+          body
+        )
+        values ($1, $2, $3, $4)
+      `,
+      [
+        "vedligeholdelse",
+        "seed-seller-anna",
+        `Midlertidig rate limit-test ${index}`,
+        "Dette midlertidige forumindlæg bruges kun til at kontrollere databasebaseret rate limiting.",
+      ],
+    );
+  }
+
+  await rateLimitClient.query("rollback");
+  throw new Error("Forumets databasebaserede rate limit blev ikke håndhævet.");
+} catch (error) {
+  await rateLimitClient.query("rollback").catch(() => {});
+  const expected =
+    error instanceof Error &&
+    error.message.includes("RATE_LIMIT:forum-post");
+  if (!expected) throw error;
+} finally {
+  await rateLimitClient.end();
+}
+
 console.log(
-  "Security tests passed: marketplace reports/moderation, ownership transfer/privacy, favorites, listing lifecycle, forum RLS, audit trails, publication and reply-depth invariants.",
+  "Security tests passed: contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

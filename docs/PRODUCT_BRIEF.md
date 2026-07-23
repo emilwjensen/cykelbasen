@@ -19,6 +19,9 @@ A buyer should understand what the bike is, who sells it and how ownership was d
 
 A seller should create a credible listing without writing a technical essay.
 
+A buyer can send a structured inquiry and explicitly share their account e-mail
+without exposing either party's address publicly or introducing real-time chat.
+
 ## Initial audience
 
 Private buyers and sellers of:
@@ -44,6 +47,7 @@ Private buyers and sellers of:
 - Report
 - Registered bike
 - Bike maintenance and ride log
+- Structured buyer contact request
 
 ## Simple listing specs
 

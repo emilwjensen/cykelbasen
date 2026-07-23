@@ -17,7 +17,11 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
 
   return (
     <article className="listing-card">
-      <Link className="listing-card__image-link" href={href}>
+      <Link
+        aria-label={`Se ${listing.title}`}
+        className="listing-card__image-link"
+        href={href}
+      >
         {listing.cover_url ? (
           <Image
             alt={listing.cover_alt ?? listing.title}
@@ -31,7 +35,12 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
             CB
           </div>
         )}
-        <span className="listing-card__verified">Dokumenteret</span>
+        <span className="listing-card__verified">
+          <svg aria-hidden="true" viewBox="0 0 20 20">
+            <path d="m5.5 10 3 3 6-6" />
+          </svg>
+          Ejerskab godkendt
+        </span>
       </Link>
 
       <div className="listing-card__body">
@@ -46,9 +55,11 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
           {listing.model_year ?? "År ikke angivet"} · Str.{" "}
           {listing.frame_size_label} · {conditionLabel(listing.condition)}
         </p>
-        <p className="listing-card__price">{formatPrice(listing.price_dkk)}</p>
+        <div className="listing-card__footer">
+          <p className="listing-card__price">{formatPrice(listing.price_dkk)}</p>
+          <span aria-hidden="true">↗</span>
+        </div>
       </div>
     </article>
   );
 }
-

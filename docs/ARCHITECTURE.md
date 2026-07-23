@@ -39,6 +39,7 @@ app/
     mine-cykler/
     mine-cykler/overtag/
     favoritter/
+    henvendelser/
     mine-annoncer/
     annoncer/ny/
     annoncer/[id]/rediger/
@@ -145,6 +146,16 @@ Moderator access comes from the `moderators` table. Do not place an editable
 `is_admin` flag on user profiles. Forum reports and marketplace listing reports
 use separate private tables but share the same moderator identity and atomic
 decision pattern.
+
+## Buyer contact and abuse limits
+
+`contact_requests` is a private buyer-to-seller handoff, not a chat system. The
+buyer explicitly shares the e-mail from the authenticated session. RLS limits
+reads to the two participants, and only the seller controls inbox status.
+
+Database triggers write private `write_rate_limit_events` for contact, forum
+posts, comments and reports. Advisory transaction locks serialize concurrent
+writes for each user and action, so the limit is enforced below the UI layer.
 
 ## Quiz
 

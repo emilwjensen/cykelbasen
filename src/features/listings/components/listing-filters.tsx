@@ -127,202 +127,173 @@ export function ListingFilterForm({ filters, options }: ListingFiltersProps) {
     Math.ceil(options.maxPrice / 500) * 500,
     rangeMinimum + 1_000,
   );
-  const [minimumPrice, setMinimumPrice] = useState(
-    Math.max(rangeMinimum, Math.min(filters.minPrice ?? rangeMinimum, rangeMaximum)),
+  const hasActiveFilters = Object.entries(filters).some(
+    ([key, value]) =>
+      key !== "sort" && value !== undefined && value !== "",
   );
-  const [maximumPrice, setMaximumPrice] = useState(
-    Math.max(rangeMinimum, Math.min(filters.maxPrice ?? rangeMaximum, rangeMaximum)),
-  );
-  const [priceTouched, setPriceTouched] = useState(
-    filters.minPrice !== undefined || filters.maxPrice !== undefined,
-  );
+  const [filtersOpen, setFiltersOpen] = useState(hasActiveFilters);
 
   return (
     <form action="/cykler" className="filters">
-      <div className="filters__search">
-        <label htmlFor="q">Søg efter mærke eller model</label>
-        <input
-          defaultValue={filters.q}
-          id="q"
-          name="q"
-          placeholder="Fx Specialized Tarmac"
-          type="search"
-        />
+      <div className="filters__heading">
+        <div>
+          <span>Tilpas din søgning</span>
+          <p>Vælg kun det, der er vigtigt for dig.</p>
+        </div>
+        <span className="filters__verified-note">
+          <span aria-hidden="true">✓</span> Kun godkendte annoncer
+        </span>
+        <button
+          aria-expanded={filtersOpen}
+          className="filters__toggle"
+          onClick={() => setFiltersOpen((open) => !open)}
+          type="button"
+        >
+          {filtersOpen ? "Skjul filtre" : "Vis filtre"}
+          <span aria-hidden="true">{filtersOpen ? "−" : "+"}</span>
+        </button>
       </div>
+      <div className={`filters__content${filtersOpen ? " is-open" : ""}`}>
+        <div className="filters__search">
+          <label htmlFor="q">Søg efter mærke eller model</label>
+          <input
+            defaultValue={filters.q}
+            id="q"
+            name="q"
+            placeholder="Fx Specialized Tarmac"
+            type="search"
+          />
+        </div>
 
-      <div className="filters__grid">
-        <label>
-          Type
-          <select defaultValue={filters.category ?? ""} name="category">
-            <option value="">Alle typer</option>
-            {bikeCategories.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Mærke
-          <select defaultValue={filters.brand ?? ""} name="brand">
-            <option value="">Alle mærker</option>
-            {options.brands.map((brand) => (
-              <option key={brand} value={brand}>
-                {brand}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Stelstørrelse
-          <select defaultValue={filters.size ?? ""} name="size">
-            <option value="">Alle størrelser</option>
-            {options.sizes.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="price-range-filter">
-          <div>
-            <span>Prisinterval</span>
-            <output>
-              {formatSliderPrice(minimumPrice)}–{formatSliderPrice(maximumPrice)} kr.
-            </output>
-          </div>
+        <div className="filters__grid">
           <label>
-            Fra {formatSliderPrice(minimumPrice)} kr.
+            Type
+            <select defaultValue={filters.category ?? ""} name="category">
+              <option value="">Alle typer</option>
+              {bikeCategories.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Mærke
+            <select defaultValue={filters.brand ?? ""} name="brand">
+              <option value="">Alle mærker</option>
+              {options.brands.map((brand) => (
+                <option key={brand} value={brand}>
+                  {brand}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Stelstørrelse
+            <select defaultValue={filters.size ?? ""} name="size">
+              <option value="">Alle størrelser</option>
+              {options.sizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Pris fra
             <input
+              defaultValue={filters.minPrice}
+              inputMode="numeric"
               max={rangeMaximum}
               min={rangeMinimum}
-              onChange={(event) => {
-                setPriceTouched(true);
-                setMinimumPrice(
-                  Math.min(Number(event.target.value), maximumPrice),
-                );
-              }}
+              name="minPrice"
+              placeholder={`${formatSliderPrice(rangeMinimum)} kr.`}
               step={500}
-              type="range"
-              value={minimumPrice}
+              type="number"
             />
           </label>
+
           <label>
-            Til {formatSliderPrice(maximumPrice)} kr.
+            Pris til
             <input
+              defaultValue={filters.maxPrice}
+              inputMode="numeric"
               max={rangeMaximum}
               min={rangeMinimum}
-              onChange={(event) => {
-                setPriceTouched(true);
-                setMaximumPrice(
-                  Math.max(Number(event.target.value), minimumPrice),
-                );
-              }}
+              name="maxPrice"
+              placeholder={`${formatSliderPrice(rangeMaximum)} kr.`}
               step={500}
-              type="range"
-              value={maximumPrice}
+              type="number"
+            />
+          </label>
+
+          <label>
+            Stelmateriale
+            <select defaultValue={filters.material ?? ""} name="material">
+              <option value="">Alle materialer</option>
+              {frameMaterials.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Bremser
+            <select defaultValue={filters.brakes ?? ""} name="brakes">
+              <option value="">Alle bremsetyper</option>
+              {brakeTypes.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Stand
+            <select defaultValue={filters.condition ?? ""} name="condition">
+              <option value="">Alle stande</option>
+              {conditions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            By
+            <input
+              defaultValue={filters.city}
+              name="city"
+              placeholder="Fx Aarhus"
             />
           </label>
         </div>
 
-        <label className="filters__number-fallback">
-          Pris fra, præcist
-          <input
-            inputMode="numeric"
-            max={rangeMaximum}
-            min={rangeMinimum}
-            name={priceTouched ? "minPrice" : undefined}
-            onChange={(event) => {
-              setPriceTouched(true);
-              setMinimumPrice(Number(event.target.value));
-            }}
-            type="number"
-            value={minimumPrice}
-          />
-        </label>
-
-        <label className="filters__number-fallback">
-          Pris til, præcist
-          <input
-            inputMode="numeric"
-            max={rangeMaximum}
-            min={rangeMinimum}
-            name={priceTouched ? "maxPrice" : undefined}
-            onChange={(event) => {
-              setPriceTouched(true);
-              setMaximumPrice(Number(event.target.value));
-            }}
-            type="number"
-            value={maximumPrice}
-          />
-        </label>
-
-        <label>
-          Stelmateriale
-          <select defaultValue={filters.material ?? ""} name="material">
-            <option value="">Alle materialer</option>
-            {frameMaterials.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Bremser
-          <select defaultValue={filters.brakes ?? ""} name="brakes">
-            <option value="">Alle bremsetyper</option>
-            {brakeTypes.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          Stand
-          <select defaultValue={filters.condition ?? ""} name="condition">
-            <option value="">Alle stande</option>
-            {conditions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label>
-          By
-          <input
-            defaultValue={filters.city}
-            name="city"
-            placeholder="Fx Aarhus"
-          />
-        </label>
-      </div>
-
-      <div className="filters__actions">
-        <label className="filters__sort">
-          Sortér
-          <select defaultValue={filters.sort} name="sort">
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button className="button button--dark" type="submit">
-          Vis cykler
-        </button>
-        <Link className="button button--quiet" href="/cykler">
-          Nulstil
-        </Link>
+        <div className="filters__actions">
+          <label className="filters__sort">
+            Sortér
+            <select defaultValue={filters.sort} name="sort">
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button className="button button--dark" type="submit">
+            Vis cykler
+          </button>
+          <Link className="button button--quiet" href="/cykler">
+            Nulstil
+          </Link>
+        </div>
       </div>
     </form>
   );

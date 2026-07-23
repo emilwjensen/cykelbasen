@@ -14,8 +14,10 @@ export function HeaderActions() {
   if (!session?.user) {
     return (
       <div className="header-actions">
-        <Link href="/auth/log-ind">Log ind</Link>
-        <Link className="header-status" href="/auth/opret">
+        <Link className="header-actions__login" href="/auth/log-ind">
+          Log ind
+        </Link>
+        <Link className="header-status header-actions__signup" href="/auth/opret">
           Opret konto
         </Link>
       </div>
@@ -24,9 +26,15 @@ export function HeaderActions() {
 
   return (
     <div className="header-actions">
-      <Link href="/favoritter">Favoritter</Link>
-      <Link href="/mine-cykler">Mine cykler</Link>
-      <Link href="/mine-annoncer">Mine annoncer</Link>
+      <Link className="header-actions__favorite" href="/favoritter">
+        Favoritter
+      </Link>
+      <Link className="header-actions__garage" href="/mine-cykler">
+        Mine cykler
+      </Link>
+      <Link className="header-actions__listings" href="/mine-annoncer">
+        Mine annoncer
+      </Link>
       <form action={signOutAction}>
         <button className="header-signout" type="submit">
           Log ud

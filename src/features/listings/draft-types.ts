@@ -9,6 +9,8 @@ export type SellerListing = {
   status: "draft" | "pending_review" | "rejected" | "published" | "reserved" | "sold" | "archived";
   updated_at: string;
   cover_url: string | null;
+  image_count: number;
+  ownership_document_status: "pending" | "approved" | "rejected" | null;
 };
 
 export type EditableListing = DraftListingInput & {
@@ -20,4 +22,3 @@ export type ListingFormState = {
   message?: string;
   errors?: Record<string, string[]>;
 };
-

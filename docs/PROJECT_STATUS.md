@@ -40,6 +40,9 @@ flow from image upload through moderator approval and publication.
 - Audited seller lifecycle changes.
 - Private listing reports with scam/stolen-bike reasons.
 - Moderator listing queue with atomic removal and lifecycle audit.
+- Structured buyer inquiries with explicit e-mail sharing.
+- Private seller inbox with new, read and closed states.
+- Database-enforced rolling rate limits for contact, forum and report writes.
 
 ### Mine cykler
 
@@ -71,8 +74,6 @@ flow from image upload through moderator approval and publication.
 | P0 | Public listing-image upload, order and deletion | Sellers cannot create a credible real listing without seeded image URLs. |
 | P0 | Private ownership-document upload | The core trust promise cannot be completed by a seller. |
 | P0 | Submit-for-review, moderator document queue and approve/reject UI | The database invariant exists, but the real publication flow does not. |
-| P0 | Safe buyer-to-seller contact path | A buyer can find and save a bike but cannot act on it. Real-time chat remains out of scope; a minimal privacy-safe contact route is needed. |
-| P0 | Rate limiting on public writes and auth-sensitive actions | Forum, reports and future contact/upload actions need abuse protection. |
 | P0 | Production moderation bootstrap and operating procedure | A real moderator must be provisioned without ad hoc production SQL. |
 
 Object storage is intentionally not replaced by Neon: Postgres stores metadata,
@@ -104,6 +105,8 @@ and use short-lived signed access.
 
 ### Reliability and operations
 
+- Extend rate limits to uploads and authentication-sensitive actions when those
+  flows are implemented.
 - Browser-level tests for signup, profile, draft, favorite and forum flows.
 - Tests for the full moderator publication path when implemented.
 - Error tracking, product analytics and database monitoring.

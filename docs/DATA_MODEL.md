@@ -8,6 +8,8 @@ active-listing update protection are added by migrations `008` and `009`.
 Connected bike identities, ownership periods and secure transfer invitations
 are added by migrations `010` through `014`.
 Marketplace reports and atomic listing moderation are added by migration `015`.
+Private contact requests and database-backed write limits are added by
+migration `016`.
 
 ## Public data
 
@@ -50,6 +52,12 @@ the owning user can read or change it.
 Private reports against public listings. A seller cannot report their own
 listing or read reports filed by others. Moderator decisions and optional
 listing removal are written atomically with a listing status audit event.
+
+### contact_requests
+
+Private structured buyer inquiries containing intent, message and the e-mail
+the buyer explicitly shares. Only buyer and seller can read a request; only the
+seller can mark it read or closed.
 
 ## Private data
 
@@ -103,6 +111,12 @@ the chain, and public listings may expose the periods without owner identities.
 Single-use, expiring transfer invitations. Only a SHA-256 hash of the random
 token is stored. Claiming one atomically closes the seller's period and creates
 a separate private registration for the buyer.
+
+### write_rate_limit_events
+
+Private implementation table populated by security-definer triggers. It
+enforces per-user rolling limits for contact requests, forum posts/comments and
+forum/listing reports.
 
 ## Listing state
 

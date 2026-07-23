@@ -95,7 +95,8 @@ private logs remain isolated between seller and buyer.
 ## Phase 7, launch hardening
 
 - RLS integration tests.
-- Rate limits for writes.
+- [x] Database-backed rate limits for contact, forum and report writes.
+- [x] Structured buyer contact request and private seller inbox.
 - Image file validation and size limits.
 - Audit logs for moderation actions.
 - Error tracking and product analytics.

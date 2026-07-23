@@ -18,13 +18,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="da">
+    <html data-scroll-behavior="smooth" lang="da">
       <body>
+        <a className="skip-link" href="#main-content">
+          Gå til indhold
+        </a>
         <SiteHeader />
-        <main>{children}</main>
+        <main id="main-content">{children}</main>
         <SiteFooter />
       </body>
     </html>
   );
 }
-

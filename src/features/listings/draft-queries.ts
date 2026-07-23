@@ -19,7 +19,13 @@ export async function getSellerListings(
         listing.price_dkk,
         listing.status,
         listing.updated_at,
-        cover.image_url as cover_url
+        cover.image_url as cover_url,
+        (
+          select count(*)::int
+          from public.listing_images image
+          where image.listing_id = listing.id
+        ) as image_count,
+        document.status as ownership_document_status
       from public.listings listing
       left join lateral (
         select image.image_url
@@ -28,6 +34,14 @@ export async function getSellerListings(
         order by image.position
         limit 1
       ) cover on true
+      left join lateral (
+        select ownership.status
+        from public.ownership_documents ownership
+        where ownership.listing_id = listing.id
+          and ownership.owner_id = listing.seller_id
+        order by ownership.created_at desc
+        limit 1
+      ) document on true
       where listing.seller_id = ${userId}
       order by listing.updated_at desc
     `,

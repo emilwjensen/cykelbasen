@@ -10,6 +10,7 @@ export const config = {
     "/annoncer/:path*",
     "/profil/:path*",
     "/favoritter/:path*",
+    "/henvendelser/:path*",
     "/forum/nyt",
     "/forum/indlaeg/:path*/rediger",
     "/admin/:path*",

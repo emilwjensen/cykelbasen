@@ -240,6 +240,26 @@ values (
 )
 on conflict (id) do nothing;
 
+insert into public.contact_requests (
+  id,
+  listing_id,
+  buyer_id,
+  seller_id,
+  intent,
+  buyer_email,
+  message
+)
+values (
+  'b0000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000002',
+  'seed-seller-anna',
+  'seed-seller-mikkel',
+  'viewing',
+  'anna@example.invalid',
+  'Jeg vil gerne se cyklen og høre, om en fremvisning i weekenden er mulig.'
+)
+on conflict (id) do nothing;
+
 insert into public.listing_favorites (user_id, listing_id)
 values (
   'seed-seller-anna',

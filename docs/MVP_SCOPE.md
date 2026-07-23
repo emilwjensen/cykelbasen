@@ -27,6 +27,7 @@
 - Moderator approval queue
 - Publish only after ownership approval
 - Favorite listings
+- Structured buyer contact request with explicit e-mail sharing
 - Report listing
 - Mark listing sold or archived
 

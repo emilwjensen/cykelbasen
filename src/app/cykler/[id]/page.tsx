@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ContactRequestForm } from "@/features/contact-requests/components/contact-request-form";
 import { FavoriteButton } from "@/features/favorites/components/favorite-button";
 import { isListingFavorite } from "@/features/favorites/queries";
 import { ListingReportForm } from "@/features/listing-reports/components/listing-report-form";
@@ -24,6 +25,7 @@ type ListingPageProps = {
   searchParams: Promise<{
     tilbage?: string | string[];
     rapport?: string;
+    kontakt?: string;
   }>;
 };
 
@@ -120,6 +122,26 @@ export default async function ListingPage({
           Rapporten kunne ikke sendes. Kontrollér oplysningerne og prøv igen.
         </p>
       )}
+      {resolvedSearchParams.kontakt === "sendt" && (
+        <p className="form-message form-message--success">
+          Henvendelsen er sendt. Sælgeren kan nu svare på din kontomail.
+        </p>
+      )}
+      {resolvedSearchParams.kontakt === "allerede" && (
+        <p className="form-message">
+          Du har allerede en aktiv henvendelse på denne annonce.
+        </p>
+      )}
+      {resolvedSearchParams.kontakt === "begraenset" && (
+        <p className="form-message form-message--error">
+          Du har sendt for mange henvendelser på kort tid. Prøv igen senere.
+        </p>
+      )}
+      {["ugyldig", "fejl"].includes(resolvedSearchParams.kontakt ?? "") && (
+        <p className="form-message form-message--error">
+          Henvendelsen kunne ikke sendes. Kontrollér beskeden og prøv igen.
+        </p>
+      )}
 
       <div className="detail__grid">
         <div>
@@ -182,9 +204,20 @@ export default async function ListingPage({
             <strong>{listing.seller_name}</strong>
             <span>{listing.seller_city ?? listing.city}</span>
           </div>
-          <button className="button button--accent button--full" disabled>
-            Kontakt åbner snart
-          </button>
+          {user?.id === listing.seller_id ? null : user?.email ? (
+            <ContactRequestForm
+              buyerEmail={user.email}
+              listingId={listing.id}
+              returnUrl={returnUrl}
+            />
+          ) : (
+            <Link
+              className="button button--accent button--full"
+              href="/auth/log-ind"
+            >
+              Log ind for at kontakte
+            </Link>
+          )}
           <p className="detail__date">
             Publiceret {formatDate(listing.published_at)}
           </p>
