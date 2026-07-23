@@ -42,7 +42,9 @@ it without Neon or storage-console access.
 
 ### Slice 3. Production moderation and seed safety
 
-Status: planned.
+Status: in progress. Public marketplace, forum, legal/SEO and automated
+accessibility smoke tests are implemented. Authenticated multi-user journeys
+still need isolated test credentials and configured Blob stores.
 
 - Add an owner-credential script for granting and revoking moderator access.
 - Require an explicit development-only confirmation before running seed data.
@@ -83,7 +85,7 @@ database intervention.
 
 ### Slice 6. Durable bike data
 
-- Edit bike identity and non-historical metadata.
+- [x] Edit bike identity and non-historical metadata.
 - Retire a bike without erasing its ownership chain.
 - Correct logs through an append-only revision audit.
 - Cancel, edit and snooze open maintenance reminders.
@@ -132,4 +134,3 @@ database intervention.
 Payments, escrow, shipping integrations, direct chat, automated document
 analysis, stolen-bike registry integration, dealer accounts, price prediction
 and a native mobile app remain outside the first public beta.
-

@@ -51,6 +51,16 @@ export const garageBikeSchema = z.object({
   notes: optionalText(5_000),
 });
 
+export const garageBikeEditSchema = garageBikeSchema.pick({
+  nickname: true,
+  category: true,
+  brand: true,
+  model: true,
+  modelYear: true,
+  frameSizeLabel: true,
+  notes: true,
+});
+
 export const bikeLogSchema = z.object({
   logType: z.enum(bikeLogTypes.map(({ value }) => value)),
   title: z.string().trim().min(3).max(120),

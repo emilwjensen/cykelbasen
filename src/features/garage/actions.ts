@@ -11,6 +11,7 @@ import {
   acceptBikeTransferSchema,
   bikeLogSchema,
   bikeMaintenanceReminderSchema,
+  garageBikeEditSchema,
   garageBikeSchema,
 } from "./schema";
 import type { BikeTransferState } from "./types";
@@ -85,6 +86,53 @@ export async function createGarageBikeAction(formData: FormData) {
 
   revalidatePath("/mine-cykler");
   redirect(`/mine-cykler/${rows[0].id}?oprettet=1`);
+}
+
+export async function updateGarageBikeAction(
+  bikeId: string,
+  formData: FormData,
+) {
+  const user = await requireUser();
+  const validBikeId = z.string().uuid().safeParse(bikeId);
+  const parsed = garageBikeEditSchema.safeParse({
+    nickname: formData.get("nickname"),
+    category: formData.get("category"),
+    brand: formData.get("brand"),
+    model: formData.get("model"),
+    modelYear: formData.get("modelYear"),
+    frameSizeLabel: formData.get("frameSizeLabel"),
+    notes: formData.get("notes"),
+  });
+
+  if (!validBikeId.success || !parsed.success) {
+    redirect(`/mine-cykler/${bikeId}/rediger?fejl=felter`);
+  }
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      update public.garage_bikes
+      set
+        nickname = ${parsed.data.nickname},
+        category = ${parsed.data.category}::public.bike_category,
+        brand = ${parsed.data.brand},
+        model = ${parsed.data.model},
+        model_year = ${parsed.data.modelYear ?? null},
+        frame_size_label = ${parsed.data.frameSizeLabel ?? null},
+        notes = ${parsed.data.notes ?? null}
+      where id = ${validBikeId.data}::uuid
+        and owner_id = ${user.id}
+        and ownership_ended_on is null
+      returning id
+    `,
+  ]);
+  const updated = (results[1] as unknown as Array<{ id: string }>)[0];
+  if (!updated) redirect(`/mine-cykler/${bikeId}/rediger?fejl=laast`);
+
+  revalidatePath("/mine-cykler");
+  revalidatePath(`/mine-cykler/${bikeId}`);
+  redirect(`/mine-cykler/${bikeId}?cykel=opdateret`);
 }
 
 export async function createBikeLogAction(

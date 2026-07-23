@@ -756,7 +756,7 @@ summary {
 }
 
 .trust-steps li > span {
-  color: var(--accent);
+  color: var(--mint);
   font-family: Georgia, serif;
   font-size: var(--font-small);
 }
@@ -839,4 +839,3 @@ summary {
 .dashboard-heading > div > p:last-child {
   font-size: 0.92rem;
 }
-

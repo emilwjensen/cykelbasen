@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:security": "node --env-file=.env scripts/test-security.mjs",
+    "test:e2e": "playwright test",
     "check": "pnpm lint && pnpm typecheck && pnpm build",
     "db:migrate": "node --env-file=.env scripts/db-migrate.mjs",
     "db:setup-app-role": "node --env-file=.env scripts/setup-app-role.mjs",
@@ -25,6 +26,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

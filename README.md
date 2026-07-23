@@ -64,6 +64,7 @@ pnpm typecheck
 pnpm build
 pnpm check
 pnpm test:security
+pnpm test:e2e
 pnpm db:migrate
 pnpm db:setup-app-role
 pnpm db:seed
@@ -119,6 +120,7 @@ godkendt udviklings-dokumentpost.
 - Privat dokumentupload med filsignaturkontrol og kortlivet preview
 - Sikker moderator-provisionering uden ad hoc SQL
 - Billedgalleri, sitemap, robots, structured data og beta-legal-sider
+- Playwright browser-smoke og automatiske accessibility-kontroller
 
 Provisionering af de to Blob stores, browsertests og resterende
 launch-hardening følger i `docs/DELIVERY_PLAN.md`.

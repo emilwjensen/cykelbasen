@@ -62,6 +62,7 @@ type MyBikePageProps = {
     logget?: string;
     overtaget?: string;
     paamindelse?: string;
+    cykel?: string;
     fejl?: string;
   }>;
 };
@@ -103,12 +104,20 @@ export default async function MyBikePage({
           {bike.ownership_ended_on ? (
             <span className="status">Tidligere ejerperiode</span>
           ) : (
-            <Link
-              className="button button--accent garage-sell-link"
-              href={`/annoncer/ny?cykel=${bike.id}`}
-            >
-              Opret salgsannonce
-            </Link>
+            <>
+              <Link
+                className="button button--quiet garage-sell-link"
+                href={`/mine-cykler/${bike.id}/rediger`}
+              >
+                Redigér cykeldata
+              </Link>
+              <Link
+                className="button button--accent garage-sell-link"
+                href={`/annoncer/ny?cykel=${bike.id}`}
+              >
+                Opret salgsannonce
+              </Link>
+            </>
           )}
         </div>
       </header>
@@ -116,9 +125,12 @@ export default async function MyBikePage({
       {(query.oprettet ||
         query.logget ||
         query.overtaget ||
-        query.paamindelse) && (
+        query.paamindelse ||
+        query.cykel) && (
         <p className="form-message form-message--success">
-          {query.overtaget
+          {query.cykel === "opdateret"
+            ? "Cykeldata er opdateret."
+            : query.overtaget
             ? "Cyklen er overtaget, og ejerhistorikken er forbundet."
             : query.paamindelse === "oprettet"
               ? "Vedligeholdelsen er planlagt."

@@ -27,6 +27,8 @@ first full browser journey against those real stores.
 - Separate public/private Vercel Blob integration with server-only credentials.
 - Development-seed production guard and a moderator provisioning script/runbook.
 - Sitemap, robots rules, manifest, structured listing data and beta legal pages.
+- Playwright public-flow smoke tests and automated WCAG A/AA checks for the
+  primary public routes.
 
 ### Marketplace
 
@@ -86,6 +88,8 @@ first full browser journey against those real stores.
 - Preserve a connected ownership timeline across registered buyers and sellers.
 - Keep each owner's notes and logs private after transfer.
 - Show privacy-safe ownership periods on connected public listings.
+- Edit the identity and private notes of an active registered bike while
+  retaining log-based odometer history.
 
 ### Forum and moderation
 
@@ -113,13 +117,13 @@ images use CDN URLs, and private evidence uses scoped short-lived access.
 
 - Reporter-facing history or receipt page if testing shows a need beyond the
   current confirmation feedback.
-- Complete accessibility pass for sliders, all forms, focus states and status
-  messages.
+- Extend the passing public accessibility suite to authenticated forms and
+  moderator routes.
 - Add generated social images and normalize brand/model suggestions.
 
 ### Mine cykler
 
-- Edit, retire and delete a registered bike.
+- Retire a registered bike without erasing its ownership chain.
 - Edit or remove incorrect log entries with an audit-friendly policy.
 - Upload private receipts and service documents after storage is selected.
 - Select which bike-log component changes should be copied into a listing.
@@ -128,7 +132,8 @@ images use CDN URLs, and private evidence uses scoped short-lived access.
 ### Reliability and operations
 
 - Extend rate limits to authentication-sensitive actions.
-- Browser-level tests for signup, profile, draft, favorite and forum flows.
+- Browser-level tests for signup, profile, draft, favorite and authenticated
+  forum writes. Public browse/forum smoke tests now pass.
 - Browser-level test for the seller-to-moderator publication path.
 - Error tracking, product analytics and database monitoring.
 - Finalize retention rules and a self-service user deletion/export process.
