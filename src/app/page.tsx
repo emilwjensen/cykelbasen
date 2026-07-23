@@ -49,24 +49,44 @@ function BikeIllustration() {
       viewBox="0 0 680 390"
     >
       <g className="bike-illustration__wheels">
-        <circle cx="158" cy="252" r="96" />
-        <circle cx="522" cy="252" r="96" />
-        <circle cx="158" cy="252" r="4" />
-        <circle cx="522" cy="252" r="4" />
+        <circle className="bike-illustration__tyre" cx="154" cy="254" r="96" />
+        <circle className="bike-illustration__rim" cx="154" cy="254" r="88" />
+        <circle className="bike-illustration__tyre" cx="526" cy="254" r="96" />
+        <circle className="bike-illustration__rim" cx="526" cy="254" r="88" />
+        <g className="bike-illustration__spokes">
+          <path d="M154 166v176M66 254h176M92 192l124 124M92 316l124-124" />
+          <path d="M526 166v176M438 254h176M464 192l124 124M464 316l124-124" />
+        </g>
+        <circle className="bike-illustration__hub" cx="154" cy="254" r="6" />
+        <circle className="bike-illustration__hub" cx="526" cy="254" r="6" />
       </g>
       <g className="bike-illustration__frame">
-        <path d="M158 252 278 119 309 252 158 252Z" />
-        <path d="M278 119 429 132 448 229 309 252 278 119Z" />
-        <path d="M158 252 309 252" />
+        <path d="M154 254 279 126 315 239 154 254Z" />
+        <path d="M279 126 429 139 446 217 315 239 279 126Z" />
       </g>
-      <g className="bike-illustration__details">
-        <path d="M429 132 522 252M448 229 522 252" />
-        <path d="M278 119 264 89M236 88h59" />
-        <path d="M429 132 443 103 476 103" />
-        <path d="M473 103c15 0 19 11 12 21l-12 15c-5 7-1 15 8 15" />
-        <circle cx="309" cy="252" r="16" />
-        <path d="m309 252 30 17M309 252l-28-16M339 269h23M260 236h21" />
-        <path d="M309 252 158 252M448 229 522 252" />
+      <path
+        className="bike-illustration__frame-accent"
+        d="M296 178 307 211"
+      />
+      <g className="bike-illustration__fork">
+        <path d="M429 139 526 254M446 217 526 254" />
+      </g>
+      <g className="bike-illustration__cockpit">
+        <path d="M279 126 265 91M238 89l58 1" />
+        <path d="M429 139 444 104 476 104" />
+        <path d="M473 104c16 0 20 11 13 22l-12 16c-6 8-1 17 10 17" />
+      </g>
+      <g className="bike-illustration__drivetrain">
+        <circle cx="315" cy="239" r="21" />
+        <circle cx="315" cy="239" r="7" />
+        <circle cx="154" cy="254" r="9" />
+        <path d="M154 245 313 218M155 263l161-3" />
+        <path d="m315 239 27 18M315 239l-23-20M342 257h23M273 219h19" />
+        <path d="M148 260c2 15 12 23 25 22l18-1" />
+      </g>
+      <g className="bike-illustration__bottle">
+        <path d="m383 174 11 9-31 40-13-11 31-40Z" />
+        <path d="m383 173 6-7 10 8-6 9" />
       </g>
     </svg>
   );

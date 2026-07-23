@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { ComparisonTray } from "@/features/listings/components/compare-controls";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ export default function RootLayout({
         </a>
         <SiteHeader />
         <main id="main-content">{children}</main>
+        <ComparisonTray />
         <SiteFooter />
       </body>
     </html>

@@ -48,10 +48,12 @@ export type ListingFilters = {
   condition?: (typeof conditions)[number]["value"];
   city?: string;
   sort: (typeof sortOptions)[number]["value"];
+  page: number;
 };
 
 export type ListingSummary = {
   id: string;
+  status: "published" | "reserved";
   title: string;
   category: (typeof bikeCategories)[number]["value"];
   brand: string;
@@ -65,7 +67,6 @@ export type ListingSummary = {
   published_at: string;
   cover_url: string | null;
   cover_alt: string | null;
-  total_count: number;
 };
 
 export type ListingDetail = ListingSummary & {
@@ -89,6 +90,43 @@ export type ListingDetail = ListingSummary & {
   images: ListingImage[];
   component_changes: ListingComponentChange[];
   ownership_history: ListingOwnershipPeriod[];
+};
+
+export type ListingPageResult = {
+  items: ListingSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+};
+
+export type ListingComparison = {
+  id: string;
+  status: "published" | "reserved";
+  title: string;
+  category: (typeof bikeCategories)[number]["value"];
+  brand: string;
+  model: string;
+  model_year: number | null;
+  frame_size_label: string;
+  frame_size_cm: number | null;
+  material: (typeof frameMaterials)[number]["value"] | null;
+  groupset_brand: string | null;
+  groupset_model: string | null;
+  drivetrain: string | null;
+  brakes: (typeof brakeTypes)[number]["value"] | null;
+  wheel_size: string | null;
+  electronic_shifting: boolean;
+  shipping_offered: boolean;
+  purchase_date: string;
+  owner_count: number;
+  purchase_proof_available: boolean;
+  service_history_available: boolean;
+  price_dkk: number;
+  condition: (typeof conditions)[number]["value"];
+  city: string;
+  cover_url: string | null;
+  cover_alt: string | null;
 };
 
 export type ListingOwnershipPeriod = {

@@ -260,6 +260,72 @@ values (
 )
 on conflict (id) do nothing;
 
+insert into public.contact_requests (
+  id,
+  listing_id,
+  buyer_id,
+  seller_id,
+  intent,
+  buyer_email,
+  message,
+  status,
+  read_at
+)
+values (
+  'b0000000-0000-4000-8000-000000000002',
+  '10000000-0000-4000-8000-000000000004',
+  'seed-seller-anna',
+  'seed-seller-mikkel',
+  'offer',
+  'anna@example.invalid',
+  'Jeg vil gerne købe cyklen og har aftalt afhentning med sælgeren.',
+  'read',
+  now()
+)
+on conflict (id) do update
+set
+  status = 'read',
+  read_at = now(),
+  closed_at = null;
+
+insert into public.listing_reservations (
+  id,
+  listing_id,
+  contact_request_id,
+  seller_id,
+  buyer_id,
+  status
+)
+values (
+  'c0000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000004',
+  'b0000000-0000-4000-8000-000000000002',
+  'seed-seller-mikkel',
+  'seed-seller-anna',
+  'active'
+)
+on conflict (id) do update
+set
+  status = 'active',
+  ended_by = null,
+  ended_at = null;
+
+insert into public.listing_status_events (
+  id,
+  listing_id,
+  actor_id,
+  from_status,
+  to_status
+)
+values (
+  'd0000000-0000-4000-8000-000000000018',
+  '10000000-0000-4000-8000-000000000004',
+  'seed-seller-mikkel',
+  'published',
+  'reserved'
+)
+on conflict (id) do nothing;
+
 insert into public.listing_favorites (user_id, listing_id)
 values (
   'seed-seller-anna',
@@ -416,6 +482,10 @@ where id in (
   '10000000-0000-4000-8000-000000000003',
   '10000000-0000-4000-8000-000000000004'
 );
+
+update public.listings
+set status = 'reserved'
+where id = '10000000-0000-4000-8000-000000000004';
 
 insert into public.listing_images (
   id,

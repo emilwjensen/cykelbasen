@@ -123,3 +123,98 @@ export async function updateContactRequestStatusAction(
   revalidatePath("/henvendelser");
   redirect(`/henvendelser?status=${parsed.data.status}&gemt=1`);
 }
+
+const reservationSchema = z.object({
+  requestId: z.string().uuid(),
+  listingId: z.string().uuid(),
+});
+
+export async function reserveListingForContactAction(
+  requestId: string,
+  listingId: string,
+) {
+  const user = await requireUser();
+  const parsed = reservationSchema.safeParse({ requestId, listingId });
+  if (!parsed.success) redirect("/henvendelser?fejl=reservation");
+
+  let reservationId: string | null = null;
+
+  try {
+    const database = getApplicationDatabase();
+    const results = await database.transaction((transaction) => [
+      transaction`select set_config('app.user_id', ${user.id}, true)`,
+      transaction`
+        select public.reserve_listing_for_contact(
+          ${parsed.data.requestId}::uuid
+        ) as reservation_id
+      `,
+    ]);
+    const rows = results[1] as unknown as Array<{
+      reservation_id: string | null;
+    }>;
+    reservationId = rows[0]?.reservation_id ?? null;
+  } catch {
+    redirect("/henvendelser?fejl=reservation");
+  }
+
+  if (!reservationId) redirect("/henvendelser?fejl=reservation");
+
+  revalidatePath("/cykler");
+  revalidatePath(`/cykler/${parsed.data.listingId}`);
+  revalidatePath("/favoritter");
+  revalidatePath("/henvendelser");
+  revalidatePath("/mine-annoncer");
+  redirect("/henvendelser?reservation=oprettet");
+}
+
+const cancelReservationSchema = z.object({
+  reservationId: z.string().uuid(),
+  listingId: z.string().uuid(),
+  view: z.enum(["seller", "buyer"]),
+});
+
+export async function cancelListingReservationAction(
+  reservationId: string,
+  listingId: string,
+  view: "seller" | "buyer",
+) {
+  const user = await requireUser();
+  const parsed = cancelReservationSchema.safeParse({
+    reservationId,
+    listingId,
+    view,
+  });
+  const buyerSuffix = view === "buyer" ? "&rolle=koeber" : "";
+  if (!parsed.success) {
+    redirect(`/henvendelser?fejl=reservation${buyerSuffix}`);
+  }
+
+  let cancelled = false;
+
+  try {
+    const database = getApplicationDatabase();
+    const results = await database.transaction((transaction) => [
+      transaction`select set_config('app.user_id', ${user.id}, true)`,
+      transaction`
+        select public.cancel_listing_reservation(
+          ${parsed.data.reservationId}::uuid
+        ) as cancelled
+      `,
+    ]);
+    const rows = results[1] as unknown as Array<{ cancelled: boolean }>;
+    cancelled = rows[0]?.cancelled ?? false;
+  } catch {
+    redirect(`/henvendelser?fejl=reservation${buyerSuffix}`);
+  }
+
+  if (!cancelled) {
+    redirect(`/henvendelser?fejl=reservation${buyerSuffix}`);
+  }
+
+  revalidatePath("/cykler");
+  revalidatePath(`/cykler/${parsed.data.listingId}`);
+  revalidatePath("/favoritter");
+  revalidatePath("/henvendelser");
+  revalidatePath("/mine-annoncer");
+  redirect(`/henvendelser?reservation=frigivet${buyerSuffix}`);
+}

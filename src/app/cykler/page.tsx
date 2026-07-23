@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ListingCard } from "@/features/listings/components/listing-card";
 import {
   ActiveFilterChips,
   ListingFilterForm,
 } from "@/features/listings/components/listing-filters";
+import { ListingPagination } from "@/features/listings/components/listing-pagination";
 import {
   getListingFilterOptions,
   getListings,
@@ -26,11 +28,25 @@ type BrowsePageProps = {
 export default async function BrowsePage({ searchParams }: BrowsePageProps) {
   const rawSearchParams = await searchParams;
   const filters = parseListingFilters(rawSearchParams);
-  const [listings, filterOptions] = await Promise.all([
+  const [result, filterOptions] = await Promise.all([
     getListings(filters),
     getListingFilterOptions(),
   ]);
-  const resultCount = listings[0]?.total_count ?? 0;
+  if (result.total > 0 && filters.page > result.totalPages) {
+    const canonicalParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(rawSearchParams)) {
+      const first = Array.isArray(value) ? value[0] : value;
+      if (first && key !== "page") canonicalParams.set(key, first);
+    }
+    if (result.totalPages > 1) {
+      canonicalParams.set("page", String(result.totalPages));
+    }
+    const canonicalQuery = canonicalParams.toString();
+    redirect(canonicalQuery ? `/cykler?${canonicalQuery}` : "/cykler");
+  }
+
+  const listings = result.items;
+  const resultCount = result.total;
   const queryString = new URLSearchParams(
     Object.entries(rawSearchParams).flatMap(([key, value]) => {
       if (!value) return [];
@@ -63,15 +79,21 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
       </div>
 
       {listings.length ? (
-        <div className="listing-grid">
-          {listings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              returnUrl={returnUrl}
-            />
-          ))}
-        </div>
+        <>
+          <div className="listing-grid">
+            {listings.map((listing) => (
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                returnUrl={returnUrl}
+              />
+            ))}
+          </div>
+          <ListingPagination
+            filters={filters}
+            totalPages={result.totalPages}
+          />
+        </>
       ) : (
         <div className="empty-state">
           <p className="eyebrow">Ingen match</p>

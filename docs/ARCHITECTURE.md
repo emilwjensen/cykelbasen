@@ -28,6 +28,7 @@ app/
     page.tsx
     cykler/
     cykler/[id]/
+    sammenlign/
     forum/
     forum/[category]/
     forum/indlaeg/[id]/
@@ -100,6 +101,18 @@ Use URL parameters as the source of truth:
 
 Parse parameters with a Zod schema. Build one parameterized SQL query from the parsed values. Do not download listings and filter in the browser.
 
+Pagination uses the same URL state through `page`. The database applies a
+stable sort, `limit` and `offset`, while a separate count returns the total
+number of matches.
+
+## Listing comparison
+
+Comparison is intentionally account-free. A small client-side selection holds
+at most three public listing IDs and titles in `localStorage`. The comparison
+route validates UUIDs, reloads all data from Neon and filters on
+`status = 'published'`; browser data is never trusted as listing data. The URL
+therefore remains shareable without introducing another private data table.
+
 ## Images
 
 Use a public object-storage namespace for listing images. The provider is an
@@ -166,6 +179,17 @@ reads to the two participants, and only the seller controls inbox status.
 Database triggers write private `write_rate_limit_events` for contact, forum
 posts, comments and reports. Advisory transaction locks serialize concurrent
 writes for each user and action, so the limit is enforced below the UI layer.
+
+`listing_reservations` connects one concrete inquiry to a listing and remains
+private to buyer, seller and moderators. A seller creates the reservation
+through a security-definer function; the buyer or seller can release it. The
+same transaction changes the public listing state and writes the lifecycle
+event. Marking the listing sold, archiving it or completing a registered-bike
+transfer also closes any active reservation and contact request.
+
+Reserved listings remain publicly readable and clearly labelled, but new
+contact requests are blocked until the reservation is released. Available
+listings sort before reserved ones.
 
 ## Quiz
 

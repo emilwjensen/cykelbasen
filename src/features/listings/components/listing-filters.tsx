@@ -35,6 +35,7 @@ function filterSearchParams(
 
   for (const [key, value] of Object.entries(filters)) {
     if (
+      key === "page" ||
       omitted.has(key as keyof ListingFilters) ||
       value === undefined ||
       value === "" ||
@@ -129,7 +130,10 @@ export function ListingFilterForm({ filters, options }: ListingFiltersProps) {
   );
   const hasActiveFilters = Object.entries(filters).some(
     ([key, value]) =>
-      key !== "sort" && value !== undefined && value !== "",
+      key !== "sort" &&
+      key !== "page" &&
+      value !== undefined &&
+      value !== "",
   );
   const [filtersOpen, setFiltersOpen] = useState(hasActiveFilters);
 

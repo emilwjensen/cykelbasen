@@ -14,6 +14,9 @@
 .env*
 !.env.example
 
+# local demo credentials
+/DEMO_USER.local.md
+
 # Vercel
 .vercel
 
@@ -28,4 +31,3 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-

@@ -169,6 +169,14 @@ export default async function SellerDashboard({
                         Se annonce
                       </Link>
                     )}
+                    {listing.status === "reserved" && (
+                      <Link
+                        className="button button--quiet"
+                        href="/henvendelser"
+                      >
+                        Håndtér reservation
+                      </Link>
+                    )}
                     <form
                       action={setSellerListingStatusAction.bind(
                         null,

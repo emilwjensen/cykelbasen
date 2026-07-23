@@ -6,6 +6,7 @@ import { ContactRequestForm } from "@/features/contact-requests/components/conta
 import { FavoriteButton } from "@/features/favorites/components/favorite-button";
 import { isListingFavorite } from "@/features/favorites/queries";
 import { ListingReportForm } from "@/features/listing-reports/components/listing-report-form";
+import { CompareButton } from "@/features/listings/components/compare-controls";
 import {
   brakeLabel,
   categoryLabel,
@@ -31,7 +32,9 @@ type ListingPageProps = {
 
 function safeReturnUrl(value: string | string[] | undefined) {
   const first = Array.isArray(value) ? value[0] : value;
-  return first?.startsWith("/cykler") || first === "/favoritter"
+  return first?.startsWith("/cykler") ||
+    first?.startsWith("/sammenlign") ||
+    first === "/favoritter"
     ? first
     : "/cykler";
 }
@@ -187,6 +190,15 @@ export default async function ListingPage({
           <p className="eyebrow">
             {categoryLabel(listing.category)} · {listing.city}
           </p>
+          {listing.status === "reserved" && (
+            <div className="detail__reserved">
+              <strong>Reserveret</strong>
+              <span>
+                Annoncen er stadig synlig, men sælger modtager ikke nye
+                henvendelser lige nu.
+              </span>
+            </div>
+          )}
           <h1>{listing.title}</h1>
           <p className="detail__price">{formatPrice(listing.price_dkk)}</p>
           <div className="detail__quick-specs">
@@ -199,12 +211,23 @@ export default async function ListingPage({
             isFavorite={favorite}
             listingId={listing.id}
           />
+          <CompareButton id={listing.id} title={listing.title} />
           <div className="seller-card">
             <p className="seller-card__label">Sælger</p>
             <strong>{listing.seller_name}</strong>
             <span>{listing.seller_city ?? listing.city}</span>
           </div>
-          {user?.id === listing.seller_id ? null : user?.email ? (
+          {user?.id === listing.seller_id ? (
+            listing.status === "reserved" ? (
+              <Link className="button button--quiet button--full" href="/henvendelser">
+                Håndtér reservation
+              </Link>
+            ) : null
+          ) : listing.status === "reserved" ? (
+            <div className="reservation-inline-note">
+              Denne cykel er reserveret til en anden køber.
+            </div>
+          ) : user?.email ? (
             <ContactRequestForm
               buyerEmail={user.email}
               listingId={listing.id}

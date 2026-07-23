@@ -22,6 +22,10 @@ A seller should create a credible listing without writing a technical essay.
 A buyer can send a structured inquiry and explicitly share their account e-mail
 without exposing either party's address publicly or introducing real-time chat.
 
+A buyer can also compare up to three public listings side by side. The
+selection stays in the browser, while the shareable URL contains only public
+listing IDs.
+
 ## Initial audience
 
 Private buyers and sellers of:
@@ -48,6 +52,8 @@ Private buyers and sellers of:
 - Registered bike
 - Bike maintenance and ride log
 - Structured buyer contact request
+- Browser-local listing comparison
+- Private listing reservation tied to a buyer inquiry
 
 ## Simple listing specs
 
@@ -106,6 +112,7 @@ The MVP uses clear states rather than a vague trust score:
 - Waiting for review
 - Ownership approved
 - Published
+- Reserved for a specific buyer
 - Rejected
 - Sold
 - Archived

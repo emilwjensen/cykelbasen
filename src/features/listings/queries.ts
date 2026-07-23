@@ -4,26 +4,31 @@ import { getDatabase } from "@/lib/database";
 import type {
   ListingDetail,
   ListingComponentChange,
+  ListingComparison,
   ListingFilterOptions,
   ListingFilters,
   ListingImage,
   ListingOwnershipPeriod,
+  ListingPageResult,
   ListingSummary,
 } from "./types";
 
 const sortClauses: Record<ListingFilters["sort"], string> = {
-  newest: "listing.published_at desc",
-  "price-asc": "listing.price_dkk asc, listing.published_at desc",
-  "price-desc": "listing.price_dkk desc, listing.published_at desc",
+  newest:
+    "(listing.status = 'reserved') asc, listing.published_at desc, listing.id",
+  "price-asc":
+    "(listing.status = 'reserved') asc, listing.price_dkk asc, listing.published_at desc, listing.id",
+  "price-desc":
+    "(listing.status = 'reserved') asc, listing.price_dkk desc, listing.published_at desc, listing.id",
   "year-desc":
-    "listing.model_year desc nulls last, listing.published_at desc",
+    "(listing.status = 'reserved') asc, listing.model_year desc nulls last, listing.published_at desc, listing.id",
 };
 
 export async function getListings(
   filters: ListingFilters,
-  limit = 48,
-): Promise<ListingSummary[]> {
-  const clauses = ["listing.status = 'published'"];
+  pageSize = 12,
+): Promise<ListingPageResult> {
+  const clauses = ["listing.status in ('published', 'reserved')"];
   const values: Array<string | number> = [];
 
   const addValue = (value: string | number) => {
@@ -85,10 +90,17 @@ export async function getListings(
     clauses.push(`listing.city ilike '%' || ${addValue(filters.city)} || '%'`);
   }
 
-  const limitParameter = addValue(limit);
-  const query = `
+  const listValues = [
+    ...values,
+    pageSize,
+    (filters.page - 1) * pageSize,
+  ];
+  const limitParameter = `$${values.length + 1}`;
+  const offsetParameter = `$${values.length + 2}`;
+  const listQuery = `
     select
       listing.id,
+      listing.status,
       listing.title,
       listing.category,
       listing.brand,
@@ -101,8 +113,7 @@ export async function getListings(
       listing.city,
       listing.published_at,
       cover.image_url as cover_url,
-      cover.alt_text as cover_alt,
-      count(*) over()::integer as total_count
+      cover.alt_text as cover_alt
     from public.listings listing
     left join lateral (
       select image.image_url, image.alt_text
@@ -114,14 +125,88 @@ export async function getListings(
     where ${clauses.join(" and ")}
     order by ${sortClauses[filters.sort]}
     limit ${limitParameter}
+    offset ${offsetParameter}
+  `;
+  const countQuery = `
+    select count(*)::integer as total
+    from public.listings listing
+    where ${clauses.join(" and ")}
   `;
 
-  const rows = await getDatabase().query(query, values);
-  return rows as unknown as ListingSummary[];
+  const database = getDatabase();
+  const [rows, countRows] = await Promise.all([
+    database.query(listQuery, listValues),
+    database.query(countQuery, values),
+  ]);
+  const total = Number((countRows as Array<{ total: number }>)[0]?.total ?? 0);
+
+  return {
+    items: rows as unknown as ListingSummary[],
+    total,
+    page: filters.page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  };
 }
 
 export async function getFeaturedListings(limit = 3) {
-  return getListings({ sort: "newest" }, limit);
+  const result = await getListings({ sort: "newest", page: 1 }, limit);
+  return result.items;
+}
+
+export async function getListingsForComparison(
+  ids: string[],
+): Promise<ListingComparison[]> {
+  if (!ids.length) return [];
+
+  const rows = (await getDatabase().query(
+    `
+      select
+        listing.id,
+        listing.status,
+        listing.title,
+        listing.category,
+        listing.brand,
+        listing.model,
+        listing.model_year,
+        listing.frame_size_label,
+        listing.frame_size_cm::float8 as frame_size_cm,
+        listing.material,
+        listing.groupset_brand,
+        listing.groupset_model,
+        listing.drivetrain,
+        listing.brakes,
+        listing.wheel_size,
+        listing.electronic_shifting,
+        listing.shipping_offered,
+        listing.purchase_date,
+        listing.owner_count,
+        listing.purchase_proof_available,
+        listing.service_history_available,
+        listing.price_dkk,
+        listing.condition,
+        listing.city,
+        cover.image_url as cover_url,
+        cover.alt_text as cover_alt
+      from public.listings listing
+      left join lateral (
+        select image.image_url, image.alt_text
+        from public.listing_images image
+        where image.listing_id = listing.id
+        order by image.position
+        limit 1
+      ) cover on true
+      where listing.id = any($1::uuid[])
+        and listing.status in ('published', 'reserved')
+    `,
+    [ids],
+  )) as unknown as ListingComparison[];
+  const byId = new Map(rows.map((listing) => [listing.id, listing]));
+
+  return ids.flatMap((id) => {
+    const listing = byId.get(id);
+    return listing ? [listing] : [];
+  });
 }
 
 export async function getListingFilterOptions(): Promise<ListingFilterOptions> {
@@ -133,7 +218,7 @@ export async function getListingFilterOptions(): Promise<ListingFilterOptions> {
           from (
             select distinct brand as value
             from public.listings
-            where status = 'published'
+            where status in ('published', 'reserved')
           ) brands
         ),
         '[]'::json
@@ -146,7 +231,7 @@ export async function getListingFilterOptions(): Promise<ListingFilterOptions> {
               frame_size_label as value,
               min(frame_size_cm) as numeric_size
             from public.listings
-            where status = 'published'
+            where status in ('published', 'reserved')
             group by frame_size_label
           ) sizes
         ),
@@ -155,7 +240,7 @@ export async function getListingFilterOptions(): Promise<ListingFilterOptions> {
       coalesce(min(price_dkk), 0)::int as "minPrice",
       coalesce(max(price_dkk), 100000)::int as "maxPrice"
     from public.listings
-    where status = 'published'
+    where status in ('published', 'reserved')
   `);
 
   const options = rows as unknown as ListingFilterOptions[];
@@ -176,6 +261,7 @@ export async function getListingById(
     `
       select
         listing.id,
+        listing.status,
         listing.seller_id,
         listing.title,
         listing.category,
@@ -205,8 +291,7 @@ export async function getListingById(
         profile.city as seller_city,
         true as ownership_verified,
         cover.image_url as cover_url,
-        cover.alt_text as cover_alt,
-        1::integer as total_count
+        cover.alt_text as cover_alt
       from public.listings listing
       join public.profiles profile on profile.id = listing.seller_id
       left join lateral (
@@ -217,7 +302,7 @@ export async function getListingById(
         limit 1
       ) cover on true
       where listing.id = $1::uuid
-        and listing.status = 'published'
+        and listing.status in ('published', 'reserved')
       limit 1
     `,
     [id],

@@ -6,6 +6,7 @@ import {
   formatPrice,
 } from "../format";
 import type { ListingSummary } from "../types";
+import { CompareButton } from "./compare-controls";
 
 type ListingCardProps = {
   listing: ListingSummary;
@@ -35,6 +36,9 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
             CB
           </div>
         )}
+        {listing.status === "reserved" && (
+          <span className="listing-card__reservation">Reserveret</span>
+        )}
         <span className="listing-card__verified">
           <svg aria-hidden="true" viewBox="0 0 20 20">
             <path d="m5.5 10 3 3 6-6" />
@@ -59,6 +63,7 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
           <p className="listing-card__price">{formatPrice(listing.price_dkk)}</p>
           <span aria-hidden="true">↗</span>
         </div>
+        <CompareButton id={listing.id} title={listing.title} />
       </div>
     </article>
   );

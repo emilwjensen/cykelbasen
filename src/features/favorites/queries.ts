@@ -30,6 +30,7 @@ export async function getFavoriteListings(
     transaction`
       select
         listing.id,
+        listing.status,
         listing.title,
         listing.category,
         listing.brand,
@@ -42,8 +43,7 @@ export async function getFavoriteListings(
         listing.city,
         listing.published_at,
         cover.image_url as cover_url,
-        cover.alt_text as cover_alt,
-        count(*) over()::integer as total_count
+        cover.alt_text as cover_alt
       from public.listing_favorites favorite
       join public.listings listing on listing.id = favorite.listing_id
       left join lateral (
@@ -54,7 +54,7 @@ export async function getFavoriteListings(
         limit 1
       ) cover on true
       where favorite.user_id = ${userId}
-        and listing.status = 'published'
+        and listing.status in ('published', 'reserved')
       order by favorite.created_at desc
     `,
   ]);

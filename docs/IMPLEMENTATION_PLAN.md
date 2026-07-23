@@ -73,7 +73,9 @@ content; moderators process the queue without direct database access.
 - [x] Brand and frame-size dropdowns.
 - [x] Interactive price range.
 - [x] Filter chips and clear-all action.
-- Preserve return URL and filters.
+- [x] Preserve return URL and filters.
+- [x] URL pagination with stable database ordering.
+- [x] Compare up to three public listings side by side.
 - Basic SEO metadata.
 - [x] Listing reports and moderator removal flow.
 - [x] Purchase date, owner count and documentation indicators.
@@ -103,6 +105,7 @@ private logs remain isolated between seller and buyer.
 - RLS integration tests.
 - [x] Database-backed rate limits for contact, forum and report writes.
 - [x] Structured buyer contact request and private seller inbox.
+- [x] Buyer-linked reservation, release and completed-sale lifecycle.
 - Image file validation and size limits.
 - Audit logs for moderation actions.
 - Error tracking and product analytics.

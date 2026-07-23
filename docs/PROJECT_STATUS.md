@@ -29,8 +29,11 @@ that workflow.
 
 - Public browse and detail routes for approved, published listings.
 - URL-based search, sorting and filters.
+- Database pagination with stable ordering and canonical page URLs.
 - Brand and frame-size dropdowns, price sliders and precise price fields.
 - Active-filter chips with individual removal and clear-all.
+- Browser-local selection and shareable side-by-side comparison for up to three
+  published listings.
 - Structured bike specifications and trust indicators.
 - Purchase date, known owner count, purchase proof and service-history markers.
 - Structured public component replacement history.
@@ -49,6 +52,12 @@ that workflow.
 - Moderator listing queue with atomic removal and lifecycle audit.
 - Structured buyer inquiries with explicit e-mail sharing.
 - Private seller inbox with new, read and closed states.
+- Buyer overview for sent inquiries and reservation status.
+- Private buyer-linked reservation flow with release, sale completion and
+  listing lifecycle audit.
+- Reserved listings remain visible but pause new inquiries and sort after
+  available listings.
+- Bike-registration transfers complete matching active reservations.
 - Database-enforced rolling rate limits for contact, forum and report writes.
 
 ### Mine cykler
@@ -91,12 +100,10 @@ and use short-lived signed access.
 
 ### Marketplace quality
 
-- Pagination or cursor-based loading instead of the current 48-result limit.
 - Listing image gallery when upload exists.
 - Preserve an intended destination through login.
 - Reporter-facing history or receipt page if testing shows a need beyond the
   current confirmation feedback.
-- Reservation flow if `reserved` remains a visible product state.
 - Broader SEO: canonical URLs, social images, sitemap and robots rules.
 - Accessibility pass for sliders, forms, focus states and status messages.
 

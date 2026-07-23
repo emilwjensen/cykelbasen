@@ -218,8 +218,8 @@ const contactOtherResults = await applicationDatabase.transaction(
 );
 
 assert(
-  contactBuyerResults[1][0]?.count === 1 &&
-    contactSellerResults[1][0]?.count === 1,
+  contactBuyerResults[1][0]?.count === 2 &&
+    contactSellerResults[1][0]?.count === 2,
   "Køber eller sælger kunne ikke læse den private henvendelse.",
 );
 assert(
@@ -287,6 +287,23 @@ try {
   const expected =
     error instanceof Error &&
     error.message.includes("kan ikke redigeres");
+  if (!expected) throw error;
+}
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      update public.listings
+      set status = 'reserved'
+      where id = ${"10000000-0000-4000-8000-000000000001"}::uuid
+    `,
+  ]);
+  throw new Error("En sælger kunne ændre aktiv annoncestatus uden auditfunktion.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("lifecycle-funktionen");
   if (!expected) throw error;
 }
 
@@ -690,8 +707,8 @@ try {
       from public.listings listing
       join public.listing_status_events event
         on event.listing_id = listing.id
+       and event.to_status = 'sold'
       where listing.id = $1::uuid
-      order by event.created_at desc
       limit 1
     `,
     ["10000000-0000-4000-8000-000000000001"],
@@ -733,6 +750,42 @@ try {
       "security-transfer-token-123456789",
     ],
   );
+  await ownershipTransferClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  await ownershipTransferClient.query(
+    `
+      insert into public.contact_requests (
+        id,
+        listing_id,
+        buyer_id,
+        seller_id,
+        intent,
+        buyer_email,
+        message
+      )
+      values ($1::uuid, $2::uuid, $3, $4, 'offer', $5, $6)
+    `,
+    [
+      "f3000000-0000-4000-8000-000000000019",
+      "10000000-0000-4000-8000-000000000001",
+      "seed-seller-mikkel",
+      "seed-seller-anna",
+      "mikkel@example.invalid",
+      "Denne henvendelse kobler reservationen til sikkerhedstestens cykeloverdragelse.",
+    ],
+  );
+  await ownershipTransferClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const transferReservation = await ownershipTransferClient.query(
+    "select public.reserve_listing_for_contact($1::uuid) as reservation_id",
+    ["f3000000-0000-4000-8000-000000000019"],
+  );
+  const transferReservationId =
+    transferReservation.rows[0]?.reservation_id;
   await ownershipTransferClient.query(
     "select set_config('app.user_id', $1, true)",
     ["seed-seller-mikkel"],
@@ -796,11 +849,24 @@ try {
       from public.listings listing
       join public.listing_status_events event
         on event.listing_id = listing.id
+       and event.to_status = 'sold'
       where listing.id = $1::uuid
-      order by event.created_at desc
       limit 1
     `,
     ["10000000-0000-4000-8000-000000000001"],
+  );
+  const transferredReservation = await ownershipTransferClient.query(
+    `
+      select
+        reservation.status,
+        reservation.ended_by,
+        request.status as request_status
+      from public.listing_reservations reservation
+      join public.contact_requests request
+        on request.id = reservation.contact_request_id
+      where reservation.id = $1::uuid
+    `,
+    [transferReservationId],
   );
 
   assert(
@@ -823,9 +889,16 @@ try {
   assert(
     transferredListing.rows[0]?.status === "sold" &&
       transferredListing.rows[0]?.actor_id === "seed-seller-anna" &&
-      transferredListing.rows[0]?.from_status === "published" &&
+      transferredListing.rows[0]?.from_status === "reserved" &&
       transferredListing.rows[0]?.to_status === "sold",
     "Den aktive annonce blev ikke afsluttet med auditspor ved overdragelsen.",
+  );
+  assert(
+    transferReservationId &&
+      transferredReservation.rows[0]?.status === "completed" &&
+      transferredReservation.rows[0]?.ended_by === "seed-seller-anna" &&
+      transferredReservation.rows[0]?.request_status === "closed",
+    "Cykeloverdragelsen afsluttede ikke reservation og henvendelse.",
   );
 
   await ownershipTransferClient.query("rollback");
@@ -1198,6 +1271,169 @@ try {
   await contactStatusClient.end();
 }
 
+const unauthorizedReservationResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      select public.reserve_listing_for_contact(
+        ${"b0000000-0000-4000-8000-000000000001"}::uuid
+      ) as reservation_id
+    `,
+  ],
+);
+
+assert(
+  unauthorizedReservationResults[1][0]?.reservation_id === null,
+  "Køberen kunne reservere sælgerens annonce på egen hånd.",
+);
+
+const reservationClient = createDatabaseClient();
+
+try {
+  await reservationClient.connect();
+  await reservationClient.query("begin");
+  await reservationClient.query("set local role cykelbasen_app");
+  await reservationClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const firstReservation = await reservationClient.query(
+    "select public.reserve_listing_for_contact($1::uuid) as reservation_id",
+    ["b0000000-0000-4000-8000-000000000001"],
+  );
+  const firstReservationId = firstReservation.rows[0]?.reservation_id;
+  const reservedAudit = await reservationClient.query(
+    `
+      select
+        reservation.status as reservation_status,
+        listing.status as listing_status,
+        request.status as request_status,
+        event.actor_id,
+        event.from_status,
+        event.to_status
+      from public.listing_reservations reservation
+      join public.listings listing on listing.id = reservation.listing_id
+      join public.contact_requests request
+        on request.id = reservation.contact_request_id
+      join public.listing_status_events event
+        on event.listing_id = listing.id
+       and event.to_status = 'reserved'
+      where reservation.id = $1::uuid
+      limit 1
+    `,
+    [firstReservationId],
+  );
+
+  assert(
+    firstReservationId &&
+      reservedAudit.rows[0]?.reservation_status === "active" &&
+      reservedAudit.rows[0]?.listing_status === "reserved" &&
+      reservedAudit.rows[0]?.request_status === "read",
+    "Reservationen opdaterede ikke aftale, annonce og henvendelse atomisk.",
+  );
+  assert(
+    reservedAudit.rows[0]?.actor_id === "seed-seller-mikkel" &&
+      reservedAudit.rows[0]?.from_status === "published" &&
+      reservedAudit.rows[0]?.to_status === "reserved",
+    "Reservationen fik ikke et korrekt auditspor.",
+  );
+
+  await reservationClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["security-test-other"],
+  );
+  const unrelatedReservationRead = await reservationClient.query(
+    "select count(*)::int as count from public.listing_reservations where id = $1::uuid",
+    [firstReservationId],
+  );
+  assert(
+    unrelatedReservationRead.rows[0]?.count === 0,
+    "En uvedkommende bruger kunne læse en privat reservation.",
+  );
+
+  await reservationClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const buyerCancellation = await reservationClient.query(
+    "select public.cancel_listing_reservation($1::uuid) as cancelled",
+    [firstReservationId],
+  );
+  const cancelledReservation = await reservationClient.query(
+    `
+      select
+        reservation.status,
+        reservation.ended_by,
+        reservation.ended_at is not null as has_ended_at,
+        listing.status as listing_status
+      from public.listing_reservations reservation
+      join public.listings listing on listing.id = reservation.listing_id
+      where reservation.id = $1::uuid
+    `,
+    [firstReservationId],
+  );
+
+  assert(
+    buyerCancellation.rows[0]?.cancelled === true &&
+      cancelledReservation.rows[0]?.status === "cancelled" &&
+      cancelledReservation.rows[0]?.ended_by === "seed-seller-anna" &&
+      cancelledReservation.rows[0]?.has_ended_at === true &&
+      cancelledReservation.rows[0]?.listing_status === "published",
+    "Køberens frigivelse genåbnede ikke annoncen med korrekt auditdata.",
+  );
+
+  await reservationClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const secondReservation = await reservationClient.query(
+    "select public.reserve_listing_for_contact($1::uuid) as reservation_id",
+    ["b0000000-0000-4000-8000-000000000001"],
+  );
+  const secondReservationId = secondReservation.rows[0]?.reservation_id;
+  const completedSale = await reservationClient.query(
+    `
+      select public.set_seller_listing_status(
+        $1::uuid,
+        'sold'::public.listing_status
+      ) as changed
+    `,
+    ["10000000-0000-4000-8000-000000000002"],
+  );
+  const completedReservation = await reservationClient.query(
+    `
+      select
+        reservation.status,
+        reservation.ended_by,
+        listing.status as listing_status,
+        request.status as request_status
+      from public.listing_reservations reservation
+      join public.listings listing on listing.id = reservation.listing_id
+      join public.contact_requests request
+        on request.id = reservation.contact_request_id
+      where reservation.id = $1::uuid
+    `,
+    [secondReservationId],
+  );
+
+  assert(
+    secondReservationId &&
+      completedSale.rows[0]?.changed === true &&
+      completedReservation.rows[0]?.status === "completed" &&
+      completedReservation.rows[0]?.ended_by === "seed-seller-mikkel" &&
+      completedReservation.rows[0]?.listing_status === "sold" &&
+      completedReservation.rows[0]?.request_status === "closed",
+    "Et gennemført salg afsluttede ikke reservation og henvendelse atomisk.",
+  );
+
+  await reservationClient.query("rollback");
+} catch (error) {
+  await reservationClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await reservationClient.end();
+}
+
 const rateLimitClient = createDatabaseClient();
 
 try {
@@ -1242,5 +1478,5 @@ try {
 }
 
 console.log(
-  "Security tests passed: ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

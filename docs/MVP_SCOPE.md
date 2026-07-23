@@ -27,7 +27,9 @@
 - Moderator approval queue
 - Publish only after ownership approval
 - Favorite listings
+- Paginated results and side-by-side comparison of up to three listings
 - Structured buyer contact request with explicit e-mail sharing
+- Reserve a listing for a specific buyer inquiry and release it again
 - Report listing
 - Mark listing sold or archived
 

@@ -73,6 +73,8 @@ godkendt udviklings-dokumentpost.
 - Rapportér indlæg og kommentarer én gang per bruger
 - Moderator-kø med atomisk hide og auditspor
 - Brand- og størrelsesdropdowns samt interaktivt prisinterval
+- URL-baseret pagination med stabil database-sortering
+- Sammenlign op til tre publicerede cykler side om side uden konto
 - Købsdato, ejerantal og dokumentationssignaler på annoncer
 - Struktureret historik for udskiftede komponenter
 - Privat “Mine cykler” med hash af stelnummer
@@ -90,6 +92,8 @@ godkendt udviklings-dokumentpost.
 - Atomisk publicering og auditspor efter godkendt ejerskab
 - Strukturerede køberhenvendelser med eksplicit deling af kontomail
 - Privat sælgerindbakke med læst- og afsluttet-status
+- Køberoverblik og privat reservation bundet til en konkret henvendelse
+- Frigivelse eller gennemført salg med atomisk annonce-audit
 - Databasebaserede rate limits for kontakt, forum og rapportering
 
 Billedupload, privat dokumentupload, signed previews og resterende

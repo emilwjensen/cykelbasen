@@ -27,6 +27,15 @@ const optionalPrice = z
   .optional()
   .catch(undefined);
 
+const pageNumber = z
+  .string()
+  .trim()
+  .regex(/^\d+$/)
+  .transform(Number)
+  .pipe(z.number().int().min(1).max(1_000))
+  .default(1)
+  .catch(1);
+
 const listingFilterSchema = z.object({
   q: optionalText,
   category: z
@@ -54,6 +63,7 @@ const listingFilterSchema = z.object({
     .enum(sortOptions.map(({ value }) => value))
     .default("newest")
     .catch("newest"),
+  page: pageNumber,
 });
 
 export function parseListingFilters(
@@ -71,5 +81,6 @@ export function parseListingFilters(
     condition: firstValue(searchParams.condition),
     city: firstValue(searchParams.city),
     sort: firstValue(searchParams.sort),
+    page: firstValue(searchParams.page),
   });
 }

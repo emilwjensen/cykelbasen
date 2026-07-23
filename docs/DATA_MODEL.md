@@ -10,7 +10,10 @@ are added by migrations `010` through `014`.
 Marketplace reports and atomic listing moderation are added by migration `015`.
 Private contact requests and database-backed write limits are added by
 migration `016`. Atomic ownership submission, review and publication are added
-by migration `017`.
+by migration `017`. Private buyer-linked reservations and stricter audited
+listing transitions are added by migration `018`; migration `019` synchronizes
+reservations with registered-bike transfers and adds marketplace indexes that
+cover both published and reserved listings.
 
 ## Public data
 
@@ -59,6 +62,14 @@ listing removal are written atomically with a listing status audit event.
 Private structured buyer inquiries containing intent, message and the e-mail
 the buyer explicitly shares. Only buyer and seller can read a request; only the
 seller can mark it read or closed.
+
+### listing_reservations
+
+Private agreement connecting a listing, seller, buyer and concrete contact
+request. Only one active reservation can exist per listing. Both participants
+can read it and release it through an atomic function; only the seller can
+create it. Completed sales and bike-registration transfers mark the reservation
+completed and close the associated inquiry.
 
 ## Private data
 
@@ -127,20 +138,32 @@ forum/listing reports.
 ```text
 draft
   -> pending_review
-  -> published
-  -> reserved
-  -> sold
-  -> archived
 
 pending_review
+  -> published
   -> rejected
+
+rejected
   -> draft
+
+published
+  -> reserved
+  -> sold / archived
+
+reserved
+  -> published
+  -> sold / archived
+
+sold
+  -> archived
 ```
 
 A database trigger blocks transition to `published` without an approved
 ownership document. The review function additionally locks the pending document
 and listing, records the moderator decision and writes the status event
-atomically.
+atomically. Active listing transitions are rejected when attempted as direct
+table updates by the runtime role; lifecycle functions own the status and audit
+changes.
 
 ## Main filter indexes
 
