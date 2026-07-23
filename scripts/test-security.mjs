@@ -914,6 +914,240 @@ try {
   await listingModerationClient.end();
 }
 
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      select public.moderate_ownership_document(
+        ${"30000000-0000-4000-8000-000000000001"}::uuid,
+        'approve',
+        'Må ikke kunne godkendes af sælgeren.'
+      )
+    `,
+  ]);
+  throw new Error("En almindelig bruger kunne behandle ejerskabsdokumentation.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("Moderatoradgang");
+  if (!expected) throw error;
+}
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      update public.ownership_documents
+      set review_note = review_note
+      where id = ${"30000000-0000-4000-8000-000000000001"}::uuid
+    `,
+  ]);
+  throw new Error("En sælger kunne opdatere dokumentets reviewfelter direkte.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("permission denied");
+  if (!expected) throw error;
+}
+
+const ownershipReviewClient = createDatabaseClient();
+
+try {
+  await ownershipReviewClient.connect();
+  await ownershipReviewClient.query("begin");
+  await ownershipReviewClient.query(
+    `
+      insert into public.listings (
+        id,
+        seller_id,
+        title,
+        category,
+        brand,
+        model,
+        frame_size_label,
+        price_dkk,
+        condition,
+        city,
+        description,
+        purchase_date
+      )
+      values (
+        $1::uuid,
+        $2,
+        $3,
+        'road'::public.bike_category,
+        $4,
+        $5,
+        $6,
+        $7,
+        'good'::public.listing_condition,
+        $8,
+        $9,
+        $10::date
+      )
+    `,
+    [
+      "f0000000-0000-4000-8000-000000000017",
+      "seed-seller-anna",
+      "Midlertidig cykel til ejerskabskontrol",
+      "Test",
+      "Review",
+      "56",
+      12_500,
+      "Aarhus",
+      "Denne annonce bruges kun til at kontrollere det atomiske ejerskabsflow.",
+      "2026-01-01",
+    ],
+  );
+  await ownershipReviewClient.query(
+    `
+      insert into public.listing_images (
+        id,
+        listing_id,
+        object_key,
+        image_url,
+        alt_text,
+        position
+      )
+      values ($1::uuid, $2::uuid, $3, $4, $5, 0)
+    `,
+    [
+      "f1000000-0000-4000-8000-000000000017",
+      "f0000000-0000-4000-8000-000000000017",
+      "security/ownership-review/image.webp",
+      "https://example.com/security/ownership-review/image.webp",
+      "Midlertidigt testbillede",
+    ],
+  );
+  await ownershipReviewClient.query(
+    `
+      insert into public.ownership_documents (
+        id,
+        listing_id,
+        owner_id,
+        object_key,
+        frame_number_hash
+      )
+      values ($1::uuid, $2::uuid, $3, $4, $5)
+    `,
+    [
+      "f2000000-0000-4000-8000-000000000017",
+      "f0000000-0000-4000-8000-000000000017",
+      "seed-seller-anna",
+      "security/ownership-review/document.pdf",
+      "security-review-frame-hash",
+    ],
+  );
+  await ownershipReviewClient.query("set local role cykelbasen_app");
+  await ownershipReviewClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-mikkel"],
+  );
+  const otherSellerSubmission = await ownershipReviewClient.query(
+    "select public.submit_listing_for_review($1::uuid) as submitted",
+    ["f0000000-0000-4000-8000-000000000017"],
+  );
+  assert(
+    otherSellerSubmission.rows[0]?.submitted === false,
+    "En anden sælger kunne indsende ejerens annonce til kontrol.",
+  );
+  await ownershipReviewClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const submittedListing = await ownershipReviewClient.query(
+    "select public.submit_listing_for_review($1::uuid) as submitted",
+    ["f0000000-0000-4000-8000-000000000017"],
+  );
+  const submissionAudit = await ownershipReviewClient.query(
+    `
+      select
+        listing.status,
+        event.actor_id,
+        event.from_status,
+        event.to_status
+      from public.listings listing
+      join public.listing_status_events event
+        on event.listing_id = listing.id
+      where listing.id = $1::uuid
+      order by event.created_at desc
+      limit 1
+    `,
+    ["f0000000-0000-4000-8000-000000000017"],
+  );
+
+  assert(
+    submittedListing.rows[0]?.submitted === true &&
+      submissionAudit.rows[0]?.status === "pending_review" &&
+      submissionAudit.rows[0]?.actor_id === "seed-seller-anna" &&
+      submissionAudit.rows[0]?.from_status === "draft" &&
+      submissionAudit.rows[0]?.to_status === "pending_review",
+    "Sælgerens indsendelse fik ikke korrekt status og auditspor.",
+  );
+
+  await ownershipReviewClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-moderator"],
+  );
+  const reviewedDocument = await ownershipReviewClient.query(
+    `
+      select public.moderate_ownership_document(
+        $1::uuid,
+        'approve',
+        $2
+      ) as reviewed
+    `,
+    [
+      "f2000000-0000-4000-8000-000000000017",
+      "Dokumentationen matcher annoncen og kan godkendes.",
+    ],
+  );
+  const reviewAudit = await ownershipReviewClient.query(
+    `
+      select
+        document.status as document_status,
+        document.reviewed_by,
+        document.reviewed_at is not null as has_review_timestamp,
+        listing.status as listing_status,
+        listing.published_at is not null as has_publication_timestamp,
+        event.actor_id,
+        event.from_status,
+        event.to_status
+      from public.ownership_documents document
+      join public.listings listing on listing.id = document.listing_id
+      join public.listing_status_events event
+        on event.listing_id = listing.id
+      where document.id = $1::uuid
+        and event.to_status = 'published'
+      limit 1
+    `,
+    ["f2000000-0000-4000-8000-000000000017"],
+  );
+
+  assert(
+    reviewedDocument.rows[0]?.reviewed === true &&
+      reviewAudit.rows[0]?.document_status === "approved" &&
+      reviewAudit.rows[0]?.reviewed_by === "seed-moderator" &&
+      reviewAudit.rows[0]?.has_review_timestamp === true &&
+      reviewAudit.rows[0]?.listing_status === "published" &&
+      reviewAudit.rows[0]?.has_publication_timestamp === true,
+    "Godkendelse opdaterede ikke dokument og annonce atomisk.",
+  );
+  assert(
+    reviewAudit.rows[0]?.actor_id === "seed-moderator" &&
+      reviewAudit.rows[0]?.from_status === "pending_review" &&
+      reviewAudit.rows[0]?.to_status === "published",
+    "Ejerskabsgodkendelsen fik ikke et korrekt publicerings-auditspor.",
+  );
+
+  await ownershipReviewClient.query("rollback");
+} catch (error) {
+  await ownershipReviewClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await ownershipReviewClient.end();
+}
+
 const contactStatusClient = createDatabaseClient();
 
 try {
@@ -1008,5 +1242,5 @@ try {
 }
 
 console.log(
-  "Security tests passed: contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

@@ -124,6 +124,9 @@ Path convention:
 ```
 
 Only the owner and moderators get signed URLs. Never expose a public storage URL.
+Until an object-storage provider is selected, the application stores and shows
+only the private object reference to moderators; it does not pretend that Neon
+contains the file bytes.
 
 ## Neon authorization bridge
 
@@ -146,6 +149,13 @@ Moderator access comes from the `moderators` table. Do not place an editable
 `is_admin` flag on user profiles. Forum reports and marketplace listing reports
 use separate private tables but share the same moderator identity and atomic
 decision pattern.
+
+For ownership review, sellers call a security-definer function that accepts
+only their own draft or rejected listing when an image and pending document
+record exist. The moderator decision function locks the document and listing,
+stores review metadata, publishes or rejects the listing and appends the
+lifecycle event in one transaction. Direct document updates are not granted to
+the runtime role.
 
 ## Buyer contact and abuse limits
 

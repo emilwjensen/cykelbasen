@@ -62,8 +62,8 @@ function BikeIllustration() {
       <g className="bike-illustration__details">
         <path d="M429 132 522 252M448 229 522 252" />
         <path d="M278 119 264 89M236 88h59" />
-        <path d="M429 132 443 91 474 78" />
-        <path d="M471 78c16 0 20 12 10 21l-14 12" />
+        <path d="M429 132 443 103 476 103" />
+        <path d="M473 103c15 0 19 11 12 21l-12 15c-5 7-1 15 8 15" />
         <circle cx="309" cy="252" r="16" />
         <path d="m309 252 30 17M309 252l-28-16M339 269h23M260 236h21" />
         <path d="M309 252 158 252M448 229 522 252" />

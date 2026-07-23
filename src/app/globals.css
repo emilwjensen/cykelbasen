@@ -3598,6 +3598,18 @@ summary {
   stroke-width: 3.5;
 }
 
+.bike-illustration__wheels {
+  stroke-width: 3.2;
+}
+
+.bike-illustration__frame {
+  stroke-width: 5;
+}
+
+.bike-illustration__details {
+  stroke-width: 3.1;
+}
+
 .hero-visual__annotation {
   position: absolute;
   z-index: 3;
@@ -3626,8 +3638,9 @@ summary {
 }
 
 .hero-visual__annotation--two {
+  top: 24%;
   right: 5%;
-  bottom: 10%;
+  bottom: auto;
 }
 
 .hero-visual__footer {

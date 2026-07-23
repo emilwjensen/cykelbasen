@@ -9,7 +9,8 @@ Connected bike identities, ownership periods and secure transfer invitations
 are added by migrations `010` through `014`.
 Marketplace reports and atomic listing moderation are added by migration `015`.
 Private contact requests and database-backed write limits are added by
-migration `016`.
+migration `016`. Atomic ownership submission, review and publication are added
+by migration `017`.
 
 ## Public data
 
@@ -67,7 +68,10 @@ Users allowed to review documents and moderate content. Only database administra
 
 ### ownership_documents
 
-Metadata for uploaded evidence and review state. Files will live in private object storage.
+Metadata for uploaded evidence and review state. Files will live in private
+object storage. Sellers cannot update review state directly. Migration `017`
+adds security-definer functions for draft submission and moderator decisions;
+approval publishes the associated listing in the same transaction.
 
 ### post_votes and comment_votes
 
@@ -133,7 +137,10 @@ pending_review
   -> draft
 ```
 
-A database trigger blocks transition to `published` without an approved ownership document.
+A database trigger blocks transition to `published` without an approved
+ownership document. The review function additionally locks the pending document
+and listing, records the moderator decision and writes the status event
+atomically.
 
 ## Main filter indexes
 

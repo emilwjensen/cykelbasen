@@ -85,10 +85,13 @@ godkendt udviklings-dokumentpost.
 - Sælgerflow til solgt og arkiveret med auditspor
 - Rapportér mistænkelige annoncer til en privat moderator-kø
 - Moderatorfjernelse af annoncer med atomisk auditspor
+- Indsend annonce til ejerskabskontrol med databasevalideret readiness
+- Privat moderator-kø til godkendelse eller afvisning af dokumentposter
+- Atomisk publicering og auditspor efter godkendt ejerskab
 - Strukturerede køberhenvendelser med eksplicit deling af kontomail
 - Privat sælgerindbakke med læst- og afsluttet-status
 - Databasebaserede rate limits for kontakt, forum og rapportering
 
-Billedupload, dokument-review, kontakt og resterende launch-hardening følger
-som separate vertikale slices. Se `docs/PROJECT_STATUS.md` for den prioriterede
-scope-audit.
+Billedupload, privat dokumentupload, signed previews og resterende
+launch-hardening følger som separate vertikale slices. Se
+`docs/PROJECT_STATUS.md` for den prioriterede scope-audit.

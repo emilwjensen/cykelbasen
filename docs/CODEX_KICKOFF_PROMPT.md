@@ -3,19 +3,21 @@
 Use this prompt for the next vertical slice:
 
 ```text
-Complete the ownership-document review and publication workflow.
+Select and integrate object storage for listing images and ownership documents.
 
 Read AGENTS.md and all files in docs before changing code. Keep Next.js App
 Router, TypeScript, Tailwind CSS, Neon Postgres, SQL migrations, Neon Auth and
 pnpm. Do not add an ORM or another backend.
 
 Implement:
-1. Record the external object-storage decision before adding file bytes.
-2. Upload ownership evidence through a short-lived, private scoped URL.
-3. Let the seller submit a complete draft for review.
-4. Give moderators a private queue with signed document previews.
-5. Approve or reject atomically and publish only after approval.
-6. Add file validation, rate limits, RLS tests and Danish UI states.
+1. Record the provider and security decision in an ADR.
+2. Upload listing images through short-lived scoped URLs and store public/CDN
+   metadata in listing_images.
+3. Support image order, cover selection and deletion.
+4. Upload ownership evidence to a separate private namespace.
+5. Add short-lived signed previews to the existing moderator document queue.
+6. Validate MIME type, file signature, size and ownership server-side.
+7. Add database-backed upload limits, authorization tests and Danish UI states.
 
 Do not build real-time chat, payment, quiz or automated document analysis.
 

@@ -6,12 +6,14 @@ Last reviewed: 2026-07-23.
 
 Cykelbasen is a coherent, Neon-only product prototype with a working public
 marketplace, authenticated seller area, private bike ownership area, forum and
-forum moderation. It is not launch-ready yet because the trust-critical upload
-and ownership-review flow is still missing.
+moderation. It is not launch-ready yet because the trust-critical image and
+private-document uploads still need an external object-storage provider.
 
-The current implementation proves most read paths and several authenticated
-write paths. The remaining work should prioritize completing one real seller
-flow from image upload through moderator approval and publication.
+The application-side ownership workflow is complete: a seller submits a ready
+draft, a moderator approves or rejects the private document record, and the
+database atomically publishes or rejects the listing with an audit trail. The
+remaining P0 work is to attach real file bytes and signed document previews to
+that workflow.
 
 ## Implemented
 
@@ -33,6 +35,11 @@ flow from image upload through moderator approval and publication.
 - Purchase date, known owner count, purchase proof and service-history markers.
 - Structured public component replacement history.
 - Authenticated listing drafts and draft editing.
+- Seller readiness state and submit-for-review action requiring an image and a
+  pending ownership-document record.
+- Private moderator document queue with approved and rejected history.
+- Atomic ownership approval, listing publication or rejection and lifecycle
+  audit.
 - Seller dashboard with explicit sold and archived actions.
 - Private buyer favorites and a `/favoritter` overview.
 - Database-enforced ownership approval before publication.
@@ -72,8 +79,7 @@ flow from image upload through moderator approval and publication.
 | Priority | Missing capability | Why it blocks launch |
 | --- | --- | --- |
 | P0 | Public listing-image upload, order and deletion | Sellers cannot create a credible real listing without seeded image URLs. |
-| P0 | Private ownership-document upload | The core trust promise cannot be completed by a seller. |
-| P0 | Submit-for-review, moderator document queue and approve/reject UI | The database invariant exists, but the real publication flow does not. |
+| P0 | Private ownership-document upload and signed moderator preview | The review workflow exists, but a seller cannot attach real evidence and a moderator cannot inspect its bytes yet. |
 | P0 | Production moderation bootstrap and operating procedure | A real moderator must be provisioned without ad hoc production SQL. |
 
 Object storage is intentionally not replaced by Neon: Postgres stores metadata,
@@ -108,7 +114,7 @@ and use short-lived signed access.
 - Extend rate limits to uploads and authentication-sensitive actions when those
   flows are implemented.
 - Browser-level tests for signup, profile, draft, favorite and forum flows.
-- Tests for the full moderator publication path when implemented.
+- Browser-level test for the seller-to-moderator publication path.
 - Error tracking, product analytics and database monitoring.
 - Privacy policy, terms, retention rules and a user deletion/export process.
 - Backup/restore rehearsal and production seed separation.
@@ -116,11 +122,10 @@ and use short-lived signed access.
 ## Recommended sequence
 
 1. Select object storage and build listing-image upload.
-2. Build private ownership-document upload and submit-for-review.
-3. Build the moderator ownership queue with signed previews and atomic decisions.
-4. Add minimal buyer contact and marketplace reports.
-5. Add rate limits, browser tests, accessibility and operational safeguards.
-6. Run a closed test with real sellers before adding quiz, chat or payments.
+2. Build private ownership-document upload and signed moderator previews.
+3. Provision production moderators and document the operating procedure.
+4. Add browser tests, accessibility and operational safeguards.
+5. Run a closed test with real sellers before adding quiz, chat or payments.
 
 Quiz, payments, escrow, shipping integrations, price estimation and real-time
 chat remain deliberately outside the MVP.

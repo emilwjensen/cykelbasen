@@ -35,13 +35,19 @@ Exit criteria: authenticated user creates a complete draft with images.
 
 ## Phase 3, ownership review
 
-- Neon Auth and restricted RLS application role.
+- [x] Neon Auth and restricted RLS application role.
 - Private document upload.
-- Submit listing for review.
-- Moderator queue.
+- [x] Submit listing for review.
+- [x] Moderator queue.
 - Signed document preview.
-- Approve and reject actions.
-- Publish action after approval.
+- [x] Approve and reject actions.
+- [x] Publish action after approval.
+
+Current evidence: sellers can submit only a draft with both an image record and
+a pending ownership-document record. Moderators process a private queue, and a
+single database function stores the decision, publishes or rejects the listing
+and writes its audit event. File upload and signed preview remain blocked on the
+external object-storage decision.
 
 Exit criteria: the full trust flow works without the Neon console.
 
