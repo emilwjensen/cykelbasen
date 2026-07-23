@@ -119,7 +119,12 @@ export default async function ComparisonPage({
             Træk vandret for at se alle valgte cykler
             <span aria-hidden="true">→</span>
           </p>
-          <div className="comparison-scroll">
+          <div
+            aria-label="Sammenligningstabel – rul vandret for flere cykler"
+            className="comparison-scroll"
+            role="region"
+            tabIndex={0}
+          >
             <div className="comparison-table" style={comparisonStyle}>
             <div className="comparison-row comparison-row--products">
               <strong>Cykel</strong>
