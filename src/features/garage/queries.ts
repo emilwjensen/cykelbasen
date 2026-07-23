@@ -23,7 +23,19 @@ export async function getGarageBikes(
         bike.model,
         bike.model_year,
         bike.frame_size_label,
+        bike.frame_size_cm,
+        bike.color,
+        bike.material,
+        bike.groupset_brand,
+        bike.groupset_model,
+        bike.drivetrain,
+        bike.brakes,
+        bike.wheel_size,
+        bike.electronic_shifting,
         bike.acquired_on,
+        bike.acquisition_source,
+        bike.purchase_price_dkk,
+        bike.purchase_location,
         bike.ownership_ended_on,
         bike.current_odometer_km,
         bike.updated_at,
@@ -86,7 +98,19 @@ export async function getGarageBike(
         bike.model,
         bike.model_year,
         bike.frame_size_label,
+        bike.frame_size_cm,
+        bike.color,
+        bike.material,
+        bike.groupset_brand,
+        bike.groupset_model,
+        bike.drivetrain,
+        bike.brakes,
+        bike.wheel_size,
+        bike.electronic_shifting,
         bike.acquired_on,
+        bike.acquisition_source,
+        bike.purchase_price_dkk,
+        bike.purchase_location,
         bike.ownership_ended_on,
         bike.acquired_used,
         bike.owner_count_at_acquisition,
@@ -184,9 +208,31 @@ export async function getGarageBike(
         reminder.due_odometer_km nulls last,
         reminder.created_at desc
     `,
+    transaction`
+      select
+        document.id,
+        document.document_type,
+        document.title,
+        document.document_date,
+        document.original_filename,
+        document.content_type,
+        document.size_bytes,
+        document.created_at
+      from public.bike_documents document
+      where document.bike_id = ${bikeId}::uuid
+        and document.owner_id = ${userId}
+      order by
+        document.document_date desc nulls last,
+        document.created_at desc
+    `,
   ]);
 
-  const bikes = results[1] as unknown as Array<Omit<GarageBikeDetail, "logs">>;
+  const bikes = results[1] as unknown as Array<
+    Omit<
+      GarageBikeDetail,
+      "logs" | "reminders" | "ownership_history" | "documents"
+    >
+  >;
   const bike = bikes[0];
   if (!bike) return null;
 
@@ -195,5 +241,6 @@ export async function getGarageBike(
     logs: results[2] as unknown as BikeLogEntry[],
     ownership_history: results[3] as unknown as BikeOwnershipPeriod[],
     reminders: results[4] as unknown as GarageBikeDetail["reminders"],
+    documents: results[5] as unknown as GarageBikeDetail["documents"],
   };
 }

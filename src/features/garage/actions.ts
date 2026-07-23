@@ -4,11 +4,18 @@ import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import {
+  deletePrivateDocumentBlob,
+  UploadValidationError,
+  uploadBikeDocument,
+  verifyPrivateDocument,
+} from "@/lib/blob-storage";
 import { getProfile } from "@/features/profiles/queries";
 import { requireUser } from "@/lib/auth/server";
 import { getApplicationDatabase } from "@/lib/database";
 import {
   acceptBikeTransferSchema,
+  bikeDocumentSchema,
   bikeLogSchema,
   bikeMaintenanceReminderSchema,
   garageBikeEditSchema,
@@ -23,12 +30,27 @@ export async function createGarageBikeAction(formData: FormData) {
   const parsed = garageBikeSchema.safeParse({
     nickname: formData.get("nickname"),
     category: formData.get("category"),
-    brand: formData.get("brand"),
+    brand:
+      formData.get("brandSelection") === "other"
+        ? formData.get("customBrand")
+        : formData.get("brandSelection"),
     model: formData.get("model"),
     modelYear: formData.get("modelYear"),
     frameSizeLabel: formData.get("frameSizeLabel"),
+    frameSizeCm: formData.get("frameSizeCm"),
+    color: formData.get("color"),
+    material: formData.get("material"),
+    groupsetBrand: formData.get("groupsetBrand"),
+    groupsetModel: formData.get("groupsetModel"),
+    drivetrain: formData.get("drivetrain"),
+    brakes: formData.get("brakes"),
+    wheelSize: formData.get("wheelSize"),
+    electronicShifting: formData.get("electronicShifting") === "on",
     serialNumber: formData.get("serialNumber"),
     acquiredOn: formData.get("acquiredOn"),
+    acquisitionSource: formData.get("acquisitionSource"),
+    purchasePriceDkk: formData.get("purchasePriceDkk"),
+    purchaseLocation: formData.get("purchaseLocation"),
     acquiredUsed: formData.get("acquiredUsed") === "on",
     ownerCountAtAcquisition: formData.get("ownerCountAtAcquisition"),
     currentOdometerKm: formData.get("currentOdometerKm"),
@@ -49,8 +71,20 @@ export async function createGarageBikeAction(formData: FormData) {
         model,
         model_year,
         frame_size_label,
+        frame_size_cm,
+        color,
+        material,
+        groupset_brand,
+        groupset_model,
+        drivetrain,
+        brakes,
+        wheel_size,
+        electronic_shifting,
         serial_number_hash,
         acquired_on,
+        acquisition_source,
+        purchase_price_dkk,
+        purchase_location,
         acquired_used,
         owner_count_at_acquisition,
         current_odometer_km,
@@ -64,6 +98,15 @@ export async function createGarageBikeAction(formData: FormData) {
         ${parsed.data.model},
         ${parsed.data.modelYear ?? null},
         ${parsed.data.frameSizeLabel ?? null},
+        ${parsed.data.frameSizeCm ?? null},
+        ${parsed.data.color ?? null},
+        ${parsed.data.material ?? null}::public.frame_material,
+        ${parsed.data.groupsetBrand ?? null},
+        ${parsed.data.groupsetModel ?? null},
+        ${parsed.data.drivetrain ?? null},
+        ${parsed.data.brakes ?? null}::public.brake_type,
+        ${parsed.data.wheelSize ?? null},
+        ${parsed.data.electronicShifting},
         case
           when ${parsed.data.serialNumber ?? null}::text is null then null
           else encode(
@@ -72,6 +115,9 @@ export async function createGarageBikeAction(formData: FormData) {
           )
         end,
         ${parsed.data.acquiredOn}::date,
+        ${parsed.data.acquisitionSource ?? null}::public.bike_acquisition_source,
+        ${parsed.data.purchasePriceDkk ?? null},
+        ${parsed.data.purchaseLocation ?? null},
         ${parsed.data.acquiredUsed},
         ${parsed.data.ownerCountAtAcquisition},
         ${parsed.data.currentOdometerKm},
@@ -85,7 +131,7 @@ export async function createGarageBikeAction(formData: FormData) {
   if (!rows[0]) redirect("/mine-cykler/ny?fejl=gem");
 
   revalidatePath("/mine-cykler");
-  redirect(`/mine-cykler/${rows[0].id}?oprettet=1`);
+  redirect(`/mine-cykler/${rows[0].id}?oprettet=1#dokumenter`);
 }
 
 export async function updateGarageBikeAction(
@@ -97,10 +143,25 @@ export async function updateGarageBikeAction(
   const parsed = garageBikeEditSchema.safeParse({
     nickname: formData.get("nickname"),
     category: formData.get("category"),
-    brand: formData.get("brand"),
+    brand:
+      formData.get("brandSelection") === "other"
+        ? formData.get("customBrand")
+        : formData.get("brandSelection"),
     model: formData.get("model"),
     modelYear: formData.get("modelYear"),
     frameSizeLabel: formData.get("frameSizeLabel"),
+    frameSizeCm: formData.get("frameSizeCm"),
+    color: formData.get("color"),
+    material: formData.get("material"),
+    groupsetBrand: formData.get("groupsetBrand"),
+    groupsetModel: formData.get("groupsetModel"),
+    drivetrain: formData.get("drivetrain"),
+    brakes: formData.get("brakes"),
+    wheelSize: formData.get("wheelSize"),
+    electronicShifting: formData.get("electronicShifting") === "on",
+    acquisitionSource: formData.get("acquisitionSource"),
+    purchasePriceDkk: formData.get("purchasePriceDkk"),
+    purchaseLocation: formData.get("purchaseLocation"),
     notes: formData.get("notes"),
   });
 
@@ -120,6 +181,19 @@ export async function updateGarageBikeAction(
         model = ${parsed.data.model},
         model_year = ${parsed.data.modelYear ?? null},
         frame_size_label = ${parsed.data.frameSizeLabel ?? null},
+        frame_size_cm = ${parsed.data.frameSizeCm ?? null},
+        color = ${parsed.data.color ?? null},
+        material = ${parsed.data.material ?? null}::public.frame_material,
+        groupset_brand = ${parsed.data.groupsetBrand ?? null},
+        groupset_model = ${parsed.data.groupsetModel ?? null},
+        drivetrain = ${parsed.data.drivetrain ?? null},
+        brakes = ${parsed.data.brakes ?? null}::public.brake_type,
+        wheel_size = ${parsed.data.wheelSize ?? null},
+        electronic_shifting = ${parsed.data.electronicShifting},
+        acquisition_source =
+          ${parsed.data.acquisitionSource ?? null}::public.bike_acquisition_source,
+        purchase_price_dkk = ${parsed.data.purchasePriceDkk ?? null},
+        purchase_location = ${parsed.data.purchaseLocation ?? null},
         notes = ${parsed.data.notes ?? null}
       where id = ${validBikeId.data}::uuid
         and owner_id = ${user.id}
@@ -133,6 +207,118 @@ export async function updateGarageBikeAction(
   revalidatePath("/mine-cykler");
   revalidatePath(`/mine-cykler/${bikeId}`);
   redirect(`/mine-cykler/${bikeId}?cykel=opdateret`);
+}
+
+export async function uploadBikeDocumentAction(formData: FormData) {
+  const user = await requireUser();
+  const parsed = bikeDocumentSchema.safeParse({
+    bikeId: formData.get("bikeId"),
+    documentType: formData.get("documentType"),
+    title: formData.get("title"),
+    documentDate: formData.get("documentDate"),
+  });
+  if (!parsed.success) redirect("/mine-cykler?fejl=dokument");
+
+  let upload: Awaited<ReturnType<typeof verifyPrivateDocument>>;
+  try {
+    upload = await verifyPrivateDocument(formData.get("file") ?? "");
+  } catch (error) {
+    const code = error instanceof UploadValidationError ? "fil" : "lager";
+    redirect(`/mine-cykler/${parsed.data.bikeId}?fejl=dokument-${code}#dokumenter`);
+  }
+
+  const database = getApplicationDatabase();
+  const ownership = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      select id
+      from public.garage_bikes
+      where id = ${parsed.data.bikeId}::uuid
+        and owner_id = ${user.id}
+        and ownership_ended_on is null
+    `,
+  ]);
+  if (!(ownership[1] as unknown as Array<{ id: string }>)[0]) {
+    redirect(`/mine-cykler/${parsed.data.bikeId}?fejl=dokument-adgang#dokumenter`);
+  }
+
+  let blob: Awaited<ReturnType<typeof uploadBikeDocument>> | undefined;
+  try {
+    const uploadedBlob = await uploadBikeDocument(
+      user.id,
+      parsed.data.bikeId,
+      upload,
+    );
+    blob = uploadedBlob;
+    await database.transaction((transaction) => [
+      transaction`select set_config('app.user_id', ${user.id}, true)`,
+      transaction`
+        insert into public.bike_documents (
+          bike_id,
+          owner_id,
+          document_type,
+          title,
+          document_date,
+          object_key,
+          original_filename,
+          content_type,
+          size_bytes
+        )
+        values (
+          ${parsed.data.bikeId}::uuid,
+          ${user.id},
+          ${parsed.data.documentType}::public.bike_document_type,
+          ${parsed.data.title},
+          ${parsed.data.documentDate ?? null}::date,
+          ${uploadedBlob.pathname},
+          ${upload.originalFilename},
+          ${upload.contentType},
+          ${upload.sizeBytes}
+        )
+      `,
+    ]);
+  } catch {
+    if (blob) await Promise.allSettled([deletePrivateDocumentBlob(blob.pathname)]);
+    redirect(`/mine-cykler/${parsed.data.bikeId}?fejl=dokument-lager#dokumenter`);
+  }
+
+  revalidatePath(`/mine-cykler/${parsed.data.bikeId}`);
+  redirect(`/mine-cykler/${parsed.data.bikeId}?dokument=uploadet#dokumenter`);
+}
+
+export async function deleteBikeDocumentAction(
+  bikeId: string,
+  documentId: string,
+) {
+  const user = await requireUser();
+  const parsed = z
+    .object({ bikeId: z.string().uuid(), documentId: z.string().uuid() })
+    .safeParse({ bikeId, documentId });
+  if (!parsed.success) redirect("/mine-cykler?fejl=dokument");
+
+  const database = getApplicationDatabase();
+  const results = await database.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${user.id}, true)`,
+    transaction`
+      delete from public.bike_documents document
+      using public.garage_bikes bike
+      where document.id = ${parsed.data.documentId}::uuid
+        and document.bike_id = ${parsed.data.bikeId}::uuid
+        and bike.id = document.bike_id
+        and document.owner_id = ${user.id}
+        and bike.owner_id = ${user.id}
+        and bike.ownership_ended_on is null
+      returning document.object_key
+    `,
+  ]);
+  const deleted = (results[1] as unknown as Array<{ object_key: string }>)[0];
+  if (!deleted) {
+    redirect(`/mine-cykler/${parsed.data.bikeId}?fejl=dokument-adgang#dokumenter`);
+  }
+
+  await Promise.allSettled([deletePrivateDocumentBlob(deleted.object_key)]);
+  revalidatePath(`/mine-cykler/${parsed.data.bikeId}`);
+  redirect(`/mine-cykler/${parsed.data.bikeId}?dokument=slettet#dokumenter`);
 }
 
 export async function createBikeLogAction(

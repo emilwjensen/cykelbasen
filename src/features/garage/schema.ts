@@ -1,7 +1,13 @@
 import { z } from "zod";
 import {
+  acquisitionSources,
+  bikeDocumentTypes,
+} from "@/features/bikes/catalog";
+import {
+  brakeTypes,
   bikeCategories,
   componentCategories,
+  frameMaterials,
 } from "@/features/listings/types";
 import { bikeLogTypes } from "./types";
 
@@ -37,8 +43,29 @@ export const garageBikeSchema = z.object({
   model: z.string().trim().min(1).max(80),
   modelYear: optionalInteger(1950, 2100),
   frameSizeLabel: optionalText(20),
+  frameSizeCm: optionalInteger(35, 70),
+  color: optionalText(40),
+  material: z
+    .enum(frameMaterials.map(({ value }) => value))
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  groupsetBrand: optionalText(60),
+  groupsetModel: optionalText(80),
+  drivetrain: optionalText(20),
+  brakes: z
+    .enum(brakeTypes.map(({ value }) => value))
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  wheelSize: optionalText(30),
+  electronicShifting: z.boolean(),
   serialNumber: optionalText(120),
   acquiredOn: pastDate,
+  acquisitionSource: z
+    .enum(acquisitionSources.map(({ value }) => value))
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
+  purchasePriceDkk: optionalInteger(0, 1_000_000),
+  purchaseLocation: optionalText(120),
   acquiredUsed: z.boolean(),
   ownerCountAtAcquisition: z.preprocess(
     (value) => Number(value),
@@ -58,7 +85,26 @@ export const garageBikeEditSchema = garageBikeSchema.pick({
   model: true,
   modelYear: true,
   frameSizeLabel: true,
+  frameSizeCm: true,
+  color: true,
+  material: true,
+  groupsetBrand: true,
+  groupsetModel: true,
+  drivetrain: true,
+  brakes: true,
+  wheelSize: true,
+  electronicShifting: true,
+  acquisitionSource: true,
+  purchasePriceDkk: true,
+  purchaseLocation: true,
   notes: true,
+});
+
+export const bikeDocumentSchema = z.object({
+  bikeId: z.string().uuid(),
+  documentType: z.enum(bikeDocumentTypes.map(({ value }) => value)),
+  title: z.string().trim().min(2).max(120),
+  documentDate: optionalDate,
 });
 
 export const bikeLogSchema = z.object({

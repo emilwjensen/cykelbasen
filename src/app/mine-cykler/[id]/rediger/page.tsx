@@ -2,9 +2,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountNavigation } from "@/components/account-navigation";
+import {
+  acquisitionSources,
+  groupsetBrands,
+} from "@/features/bikes/catalog";
+import { BrandSelect } from "@/features/bikes/components/brand-select";
 import { updateGarageBikeAction } from "@/features/garage/actions";
 import { getGarageBike } from "@/features/garage/queries";
-import { bikeCategories } from "@/features/listings/types";
+import {
+  bikeCategories,
+  brakeTypes,
+  frameMaterials,
+} from "@/features/listings/types";
 import { requireUser } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +47,8 @@ export default async function EditBikePage({
         <p className="eyebrow">Mine cykler</p>
         <h1>Redigér {bike.nickname}</h1>
         <p>
-          Ret identitet og private noter. Kilometer og historik vedligeholdes
-          gennem logposter, så tidslinjen forbliver sporbar.
+          Ret cykelpassets identitet, specs og købsdata. Kilometer og historik
+          vedligeholdes gennem logposter, så tidslinjen forbliver sporbar.
         </p>
       </header>
 
@@ -76,15 +85,7 @@ export default async function EditBikePage({
               ))}
             </select>
           </label>
-          <label>
-            Mærke
-            <input
-              defaultValue={bike.brand}
-              maxLength={60}
-              name="brand"
-              required
-            />
-          </label>
+          <BrandSelect defaultBrand={bike.brand} />
           <label>
             Model
             <input
@@ -105,14 +106,123 @@ export default async function EditBikePage({
             />
           </label>
           <label>
-            Stelstørrelse
+            Stelstørrelse, label
             <input
               defaultValue={bike.frame_size_label ?? ""}
               maxLength={20}
               name="frameSizeLabel"
             />
           </label>
+          <label>
+            Stelstørrelse i cm
+            <input
+              defaultValue={bike.frame_size_cm ?? ""}
+              max={70}
+              min={35}
+              name="frameSizeCm"
+              type="number"
+            />
+          </label>
+          <label>
+            Farve
+            <input defaultValue={bike.color ?? ""} maxLength={40} name="color" />
+          </label>
+          <label>
+            Stelmateriale
+            <select defaultValue={bike.material ?? ""} name="material">
+              <option value="">Ikke angivet</option>
+              {frameMaterials.map((material) => (
+                <option key={material.value} value={material.value}>
+                  {material.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Gearmærke
+            <select defaultValue={bike.groupset_brand ?? ""} name="groupsetBrand">
+              <option value="">Ikke angivet</option>
+              {groupsetBrands.map((brand) => (
+                <option key={brand} value={brand}>{brand}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Geargruppe
+            <input
+              defaultValue={bike.groupset_model ?? ""}
+              maxLength={80}
+              name="groupsetModel"
+            />
+          </label>
+          <label>
+            Drivlinje
+            <input
+              defaultValue={bike.drivetrain ?? ""}
+              maxLength={20}
+              name="drivetrain"
+              placeholder="Fx 2x12"
+            />
+          </label>
+          <label>
+            Bremsetype
+            <select defaultValue={bike.brakes ?? ""} name="brakes">
+              <option value="">Ikke angivet</option>
+              {brakeTypes.map((brake) => (
+                <option key={brake.value} value={brake.value}>
+                  {brake.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Hjulstørrelse
+            <input
+              defaultValue={bike.wheel_size ?? ""}
+              maxLength={30}
+              name="wheelSize"
+            />
+          </label>
+          <label>
+            Købt gennem
+            <select
+              defaultValue={bike.acquisition_source ?? ""}
+              name="acquisitionSource"
+            >
+              <option value="">Ikke angivet</option>
+              {acquisitionSources.map((source) => (
+                <option key={source.value} value={source.value}>
+                  {source.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Købssted eller sælger
+            <input
+              defaultValue={bike.purchase_location ?? ""}
+              maxLength={120}
+              name="purchaseLocation"
+            />
+          </label>
+          <label>
+            Købspris i kr.
+            <input
+              defaultValue={bike.purchase_price_dkk ?? ""}
+              min={0}
+              name="purchasePriceDkk"
+              type="number"
+            />
+          </label>
         </div>
+        <label className="garage-log-check">
+          <input
+            defaultChecked={bike.electronic_shifting}
+            name="electronicShifting"
+            type="checkbox"
+          />
+          Elektroniske gear
+        </label>
         <label>
           Private noter
           <textarea
@@ -134,4 +244,3 @@ export default async function EditBikePage({
     </div>
   );
 }
-

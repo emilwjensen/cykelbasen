@@ -3,9 +3,15 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { AccountNavigation } from "@/components/account-navigation";
 import {
+  acquisitionSources,
+  bikeDocumentTypes,
+} from "@/features/bikes/catalog";
+import {
   completeBikeMaintenanceReminderAction,
   createBikeLogAction,
   createBikeMaintenanceReminderAction,
+  deleteBikeDocumentAction,
+  uploadBikeDocumentAction,
 } from "@/features/garage/actions";
 import { BikeTransferForm } from "@/features/garage/components/bike-transfer-form";
 import { getGarageBike } from "@/features/garage/queries";
@@ -16,7 +22,11 @@ import {
   formatDate,
   formatPrice,
 } from "@/features/listings/format";
-import { componentCategories } from "@/features/listings/types";
+import {
+  brakeTypes,
+  componentCategories,
+  frameMaterials,
+} from "@/features/listings/types";
 import { requireUser } from "@/lib/auth/server";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +36,18 @@ const logTypeLabels = Object.fromEntries(
 );
 const componentLabels = Object.fromEntries(
   componentCategories.map((type) => [type.value, type.label]),
+);
+const documentLabels = Object.fromEntries(
+  bikeDocumentTypes.map((type) => [type.value, type.label]),
+);
+const acquisitionLabels = Object.fromEntries(
+  acquisitionSources.map((type) => [type.value, type.label]),
+);
+const materialLabels = Object.fromEntries(
+  frameMaterials.map((type) => [type.value, type.label]),
+);
+const brakeLabels = Object.fromEntries(
+  brakeTypes.map((type) => [type.value, type.label]),
 );
 
 function reminderState(
@@ -63,6 +85,7 @@ type MyBikePageProps = {
     overtaget?: string;
     paamindelse?: string;
     cykel?: string;
+    dokument?: string;
     fejl?: string;
   }>;
 };
@@ -126,9 +149,14 @@ export default async function MyBikePage({
         query.logget ||
         query.overtaget ||
         query.paamindelse ||
-        query.cykel) && (
+        query.cykel ||
+        query.dokument) && (
         <p className="form-message form-message--success">
-          {query.cykel === "opdateret"
+          {query.dokument === "uploadet"
+            ? "Dokumentet er gemt privat på cykelpasset."
+            : query.dokument === "slettet"
+              ? "Dokumentet er slettet."
+              : query.cykel === "opdateret"
             ? "Cykeldata er opdateret."
             : query.overtaget
             ? "Cyklen er overtaget, og ejerhistorikken er forbundet."
@@ -143,7 +171,11 @@ export default async function MyBikePage({
       )}
       {query.fejl && (
         <p className="form-message form-message--error">
-          {query.fejl === "paamindelse"
+          {query.fejl.startsWith("dokument")
+            ? query.fejl === "dokument-fil"
+              ? "Dokumentet skal være PDF, JPG, PNG eller WebP og højst 10 MB."
+              : "Dokumentet kunne ikke gemmes. Kontrollér den private Blob-store og prøv igen."
+            : query.fejl === "paamindelse"
             ? "Vedligeholdelsesplanen kunne ikke gemmes. Vælg en dato eller kilometerstand."
             : "Logposten kunne ikke gemmes. Kontrollér felterne."}
         </p>
@@ -167,6 +199,156 @@ export default async function MyBikePage({
           <strong>{bike.log_count} logposter</strong>
         </div>
       </div>
+
+      <section className="account-card" id="cykelpas">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Cykelpas</p>
+            <h2>Data der kan genbruges</h2>
+          </div>
+          <p>
+            Oplysningerne er private her. Ved et senere salg vælger du selv,
+            hvilke sikre felter der kopieres til annoncen.
+          </p>
+        </div>
+        <dl className="bike-passport-grid">
+          <div><dt>Stel</dt><dd>{[
+            bike.material ? materialLabels[bike.material] : null,
+            bike.frame_size_cm ? `${bike.frame_size_cm} cm` : bike.frame_size_label,
+            bike.color,
+          ].filter(Boolean).join(" · ") || "Ikke udfyldt"}</dd></div>
+          <div><dt>Geargruppe</dt><dd>{[
+            bike.groupset_brand,
+            bike.groupset_model,
+            bike.drivetrain,
+            bike.electronic_shifting ? "elektronisk" : null,
+          ].filter(Boolean).join(" · ") || "Ikke udfyldt"}</dd></div>
+          <div><dt>Bremser og hjul</dt><dd>{[
+            bike.brakes ? brakeLabels[bike.brakes] : null,
+            bike.wheel_size,
+          ].filter(Boolean).join(" · ") || "Ikke udfyldt"}</dd></div>
+          <div><dt>Køb</dt><dd>{[
+            bike.acquisition_source
+              ? acquisitionLabels[bike.acquisition_source]
+              : null,
+            bike.purchase_location,
+            bike.purchase_price_dkk !== null
+              ? formatPrice(bike.purchase_price_dkk)
+              : null,
+          ].filter(Boolean).join(" · ") || "Ikke udfyldt"}</dd></div>
+        </dl>
+      </section>
+
+      <section className="account-card bike-documents" id="dokumenter">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Privat dokumentmappe</p>
+            <h2>Kvitteringer og bilag</h2>
+          </div>
+          <p>
+            Filerne ligger i den private Blob-store. De bliver aldrig vist
+            offentligt eller overført til en ny ejer.
+          </p>
+        </div>
+        <div className="bike-documents__layout">
+          <div className="bike-documents__list">
+            {bike.documents.length ? (
+              bike.documents.map((document) => (
+                <article key={document.id}>
+                  <div>
+                    <span>{documentLabels[document.document_type]}</span>
+                    <h3>{document.title}</h3>
+                    <p>
+                      {document.document_date
+                        ? formatDate(document.document_date)
+                        : "Dato ikke angivet"}
+                      {" · "}
+                      {(document.size_bytes / 1024 / 1024).toLocaleString(
+                        "da-DK",
+                        { maximumFractionDigits: 1 },
+                      )}{" "}
+                      MB
+                    </p>
+                  </div>
+                  <div className="form-actions">
+                    <a
+                      className="button button--quiet"
+                      href={`/api/bike-documents/${document.id}/preview`}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      Åbn sikkert
+                    </a>
+                    {!bike.ownership_ended_on && (
+                      <form
+                        action={deleteBikeDocumentAction.bind(
+                          null,
+                          bike.id,
+                          document.id,
+                        )}
+                      >
+                        <button className="button button--quiet" type="submit">
+                          Slet
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="maintenance-reminder-empty">
+                <strong>Ingen dokumenter endnu</strong>
+                <p>Start med købskvitteringen eller købsaftalen.</p>
+              </div>
+            )}
+          </div>
+          {!bike.ownership_ended_on && (
+            <form action={uploadBikeDocumentAction} className="stacked-form">
+              <input name="bikeId" type="hidden" value={bike.id} />
+              <label>
+                Dokumenttype
+                <select name="documentType" required>
+                  {bikeDocumentTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Titel
+                <input
+                  maxLength={120}
+                  minLength={2}
+                  name="title"
+                  placeholder="Fx Kvittering fra Fri BikeShop"
+                  required
+                />
+              </label>
+              <label>
+                Dokumentdato
+                <input
+                  max={new Date().toISOString().slice(0, 10)}
+                  name="documentDate"
+                  type="date"
+                />
+              </label>
+              <label>
+                PDF eller billede, maks. 10 MB
+                <input
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
+                  name="file"
+                  required
+                  type="file"
+                />
+              </label>
+              <button className="button button--accent" type="submit">
+                Upload privat
+              </button>
+            </form>
+          )}
+        </div>
+      </section>
 
       <section className="maintenance-planner" id="vedligehold">
         <div className="section-heading">

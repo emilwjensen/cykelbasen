@@ -1,7 +1,10 @@
 import type {
+  BrakeType,
   ComponentCategory,
+  FrameMaterial,
 } from "@/features/listings/types";
 import { bikeCategories } from "@/features/listings/types";
+import type { BikeDocumentType } from "@/features/bikes/catalog";
 
 export const bikeLogTypes = [
   { value: "ride", label: "Tur" },
@@ -67,6 +70,24 @@ export type BikeMaintenanceReminder = {
 };
 
 export type GarageBikeDetail = GarageBikeSummary & {
+  color: string | null;
+  frame_size_cm: number | null;
+  material: FrameMaterial | null;
+  groupset_brand: string | null;
+  groupset_model: string | null;
+  drivetrain: string | null;
+  brakes: BrakeType | null;
+  wheel_size: string | null;
+  electronic_shifting: boolean;
+  acquisition_source:
+    | "dealer"
+    | "private-sale"
+    | "marketplace"
+    | "gift"
+    | "other"
+    | null;
+  purchase_price_dkk: number | null;
+  purchase_location: string | null;
   acquired_used: boolean;
   owner_count_at_acquisition: number;
   has_serial_number: boolean;
@@ -74,6 +95,18 @@ export type GarageBikeDetail = GarageBikeSummary & {
   logs: BikeLogEntry[];
   reminders: BikeMaintenanceReminder[];
   ownership_history: BikeOwnershipPeriod[];
+  documents: BikeDocument[];
+};
+
+export type BikeDocument = {
+  id: string;
+  document_type: BikeDocumentType;
+  title: string;
+  document_date: string | null;
+  original_filename: string;
+  content_type: string;
+  size_bytes: number;
+  created_at: string;
 };
 
 export type BikeTransferState = {

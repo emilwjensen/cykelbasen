@@ -13,9 +13,9 @@ export const MAX_LISTING_IMAGES = 8;
 export const MAX_LISTING_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_OWNERSHIP_DOCUMENT_BYTES = 10 * 1024 * 1024;
 
-type UploadKind = "listing-image" | "ownership-document";
+type UploadKind = "listing-image" | "private-document";
 
-type VerifiedUpload = {
+export type VerifiedUpload = {
   contentType: string;
   extension: string;
   file: File;
@@ -29,7 +29,8 @@ function tokenFor(kind: UploadKind) {
   const token =
     kind === "listing-image"
       ? process.env.LISTING_IMAGES_BLOB_READ_WRITE_TOKEN
-      : process.env.OWNERSHIP_DOCUMENTS_BLOB_READ_WRITE_TOKEN;
+      : process.env.PRIVATE_DOCUMENTS_BLOB_READ_WRITE_TOKEN ??
+        process.env.OWNERSHIP_DOCUMENTS_BLOB_READ_WRITE_TOKEN;
 
   if (!token) {
     throw new Error(
@@ -127,6 +128,10 @@ export function verifyOwnershipDocument(value: FormDataEntryValue) {
   );
 }
 
+export function verifyPrivateDocument(value: FormDataEntryValue) {
+  return verifyOwnershipDocument(value);
+}
+
 export async function uploadListingImage(
   userId: string,
   listingId: string,
@@ -167,7 +172,29 @@ export async function uploadOwnershipDocument(
     cacheControlMaxAge: 60,
     contentType: upload.contentType,
     maximumSizeInBytes: MAX_OWNERSHIP_DOCUMENT_BYTES,
-    token: tokenFor("ownership-document"),
+    token: tokenFor("private-document"),
+  });
+}
+
+export async function uploadBikeDocument(
+  userId: string,
+  bikeId: string,
+  upload: VerifiedUpload,
+): Promise<PutBlobResult> {
+  const pathname = [
+    "bike-documents",
+    safePathSegment(userId),
+    bikeId,
+    `${randomUUID()}.${upload.extension}`,
+  ].join("/");
+
+  return put(pathname, upload.file, {
+    access: "private",
+    addRandomSuffix: false,
+    cacheControlMaxAge: 60,
+    contentType: upload.contentType,
+    maximumSizeInBytes: MAX_OWNERSHIP_DOCUMENT_BYTES,
+    token: tokenFor("private-document"),
   });
 }
 
@@ -176,15 +203,19 @@ export async function deleteListingImageBlob(pathname: string) {
 }
 
 export async function deleteOwnershipDocumentBlob(pathname: string) {
-  await del(pathname, { token: tokenFor("ownership-document") });
+  await del(pathname, { token: tokenFor("private-document") });
 }
 
-export async function createOwnershipDocumentPreview(pathname: string) {
+export async function deletePrivateDocumentBlob(pathname: string) {
+  await del(pathname, { token: tokenFor("private-document") });
+}
+
+export async function createPrivateDocumentPreview(pathname: string) {
   const validUntil = Date.now() + 2 * 60 * 1000;
   const signedToken = await issueSignedToken({
     operations: ["get"],
     pathname,
-    token: tokenFor("ownership-document"),
+    token: tokenFor("private-document"),
     validUntil,
   });
 
@@ -199,12 +230,14 @@ export async function createOwnershipDocumentPreview(pathname: string) {
   return presignedUrl;
 }
 
+export const createOwnershipDocumentPreview = createPrivateDocumentPreview;
+
 export function storageConfiguration() {
   return {
     listingImages: Boolean(process.env.LISTING_IMAGES_BLOB_READ_WRITE_TOKEN),
     ownershipDocuments: Boolean(
+      process.env.PRIVATE_DOCUMENTS_BLOB_READ_WRITE_TOKEN ??
       process.env.OWNERSHIP_DOCUMENTS_BLOB_READ_WRITE_TOKEN,
     ),
   };
 }
-

@@ -22,6 +22,9 @@ export const brakeTypes = [
   { value: "other", label: "Andet" },
 ] as const;
 
+export type FrameMaterial = (typeof frameMaterials)[number]["value"];
+export type BrakeType = (typeof brakeTypes)[number]["value"];
+
 export const conditions = [
   { value: "like-new", label: "Som ny" },
   { value: "excellent", label: "Meget god" },
