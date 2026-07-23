@@ -1942,6 +1942,54 @@ try {
   await bikePassportClient.end();
 }
 
+const accountLifecycleClient = createDatabaseClient();
+
+try {
+  await accountLifecycleClient.connect();
+  await accountLifecycleClient.query("begin");
+  await accountLifecycleClient.query(
+    "insert into public.profiles (id, display_name, city) values ($1, $2, $3)",
+    ["security-delete-user", "Slette Test", "Aarhus"],
+  );
+  await accountLifecycleClient.query("set local role cykelbasen_app");
+  await accountLifecycleClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["security-delete-user"],
+  );
+  await accountLifecycleClient.query(
+    `
+      insert into public.account_deletion_requests (user_id, status)
+      values ($1, 'requested')
+    `,
+    ["security-delete-user"],
+  );
+  const deletion = await accountLifecycleClient.query(
+    "select public.delete_application_account() as paths",
+  );
+  const deletedProfile = await accountLifecycleClient.query(
+    `
+      select display_name, city, deleted_at is not null as is_deleted
+      from public.profiles
+      where id = $1
+    `,
+    ["security-delete-user"],
+  );
+  assert(
+    Array.isArray(deletion.rows[0]?.paths?.private) &&
+      Array.isArray(deletion.rows[0]?.paths?.public) &&
+      deletedProfile.rows[0]?.display_name === "Slettet bruger" &&
+      deletedProfile.rows[0]?.city === null &&
+      deletedProfile.rows[0]?.is_deleted === true,
+    "Kontosletning anonymiserede ikke profilen eller returnerede Blob-oprydning.",
+  );
+  await accountLifecycleClient.query("rollback");
+} catch (error) {
+  await accountLifecycleClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await accountLifecycleClient.end();
+}
+
 console.log(
-  "Security tests passed: private bike documents, bike/log/reminder audits, storage policies/reordering, bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: account anonymization, private bike documents, bike/log/reminder audits, storage policies/reordering, bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );
