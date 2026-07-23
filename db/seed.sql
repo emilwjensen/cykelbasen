@@ -272,3 +272,106 @@ set
   image_url = excluded.image_url,
   alt_text = excluded.alt_text;
 
+insert into public.forum_posts (
+  id,
+  category_slug,
+  author_id,
+  title,
+  body,
+  created_at
+)
+values
+  (
+    '40000000-0000-4000-8000-000000000001',
+    'cykelvalg-og-stoerrelse',
+    'seed-seller-anna',
+    'Er en størrelse 56 for stor til 178 cm?',
+    'Jeg kigger på en endurance-cykel i størrelse 56. Min skridtlængde er cirka 83 cm, og jeg foretrækker en afslappet position. Hvilke mål bør jeg især sammenligne?',
+    now() - interval '8 hours'
+  ),
+  (
+    '40000000-0000-4000-8000-000000000002',
+    'vedligeholdelse',
+    'seed-seller-mikkel',
+    'Tjekliste før første forårstur',
+    'Hvad gennemgår I på cyklen efter vinteren? Jeg tænker dæktryk, kæde og bremser, men vil gerne samle en kort og praktisk tjekliste.',
+    now() - interval '1 day'
+  ),
+  (
+    '40000000-0000-4000-8000-000000000003',
+    'prisvurdering',
+    'seed-seller-anna',
+    'Hvordan vurderer I brugte carbonhjul?',
+    'Jeg har svært ved at vurdere prisforskellen på hjul med og uden dokumenteret servicehistorik. Hvilke tegn på slid påvirker prisen mest?',
+    now() - interval '2 days'
+  )
+on conflict (id) do update
+set
+  category_slug = excluded.category_slug,
+  title = excluded.title,
+  body = excluded.body;
+
+insert into public.forum_comments (
+  id,
+  post_id,
+  author_id,
+  parent_id,
+  body,
+  created_at
+)
+values
+  (
+    '50000000-0000-4000-8000-000000000001',
+    '40000000-0000-4000-8000-000000000001',
+    'seed-seller-mikkel',
+    null,
+    'Start med stack og reach frem for størrelsesnummeret alene. Sammenlign også med en cykel, du allerede sidder godt på.',
+    now() - interval '7 hours'
+  ),
+  (
+    '50000000-0000-4000-8000-000000000002',
+    '40000000-0000-4000-8000-000000000001',
+    'seed-seller-anna',
+    '50000000-0000-4000-8000-000000000001',
+    'Tak, det giver mening. Jeg finder geometrimålene på min nuværende cykel først.',
+    now() - interval '6 hours'
+  ),
+  (
+    '50000000-0000-4000-8000-000000000003',
+    '40000000-0000-4000-8000-000000000002',
+    'seed-seller-anna',
+    null,
+    'Jeg kontrollerer også dæksiderne for revner og efterspænder kun med momentnøgle, hvor producenten anbefaler det.',
+    now() - interval '20 hours'
+  )
+on conflict (id) do update
+set body = excluded.body;
+
+insert into public.post_votes (post_id, user_id, value)
+values
+  ('40000000-0000-4000-8000-000000000001', 'seed-seller-mikkel', 1),
+  ('40000000-0000-4000-8000-000000000002', 'seed-seller-anna', 1)
+on conflict (post_id, user_id) do update
+set value = excluded.value;
+
+insert into public.comment_votes (comment_id, user_id, value)
+values
+  ('50000000-0000-4000-8000-000000000001', 'seed-seller-anna', 1)
+on conflict (comment_id, user_id) do update
+set value = excluded.value;
+
+insert into public.content_reports (
+  id,
+  reporter_id,
+  post_id,
+  reason,
+  details
+)
+values (
+  '60000000-0000-4000-8000-000000000001',
+  'seed-seller-anna',
+  '40000000-0000-4000-8000-000000000002',
+  'other',
+  'Udviklingsrapport til test af moderator-køen.'
+)
+on conflict (id) do nothing;

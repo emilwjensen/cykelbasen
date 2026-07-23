@@ -11,13 +11,10 @@ export function SiteHeader() {
         </Link>
         <nav aria-label="Primær navigation" className="site-nav">
           <Link href="/cykler">Find cykel</Link>
-          <span className="site-nav__soon" title="Forum bygges i en senere fase">
-            Forum <small>snart</small>
-          </span>
+          <Link href="/forum">Forum</Link>
         </nav>
         <HeaderActions />
       </div>
     </header>
   );
 }
-

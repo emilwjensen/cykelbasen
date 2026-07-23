@@ -3,24 +3,21 @@
 Use this prompt for the next vertical slice:
 
 ```text
-Complete the image portion of Phase 2.
+Complete forum reporting and moderation.
 
 Read AGENTS.md and all files in docs before changing code. Keep Next.js App
 Router, TypeScript, Tailwind CSS, Neon Postgres, SQL migrations, Neon Auth and
 pnpm. Do not add an ORM or another backend.
 
-Start by recording an ADR for the object-storage provider. Listing images must
-be public, while the later ownership-document namespace must remain private.
-
 Implement:
-1. Direct, scoped image upload for an authenticated listing owner.
-2. Server-side MIME type, file size and ownership validation.
-3. Store image metadata in listing_images.
-4. Reorder and delete images.
-5. Cover-image preview in mine annoncer and the public listing card.
+1. Report a forum post or comment once per authenticated user.
+2. Moderator-only report queue backed by the moderators table.
+3. Hide a reported post or comment without deleting its audit context.
+4. Record moderator, reason and timestamps.
+5. RLS tests for reporter, other user and moderator access.
 6. Loading, empty and error states in Danish.
 
-Do not build chat, payment, quiz, document review or forum yet.
+Do not build chat, payment, quiz, document review or file uploads yet.
 
 Before finishing, run lint, typecheck, build and security tests.
 ```

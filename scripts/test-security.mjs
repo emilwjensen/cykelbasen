@@ -62,6 +62,94 @@ assert(
   "Sikkerhedstesten brugte ikke den begrænsede applikationsrolle.",
 );
 
+const forumOwnerResults = await applicationDatabase.transaction((transaction) => [
+  transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+  transaction`
+    update public.forum_posts
+    set title = title
+    where id = ${"40000000-0000-4000-8000-000000000001"}::uuid
+    returning id
+  `,
+  transaction`
+    select count(*)::int as count
+    from public.post_votes
+  `,
+]);
+
+const forumOtherResults = await applicationDatabase.transaction((transaction) => [
+  transaction`select set_config('app.user_id', ${"security-test-other"}, true)`,
+  transaction`
+    update public.forum_posts
+    set title = title
+    where id = ${"40000000-0000-4000-8000-000000000001"}::uuid
+    returning id
+  `,
+  transaction`
+    select count(*)::int as count
+    from public.post_votes
+  `,
+]);
+
+assert(
+  forumOwnerResults[1].length === 1,
+  "Forfatteren kunne ikke opdatere sit forumindlæg.",
+);
+assert(
+  forumOwnerResults[2][0]?.count === 1,
+  "Brugeren kunne ikke læse sin egen forumstemme.",
+);
+assert(
+  forumOtherResults[1].length === 0,
+  "En anden bruger kunne opdatere forfatterens forumindlæg.",
+);
+assert(
+  forumOtherResults[2][0]?.count === 0,
+  "En anden bruger kunne læse private forumstemmer.",
+);
+
+const voteResults = await applicationDatabase.transaction((transaction) => [
+  transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+  transaction`
+    update public.post_votes
+    set value = -1
+    where post_id = ${"40000000-0000-4000-8000-000000000002"}::uuid
+      and user_id = ${"seed-seller-anna"}
+  `,
+  transaction`
+    update public.post_votes
+    set value = 1
+    where post_id = ${"40000000-0000-4000-8000-000000000002"}::uuid
+      and user_id = ${"seed-seller-anna"}
+  `,
+  transaction`
+    select score
+    from public.forum_posts
+    where id = ${"40000000-0000-4000-8000-000000000002"}::uuid
+  `,
+]);
+
+assert(
+  voteResults[3][0]?.score === 1,
+  "Forumscore fulgte ikke ændringen af en stemme.",
+);
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      update public.forum_posts
+      set score = 999
+      where id = ${"40000000-0000-4000-8000-000000000001"}::uuid
+    `,
+  ]);
+  throw new Error("Forumscore kunne ændres direkte af applikationsrollen.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("permission denied");
+  if (!expected) throw error;
+}
+
 const ownerClient = createDatabaseClient();
 
 try {
@@ -135,5 +223,40 @@ try {
   await ownerClient.end();
 }
 
-console.log("Security tests passed: RLS isolation and publication invariant.");
+const forumOwnerClient = createDatabaseClient();
 
+try {
+  await forumOwnerClient.connect();
+  await forumOwnerClient.query("begin");
+  await forumOwnerClient.query(
+    `
+      insert into public.forum_comments (
+        post_id,
+        author_id,
+        parent_id,
+        body
+      )
+      values ($1::uuid, $2, $3::uuid, $4)
+    `,
+    [
+      "40000000-0000-4000-8000-000000000001",
+      "seed-seller-mikkel",
+      "50000000-0000-4000-8000-000000000002",
+      "Dette svar må ikke oprettes på niveau tre.",
+    ],
+  );
+  await forumOwnerClient.query("commit");
+  throw new Error("Et forumsvar på niveau tre blev tilladt.");
+} catch (error) {
+  await forumOwnerClient.query("rollback").catch(() => {});
+  const expected =
+    error instanceof Error &&
+    error.message.includes("topniveau-kommentar");
+  if (!expected) throw error;
+} finally {
+  await forumOwnerClient.end();
+}
+
+console.log(
+  "Security tests passed: marketplace and forum RLS, managed scores, publication and reply-depth invariants.",
+);

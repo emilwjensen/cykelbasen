@@ -1,6 +1,7 @@
 # Data model
 
-The active initial migration is `db/migrations/001_initial_marketplace.sql`.
+The marketplace foundation starts in `db/migrations/001_initial_marketplace.sql`.
+Forum tables and least-privilege grants are added by migrations `004` and `005`.
 
 ## Public data
 
@@ -40,7 +41,8 @@ Metadata for uploaded evidence and review state. Files will live in private obje
 
 ### post_votes and comment_votes
 
-One vote per user and target. Public posts expose only the aggregate score.
+One private vote per user and target. Database triggers maintain the public
+aggregate score, and the runtime role cannot update scores directly.
 
 ### content_reports
 

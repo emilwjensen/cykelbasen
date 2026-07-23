@@ -67,6 +67,9 @@ godkendt udviklings-dokumentpost.
 - Profil samt sælgerdashboard
 - Opret og redigér annoncekladder med server-side Zod-validering
 - Begrænset `cykelbasen_app`-rolle uden `BYPASSRLS`
+- Forumkategorier samt sortering efter nyeste og score
+- Opret og redigér forumindlæg
+- Kommentarer, ét niveau af svar og private bruger-stemmer
 
-Billedupload, ejerskabsflow, moderation-UI og forum følger som separate
+Billedupload, ejerskabsflow, rapportering og moderation-UI følger som separate
 vertikale slices.

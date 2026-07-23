@@ -17,7 +17,7 @@ export function SiteFooter() {
         <div>
           <p className="site-footer__heading">Markedsplads</p>
           <Link href="/cykler">Se alle cykler</Link>
-          <span>Sælg din cykel — snart</span>
+          <span>Sælg din cykel - snart</span>
         </div>
         <div>
           <p className="site-footer__heading">Tryghed</p>
@@ -32,4 +32,3 @@ export function SiteFooter() {
     </footer>
   );
 }
-
