@@ -1,7 +1,8 @@
 # Data model
 
 The marketplace foundation starts in `db/migrations/001_initial_marketplace.sql`.
-Forum tables and least-privilege grants are added by migrations `004` and `005`.
+Forum tables, least-privilege grants and reports are added by migrations `004`
+through `006`.
 
 ## Public data
 
@@ -46,7 +47,9 @@ aggregate score, and the runtime role cannot update scores directly.
 
 ### content_reports
 
-Reports created by authenticated users. Visible to the reporter and moderators.
+Forum post and comment reports created by authenticated users. Reports are
+visible only to their reporter and moderators. A moderator decision stores the
+moderator, note and timestamp atomically with an optional content hide.
 
 ## Listing state
 

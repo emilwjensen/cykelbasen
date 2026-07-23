@@ -41,7 +41,8 @@ export async function moderateForumReportAction(formData: FormData) {
     `,
   ]);
 
-  if (!results[1][0]?.handled) {
+  const rows = results[1] as unknown as Array<{ handled: boolean }>;
+  if (!rows[0]?.handled) {
     redirect("/admin/rapporter?fejl=behandlet");
   }
 

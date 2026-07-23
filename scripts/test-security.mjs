@@ -133,6 +133,107 @@ assert(
   "Forumscore fulgte ikke ændringen af en stemme.",
 );
 
+const reporterResults = await applicationDatabase.transaction((transaction) => [
+  transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+  transaction`select count(*)::int as count from public.content_reports`,
+]);
+
+const reportOtherResults = await applicationDatabase.transaction((transaction) => [
+  transaction`select set_config('app.user_id', ${"seed-seller-mikkel"}, true)`,
+  transaction`select count(*)::int as count from public.content_reports`,
+]);
+
+const moderatorReportResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-moderator"}, true)`,
+    transaction`select count(*)::int as count from public.content_reports`,
+  ],
+);
+
+assert(
+  reporterResults[1][0]?.count === 1,
+  "Rapportøren kunne ikke læse sin egen rapport.",
+);
+assert(
+  reportOtherResults[1][0]?.count === 0,
+  "En anden bruger kunne læse rapportørens private rapport.",
+);
+assert(
+  moderatorReportResults[1][0]?.count === 1,
+  "Moderatoren kunne ikke læse den åbne rapportkø.",
+);
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      insert into public.content_reports (
+        reporter_id,
+        post_id,
+        reason,
+        details
+      )
+      values (
+        ${"seed-seller-anna"},
+        ${"40000000-0000-4000-8000-000000000001"}::uuid,
+        'other',
+        'Forsøg på at rapportere eget indhold.'
+      )
+    `,
+  ]);
+  throw new Error("En forfatter kunne rapportere sit eget forumindhold.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("row-level security");
+  if (!expected) throw error;
+}
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      insert into public.content_reports (
+        reporter_id,
+        post_id,
+        reason,
+        details
+      )
+      values (
+        ${"seed-seller-anna"},
+        ${"40000000-0000-4000-8000-000000000002"}::uuid,
+        'other',
+        'Forsøg på at rapportere det samme indhold igen.'
+      )
+    `,
+  ]);
+  throw new Error("En bruger kunne rapportere det samme indhold to gange.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("duplicate key");
+  if (!expected) throw error;
+}
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      select public.moderate_forum_report(
+        ${"60000000-0000-4000-8000-000000000001"}::uuid,
+        'dismiss',
+        'Ikke en moderatorbeslutning'
+      )
+    `,
+  ]);
+  throw new Error("En almindelig bruger kunne behandle en forumrapport.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("Moderatoradgang");
+  if (!expected) throw error;
+}
+
 try {
   await applicationDatabase.transaction((transaction) => [
     transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
@@ -257,6 +358,73 @@ try {
   await forumOwnerClient.end();
 }
 
+const moderationClient = createDatabaseClient();
+
+try {
+  await moderationClient.connect();
+  await moderationClient.query("begin");
+  await moderationClient.query(
+    `
+      insert into public.content_reports (
+        id,
+        reporter_id,
+        post_id,
+        reason,
+        details
+      )
+      values ($1::uuid, $2, $3::uuid, 'other', $4)
+    `,
+    [
+      "f0000000-0000-4000-8000-000000000006",
+      "seed-seller-mikkel",
+      "40000000-0000-4000-8000-000000000003",
+      "Midlertidig rapport til atomisk moderationstest.",
+    ],
+  );
+  await moderationClient.query("set local role cykelbasen_app");
+  await moderationClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-moderator"],
+  );
+  const handled = await moderationClient.query(
+    "select public.moderate_forum_report($1::uuid, 'hide', $2) as handled",
+    [
+      "f0000000-0000-4000-8000-000000000006",
+      "Skjult som del af sikkerhedstesten.",
+    ],
+  );
+  const audit = await moderationClient.query(
+    `
+      select
+        report.status,
+        report.moderated_by,
+        report.moderated_at is not null as has_timestamp,
+        post.hidden_by,
+        post.hidden_at is not null as is_hidden
+      from public.content_reports report
+      join public.forum_posts post on post.id = report.post_id
+      where report.id = $1::uuid
+    `,
+    ["f0000000-0000-4000-8000-000000000006"],
+  );
+
+  assert(handled.rows[0]?.handled === true, "Moderatorfunktionen behandlede ikke rapporten.");
+  assert(audit.rows[0]?.status === "resolved", "Rapporten blev ikke afsluttet.");
+  assert(
+    audit.rows[0]?.moderated_by === "seed-moderator" &&
+      audit.rows[0]?.hidden_by === "seed-moderator" &&
+      audit.rows[0]?.has_timestamp === true &&
+      audit.rows[0]?.is_hidden === true,
+    "Moderatorens hide og auditfelter blev ikke gemt atomisk.",
+  );
+  await moderationClient.query("rollback");
+} catch (error) {
+  await moderationClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await moderationClient.end();
+}
+
 console.log(
-  "Security tests passed: marketplace and forum RLS, managed scores, publication and reply-depth invariants.",
+  "Security tests passed: marketplace, forum and report RLS, managed scores, moderation audit, publication and reply-depth invariants.",
 );

@@ -52,14 +52,14 @@ Exit criteria: the full trust flow works without the Neon console.
 - [x] Create and edit post.
 - [x] Comments and one-level replies.
 - [x] Voting.
-- Report flow.
+- [x] Report flow and moderator hide action.
 
 Current evidence: public forum routes render against Neon; authenticated writes
 use RLS, and security tests cover author isolation, private votes, score
-integrity and reply depth.
+integrity, reply depth, private reports and atomic moderation audit.
 
-Exit criteria: authenticated users create discussions and vote. Report flow is
-completed together with the moderation route.
+Exit criteria met: authenticated users create discussions, vote and report
+content; moderators process the queue without direct database access.
 
 ## Phase 5, marketplace polish
 
@@ -68,7 +68,7 @@ completed together with the moderation route.
 - Filter chips and clear-all action.
 - Preserve return URL and filters.
 - Basic SEO metadata.
-- Moderation reports.
+- Listing reports.
 
 ## Phase 6, guided quiz
 

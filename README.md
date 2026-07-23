@@ -70,6 +70,8 @@ godkendt udviklings-dokumentpost.
 - Forumkategorier samt sortering efter nyeste og score
 - Opret og redigér forumindlæg
 - Kommentarer, ét niveau af svar og private bruger-stemmer
+- Rapportér indlæg og kommentarer én gang per bruger
+- Moderator-kø med atomisk hide og auditspor
 
-Billedupload, ejerskabsflow, rapportering og moderation-UI følger som separate
-vertikale slices.
+Billedupload, ejerskabsflow og resterende marketplace-polish følger som
+separate vertikale slices.

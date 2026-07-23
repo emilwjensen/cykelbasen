@@ -10,7 +10,8 @@ export async function isModerator(userId: string) {
     transaction`select public.is_moderator() as allowed`,
   ]);
 
-  return Boolean(results[1][0]?.allowed);
+  const rows = results[1] as unknown as Array<{ allowed: boolean }>;
+  return Boolean(rows[0]?.allowed);
 }
 
 export async function getModerationReports(

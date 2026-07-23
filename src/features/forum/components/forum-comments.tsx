@@ -2,19 +2,21 @@ import Link from "next/link";
 import { createForumCommentAction } from "../actions";
 import { formatForumDate } from "../format";
 import type { ForumComment } from "../types";
+import { ReportForm } from "./report-form";
 import { VoteControls } from "./vote-controls";
 
 type ForumCommentsProps = {
-  authenticated: boolean;
+  currentUserId: string | null;
   comments: ForumComment[];
   postId: string;
 };
 
 export function ForumComments({
-  authenticated,
+  currentUserId,
   comments,
   postId,
 }: ForumCommentsProps) {
+  const authenticated = Boolean(currentUserId);
   const topLevel = comments.filter((comment) => !comment.parent_id);
   const replies = new Map<string, ForumComment[]>();
 
@@ -79,25 +81,34 @@ export function ForumComments({
                   <span>{formatForumDate(comment.created_at)}</span>
                 </p>
                 <p className="forum-comment__text">{comment.body}</p>
-                {authenticated && (
-                  <details className="reply-box">
-                    <summary>Svar</summary>
-                    <form action={createForumCommentAction.bind(null, postId)}>
-                      <input name="parentId" type="hidden" value={comment.id} />
-                      <textarea
-                        aria-label={`Svar ${comment.author_name}`}
-                        maxLength={5_000}
-                        minLength={2}
-                        name="body"
-                        required
-                        rows={3}
-                      />
-                      <button className="button button--quiet" type="submit">
-                        Send svar
-                      </button>
-                    </form>
-                  </details>
-                )}
+                <div className="forum-comment__tools">
+                  {authenticated && (
+                    <details className="reply-box">
+                      <summary>Svar</summary>
+                      <form action={createForumCommentAction.bind(null, postId)}>
+                        <input name="parentId" type="hidden" value={comment.id} />
+                        <textarea
+                          aria-label={`Svar ${comment.author_name}`}
+                          maxLength={5_000}
+                          minLength={2}
+                          name="body"
+                          required
+                          rows={3}
+                        />
+                        <button className="button button--quiet" type="submit">
+                          Send svar
+                        </button>
+                      </form>
+                    </details>
+                  )}
+                  {currentUserId && currentUserId !== comment.author_id && (
+                    <ReportForm
+                      postId={postId}
+                      targetId={comment.id}
+                      targetType="comment"
+                    />
+                  )}
+                </div>
 
                 {(replies.get(comment.id) ?? []).map((reply) => (
                   <article className="forum-comment forum-comment--reply" key={reply.id}>
@@ -114,6 +125,13 @@ export function ForumComments({
                         <span>{formatForumDate(reply.created_at)}</span>
                       </p>
                       <p className="forum-comment__text">{reply.body}</p>
+                      {currentUserId && currentUserId !== reply.author_id && (
+                        <ReportForm
+                          postId={postId}
+                          targetId={reply.id}
+                          targetType="comment"
+                        />
+                      )}
                     </div>
                   </article>
                 ))}

@@ -11,5 +11,6 @@ export const config = {
     "/profil/:path*",
     "/forum/nyt",
     "/forum/indlaeg/:path*/rediger",
+    "/admin/:path*",
   ],
 };

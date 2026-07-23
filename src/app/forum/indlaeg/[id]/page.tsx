@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { ForumComments } from "@/features/forum/components/forum-comments";
+import { ReportForm } from "@/features/forum/components/report-form";
 import { VoteControls } from "@/features/forum/components/vote-controls";
 import { formatForumDate } from "@/features/forum/format";
 import { getForumPost } from "@/features/forum/queries";
@@ -11,7 +12,11 @@ export const dynamic = "force-dynamic";
 
 type ForumPostPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ fejl?: string; kommenteret?: string }>;
+  searchParams: Promise<{
+    fejl?: string;
+    kommenteret?: string;
+    rapport?: string;
+  }>;
 };
 
 export default async function ForumPostPage({
@@ -58,6 +63,13 @@ export default async function ForumPostPage({
               Redigér indlæg <span aria-hidden="true">→</span>
             </Link>
           )}
+          {user && user.id !== post.author_id && (
+            <ReportForm
+              postId={post.id}
+              targetId={post.id}
+              targetType="post"
+            />
+          )}
         </div>
       </article>
 
@@ -69,10 +81,25 @@ export default async function ForumPostPage({
       {query.kommenteret && (
         <p className="form-message form-message--success">Dit svar er tilføjet.</p>
       )}
+      {query.rapport === "sendt" && (
+        <p className="form-message form-message--success">
+          Tak. Rapporten er sendt til moderatorerne.
+        </p>
+      )}
+      {query.rapport === "allerede" && (
+        <p className="form-message">
+          Du har allerede rapporteret dette indhold.
+        </p>
+      )}
+      {(query.rapport === "ugyldig" || query.rapport === "fejl") && (
+        <p className="form-message form-message--error">
+          Rapporten kunne ikke sendes. Kontrollér felterne og prøv igen.
+        </p>
+      )}
 
       <ForumComments
-        authenticated={Boolean(user)}
         comments={comments}
+        currentUserId={user?.id ?? null}
         postId={post.id}
       />
     </div>
