@@ -18,14 +18,13 @@ Source: <https://github.com/neondatabase/serverless>
 Used for server-only, parameterized SQL queries against Neon Postgres. Schema
 ownership stays in plain SQL migrations.
 
-## Candidate libraries
-
 ### Neon Auth
 
 Source: <https://neon.com/docs/auth/quick-start/nextjs>
 
-Intended for the seller slice after the Neon Auth endpoint and cookie secret are
-configured.
+Used for application sessions, account creation, login and logout.
+
+## Candidate libraries
 
 ### shadcn/ui
 
@@ -45,4 +44,3 @@ must not be copied as foundations. Before copying isolated code, record:
 - exact files or concepts reused
 
 Do not introduce GPL or AGPL code without a deliberate licensing decision.
-

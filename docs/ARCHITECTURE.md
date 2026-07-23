@@ -2,14 +2,16 @@
 
 ## Application shape
 
-Use one Next.js application and one Neon Postgres project.
+Use one Next.js App Router application written in TypeScript, styled with
+Tailwind CSS, and backed by one Neon project.
 
 ```text
 Browser
-  -> Next.js pages and server actions
-  -> Neon Auth (from the seller slice)
+  -> Next.js App Router pages and server actions
+  -> TypeScript and Tailwind CSS
+  -> Neon Auth
   -> Neon Postgres with RLS
-  -> external object storage (from the seller slice)
+  -> external object storage (when uploads are implemented)
 
 GitHub
   -> Vercel preview and production deployments

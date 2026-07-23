@@ -13,7 +13,8 @@ Read these files before changing product behavior:
 
 ## Stack rules
 
-- Use Next.js App Router and TypeScript.
+- Use Next.js App Router and TypeScript for the frontend.
+- Use Tailwind CSS for styling.
 - Use Neon Postgres and Row Level Security.
 - Use Neon Auth when authentication is introduced.
 - Use the Neon serverless driver and explicit typed SQL. Do not add an ORM.

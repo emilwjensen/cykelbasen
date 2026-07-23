@@ -5,9 +5,9 @@ Use this prompt for the next vertical slice:
 ```text
 Complete the image portion of Phase 2.
 
-Read AGENTS.md and all files in docs before changing code. Keep Next.js,
-TypeScript, Neon Postgres, SQL migrations, Neon Auth and pnpm. Do not add an
-ORM.
+Read AGENTS.md and all files in docs before changing code. Keep Next.js App
+Router, TypeScript, Tailwind CSS, Neon Postgres, SQL migrations, Neon Auth and
+pnpm. Do not add an ORM or another backend.
 
 Start by recording an ADR for the object-storage provider. Listing images must
 be public, while the later ownership-document namespace must remain private.
@@ -24,4 +24,3 @@ Do not build chat, payment, quiz, document review or forum yet.
 
 Before finishing, run lint, typecheck, build and security tests.
 ```
-
