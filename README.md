@@ -14,7 +14,7 @@ publicering.
 - Vercel og GitHub Actions
 - pnpm
 
-Neon Auth tilføjes i sælger-slicen. Listing-billeder og private
+Neon Auth, profiler og sælgerkladder er integreret. Listing-billeder og private
 ejerskabsdokumenter kræver en separat object-storage integration; udbyderen er
 ikke valgt endnu.
 
@@ -32,6 +32,7 @@ Tilføj den poolede Neon-forbindelse som `DATABASE_URL` i `.env`, og kør:
 
 ```bash
 pnpm db:migrate
+pnpm db:setup-app-role
 pnpm db:seed
 pnpm dev
 ```
@@ -45,7 +46,9 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm check
+pnpm test:security
 pnpm db:migrate
+pnpm db:setup-app-role
 pnpm db:seed
 ```
 
@@ -60,7 +63,10 @@ godkendt udviklings-dokumentpost.
 - Annoncekort og detaljeside
 - Loading-, empty-, not-found- og error-states
 - Neon-migration med RLS, filterindekser og publicerings-trigger
+- Neon Auth med oprettelse, login og logout
+- Profil samt sælgerdashboard
+- Opret og redigér annoncekladder med server-side Zod-validering
+- Begrænset `cykelbasen_app`-rolle uden `BYPASSRLS`
 
-Auth, sælgerflow, uploads, moderation-UI og forum følger som separate vertikale
-slices.
-
+Billedupload, ejerskabsflow, moderation-UI og forum følger som separate
+vertikale slices.

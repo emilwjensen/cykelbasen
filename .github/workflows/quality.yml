@@ -10,6 +10,9 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      NEON_AUTH_BASE_URL: https://auth-build-placeholder.invalid
+      NEON_AUTH_COOKIE_SECRET: build-only-cookie-secret-at-least-32-characters
 
     steps:
       - name: Checkout
@@ -35,4 +38,3 @@ jobs:
 
       - name: Build
         run: pnpm build
-

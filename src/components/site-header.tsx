@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeaderActions } from "@/features/auth/components/header-actions";
 
 export function SiteHeader() {
   return (
@@ -14,7 +15,7 @@ export function SiteHeader() {
             Forum <small>snart</small>
           </span>
         </nav>
-        <span className="header-status">Salg åbner snart</span>
+        <HeaderActions />
       </div>
     </header>
   );

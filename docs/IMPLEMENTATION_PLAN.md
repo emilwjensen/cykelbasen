@@ -23,11 +23,13 @@ Exit criteria: visitors filter and open listings.
 
 ## Phase 2, seller flow
 
-- Create listing form with simple specs.
-- Edit draft listing.
+- [x] Neon Auth, profile completion and seller dashboard.
+- [x] Create listing form with simple specs.
+- [x] Edit draft listing.
 - Direct image upload to the selected object-storage provider.
 - Image order and cover image.
-- Seller dashboard.
+
+Current evidence: authenticated user creates and edits a structured draft.
 
 Exit criteria: authenticated user creates a complete draft with images.
 

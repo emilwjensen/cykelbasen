@@ -50,8 +50,9 @@ Read these files before changing product behavior:
 - Treat RLS as the authorization layer. UI checks are not authorization.
 - Ownership documents use private object storage and signed URLs.
 - Listing images use a separate public object-storage namespace.
-- The Neon owner connection is for migrations and the current read-only slice only.
-- Before authenticated writes, add a restricted non-`BYPASSRLS` application role and set the authenticated user context per transaction.
+- Use `DATABASE_URL` only for migrations and administrative scripts.
+- Runtime queries use `DATABASE_APP_URL`, the restricted non-`BYPASSRLS` role.
+- Set the authenticated user context locally in every user-scoped transaction.
 - A seller cannot publish a listing without an approved ownership document.
 - Moderation actions require a moderator record in the database.
 - Rate-limit public write endpoints before launch.

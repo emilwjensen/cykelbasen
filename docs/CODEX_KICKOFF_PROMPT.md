@@ -1,27 +1,27 @@
 # Codex kickoff prompt
 
-Phase 0 and Phase 1 are implemented. Use this prompt for the next slice:
+Use this prompt for the next vertical slice:
 
 ```text
-Build Phase 2, the authenticated seller draft flow.
+Complete the image portion of Phase 2.
 
 Read AGENTS.md and all files in docs before changing code. Keep Next.js,
-TypeScript, Neon Postgres, SQL migrations and pnpm. Do not add an ORM.
+TypeScript, Neon Postgres, SQL migrations, Neon Auth and pnpm. Do not add an
+ORM.
 
-Before implementation, configure Neon Auth and decide the object-storage
-provider in an ADR. Add a restricted, non-BYPASSRLS application database role
-and prove the app.user_id RLS bridge with integration tests.
+Start by recording an ADR for the object-storage provider. Listing images must
+be public, while the later ownership-document namespace must remain private.
 
 Implement:
-1. Sign up, sign in and profile completion.
-2. Create and edit a draft listing with server-side Zod validation.
-3. Seller dashboard for own drafts.
-4. Listing-image upload to the selected public storage namespace.
-5. Reorder and delete images.
-6. Empty, loading and error states in Danish.
+1. Direct, scoped image upload for an authenticated listing owner.
+2. Server-side MIME type, file size and ownership validation.
+3. Store image metadata in listing_images.
+4. Reorder and delete images.
+5. Cover-image preview in mine annoncer and the public listing card.
+6. Loading, empty and error states in Danish.
 
 Do not build chat, payment, quiz, document review or forum yet.
 
-Before finishing, run lint, typecheck, build and the new RLS tests.
+Before finishing, run lint, typecheck, build and security tests.
 ```
 

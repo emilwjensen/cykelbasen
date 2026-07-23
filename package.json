@@ -8,11 +8,14 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test:security": "node --env-file=.env scripts/test-security.mjs",
     "check": "pnpm lint && pnpm typecheck && pnpm build",
     "db:migrate": "node --env-file=.env scripts/db-migrate.mjs",
+    "db:setup-app-role": "node --env-file=.env scripts/setup-app-role.mjs",
     "db:seed": "node --env-file=.env scripts/run-sql.mjs db/seed.sql"
   },
   "dependencies": {
+    "@neondatabase/auth": "0.4.2-beta",
     "@neondatabase/serverless": "^1.0.2",
     "next": "16.2.11",
     "react": "19.2.4",
