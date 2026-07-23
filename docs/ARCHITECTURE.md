@@ -83,6 +83,11 @@ new `garage_bikes` row connected to the same identity. Ownership periods are
 shared as a privacy-safe timeline. Logs and notes remain attached to the
 original owner's row and are never copied.
 
+`bike_maintenance_reminders` belongs to one private registration period.
+Deadlines may use a date, an odometer target or both. Completing a reminder
+through the database function creates the corresponding maintenance log and
+links it back atomically. Reminders do not transfer to the next owner.
+
 ## Data access
 
 - Server components run read queries.
@@ -109,9 +114,10 @@ number of matches.
 
 Comparison is intentionally account-free. A small client-side selection holds
 at most three public listing IDs and titles in `localStorage`. The comparison
-route validates UUIDs, reloads all data from Neon and filters on
-`status = 'published'`; browser data is never trusted as listing data. The URL
-therefore remains shareable without introducing another private data table.
+route validates UUIDs, reloads all data from Neon and filters on public
+marketplace states (`published` or `reserved`); browser data is never trusted
+as listing data. The URL therefore remains shareable without introducing
+another private data table.
 
 ## Images
 
@@ -143,8 +149,8 @@ contains the file bytes.
 
 ## Neon authorization bridge
 
-The initial public marketplace uses server-only reads and always filters on
-`status = 'published'`. RLS is enabled in the initial migration.
+The public marketplace uses server-only reads and always filters on
+`status in ('published', 'reserved')`. RLS is enabled in the initial migration.
 
 Authenticated writes now use:
 

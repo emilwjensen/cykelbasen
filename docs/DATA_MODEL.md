@@ -13,7 +13,8 @@ migration `016`. Atomic ownership submission, review and publication are added
 by migration `017`. Private buyer-linked reservations and stricter audited
 listing transitions are added by migration `018`; migration `019` synchronizes
 reservations with registered-bike transfers and adds marketplace indexes that
-cover both published and reserved listings.
+cover both published and reserved listings. Private date- and odometer-based
+maintenance reminders with atomic log completion are added by migration `020`.
 
 ## Public data
 
@@ -105,6 +106,13 @@ shared history of the physical bike.
 
 Private ride, service, inspection, note and component-change history belonging
 to a garage bike.
+
+### bike_maintenance_reminders
+
+Private maintenance plan for one owner's bike registration. A reminder requires
+a due date, an odometer target or both. Owners can insert reminders through
+RLS, but completion fields are writable only by a security-definer function
+that creates and links a maintenance log in the same transaction.
 
 ### listing_status_events
 

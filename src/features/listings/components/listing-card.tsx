@@ -55,10 +55,20 @@ export function ListingCard({ listing, returnUrl = "/cykler" }: ListingCardProps
         <Link className="listing-card__title" href={href}>
           {listing.title}
         </Link>
-        <p className="listing-card__specs">
-          {listing.model_year ?? "År ikke angivet"} · Str.{" "}
-          {listing.frame_size_label} · {conditionLabel(listing.condition)}
-        </p>
+        <dl className="listing-card__spec-list">
+          <div>
+            <dt>Modelår</dt>
+            <dd>{listing.model_year ?? "Ikke angivet"}</dd>
+          </div>
+          <div>
+            <dt>Størrelse</dt>
+            <dd>{listing.frame_size_label}</dd>
+          </div>
+          <div>
+            <dt>Stand</dt>
+            <dd>{conditionLabel(listing.condition)}</dd>
+          </div>
+        </dl>
         <div className="listing-card__footer">
           <p className="listing-card__price">{formatPrice(listing.price_dkk)}</p>
           <span aria-hidden="true">↗</span>

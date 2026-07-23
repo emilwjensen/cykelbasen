@@ -231,24 +231,118 @@ const garageOwnerResults = await applicationDatabase.transaction((transaction) =
   transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
   transaction`select count(*)::int as count from public.garage_bikes`,
   transaction`select count(*)::int as count from public.bike_log_entries`,
+  transaction`select count(*)::int as count from public.bike_maintenance_reminders`,
 ]);
 
 const garageOtherResults = await applicationDatabase.transaction((transaction) => [
   transaction`select set_config('app.user_id', ${"seed-seller-mikkel"}, true)`,
   transaction`select count(*)::int as count from public.garage_bikes`,
   transaction`select count(*)::int as count from public.bike_log_entries`,
+  transaction`select count(*)::int as count from public.bike_maintenance_reminders`,
 ]);
 
 assert(
   garageOwnerResults[1][0]?.count === 1 &&
-    garageOwnerResults[2][0]?.count === 2,
-  "Ejeren kunne ikke læse sin private garage og cykellog.",
+    garageOwnerResults[2][0]?.count === 2 &&
+    garageOwnerResults[3][0]?.count === 2,
+  "Ejeren kunne ikke læse sin private garage, cykellog og vedligeholdelsesplan.",
 );
 assert(
   garageOtherResults[1][0]?.count === 0 &&
-    garageOtherResults[2][0]?.count === 0,
-  "En anden bruger kunne læse private garage- eller logdata.",
+    garageOtherResults[2][0]?.count === 0 &&
+    garageOtherResults[3][0]?.count === 0,
+  "En anden bruger kunne læse private garage-, log- eller vedligeholdelsesdata.",
 );
+
+const unauthorizedMaintenanceResults = await applicationDatabase.transaction(
+  (transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-mikkel"}, true)`,
+    transaction`
+      select public.complete_bike_maintenance_reminder(
+        ${"e0000000-0000-4000-8000-000000000020"}::uuid
+      ) as log_id
+    `,
+  ],
+);
+
+assert(
+  unauthorizedMaintenanceResults[1][0]?.log_id === null,
+  "En anden bruger kunne udføre ejerens vedligeholdelsesplan.",
+);
+
+try {
+  await applicationDatabase.transaction((transaction) => [
+    transaction`select set_config('app.user_id', ${"seed-seller-anna"}, true)`,
+    transaction`
+      update public.bike_maintenance_reminders
+      set completed_at = now()
+      where id = ${"e0000000-0000-4000-8000-000000000020"}::uuid
+    `,
+  ]);
+  throw new Error("Ejeren kunne ændre vedligeholdelsens completion-felter direkte.");
+} catch (error) {
+  const expected =
+    error instanceof Error &&
+    error.message.includes("permission denied");
+  if (!expected) throw error;
+}
+
+const maintenanceClient = createDatabaseClient();
+
+try {
+  await maintenanceClient.connect();
+  await maintenanceClient.query("begin");
+  await maintenanceClient.query("set local role cykelbasen_app");
+  await maintenanceClient.query(
+    "select set_config('app.user_id', $1, true)",
+    ["seed-seller-anna"],
+  );
+  const completedMaintenance = await maintenanceClient.query(
+    `
+      select public.complete_bike_maintenance_reminder(
+        $1::uuid
+      ) as log_id
+    `,
+    ["e0000000-0000-4000-8000-000000000020"],
+  );
+  const maintenanceLogId = completedMaintenance.rows[0]?.log_id;
+  const maintenanceAudit = await maintenanceClient.query(
+    `
+      select
+        reminder.completed_at is not null as is_completed,
+        reminder.completed_log_id,
+        log.log_type,
+        log.title,
+        log.occurred_on = current_date as occurred_today,
+        log.odometer_km,
+        log.component_category
+      from public.bike_maintenance_reminders reminder
+      join public.bike_log_entries log
+        on log.id = reminder.completed_log_id
+      where reminder.id = $1::uuid
+    `,
+    ["e0000000-0000-4000-8000-000000000020"],
+  );
+
+  assert(
+    maintenanceLogId &&
+      maintenanceAudit.rows[0]?.is_completed === true &&
+      maintenanceAudit.rows[0]?.completed_log_id === maintenanceLogId &&
+      maintenanceAudit.rows[0]?.log_type === "maintenance" &&
+      maintenanceAudit.rows[0]?.title === "Udført: Kontrollér kædeslid" &&
+      maintenanceAudit.rows[0]?.occurred_today === true &&
+      maintenanceAudit.rows[0]?.odometer_km === 6840 &&
+      maintenanceAudit.rows[0]?.component_category === "chain",
+    "Afsluttet vedligeholdelse oprettede ikke den korrekte log atomisk.",
+  );
+
+  await maintenanceClient.query("rollback");
+} catch (error) {
+  await maintenanceClient.query("rollback").catch(() => {});
+  throw error;
+} finally {
+  await maintenanceClient.end();
+}
 
 const favoriteOwnerResults = await applicationDatabase.transaction(
   (transaction) => [
@@ -1478,5 +1572,5 @@ try {
 }
 
 console.log(
-  "Security tests passed: listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
+  "Security tests passed: bike maintenance planning, listing reservations, ownership review/publication, contact privacy/status, database rate limits, marketplace reports/moderation, ownership transfer/privacy, favorites, forum RLS and audit invariants.",
 );

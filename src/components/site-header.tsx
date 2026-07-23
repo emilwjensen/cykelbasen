@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { HeaderActions } from "@/features/auth/components/header-actions";
+import { SiteNavigation } from "@/components/site-navigation";
 
 export function SiteHeader() {
   return (
@@ -15,11 +16,7 @@ export function SiteHeader() {
           </span>
           <span>Cykelbasen</span>
         </Link>
-        <nav aria-label="Primær navigation" className="site-nav">
-          <Link href="/cykler">Find cykel</Link>
-          <Link href="/annoncer/ny">Sælg cykel</Link>
-          <Link href="/forum">Forum</Link>
-        </nav>
+        <SiteNavigation />
         <HeaderActions />
       </div>
     </header>

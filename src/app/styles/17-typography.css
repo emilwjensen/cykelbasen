@@ -1,0 +1,32 @@
+:root {
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-micro: 0.75rem;
+  --font-caption: 0.8125rem;
+  --font-small: 0.875rem;
+  --font-body: 1rem;
+  --line-compact: 1.35;
+  --line-body: 1.65;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-body);
+}
+
+small {
+  font-size: var(--font-caption);
+  line-height: var(--line-compact);
+}
+
+.eyebrow,
+.site-footer__heading,
+.seller-card__label,
+.status,
+.form-field,
+.stacked-form label,
+.filters label {
+  line-height: var(--line-compact);
+}

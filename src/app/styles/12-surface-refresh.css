@@ -1,0 +1,180 @@
+.browse {
+  padding-block: 72px 120px;
+}
+
+.filters {
+  padding: 28px;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(13, 45, 36, 0.04);
+}
+
+.filters__heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+  margin-bottom: 22px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.filters__heading > div > span {
+  font-family: Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.filters__heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.filters__verified-note {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  color: var(--forest);
+  font-size: var(--font-caption);
+  font-weight: 750;
+}
+
+.filters__verified-note > span {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: var(--mint);
+  border-radius: 50%;
+}
+
+.filters__toggle {
+  display: none;
+}
+
+.filters__content {
+  display: block;
+}
+
+.filters input,
+.filters select,
+.stacked-form input,
+.form-field input,
+.form-field select,
+.form-field textarea,
+.forum-editor input,
+.forum-editor select,
+.forum-editor textarea,
+.comment-form textarea,
+.reply-box textarea {
+  border-color: var(--line);
+  border-radius: 8px;
+}
+
+.filters input:focus,
+.filters select:focus,
+.stacked-form input:focus,
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  background: var(--white);
+  border-color: var(--forest);
+  outline: 3px solid color-mix(in srgb, var(--mint) 65%, transparent);
+  outline-offset: 1px;
+}
+
+.price-range-filter {
+  border-radius: 8px;
+}
+
+.active-filters a,
+.status,
+.detail__quick-specs span {
+  border-radius: 999px;
+}
+
+.empty-state,
+.error-state {
+  border: 1px dashed color-mix(in srgb, var(--forest) 24%, var(--line));
+  border-radius: 16px;
+}
+
+.auth-shell {
+  min-height: calc(100vh - 76px);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(205, 229, 213, 0.5), transparent 25%),
+    var(--paper);
+}
+
+.auth-card,
+.account-card,
+.listing-form fieldset,
+.garage-card,
+.forum-editor,
+.forum-post-detail,
+.comment-form,
+.moderation-card,
+.ownership-chain,
+.garage-log-panel,
+.component-history__list article,
+.component-editor-list article {
+  border-radius: 14px;
+  box-shadow: 0 6px 30px rgba(13, 45, 36, 0.04);
+}
+
+.account-aside,
+.forum-hero,
+.forum-category-hero,
+.garage-detail__hero,
+.profile-warning,
+.bike-transfer-panel {
+  border-radius: 16px;
+}
+
+.detail__image {
+  border-radius: 16px 16px 0 0;
+}
+
+.detail__verified {
+  border-radius: 0 0 16px 16px;
+}
+
+.seller-card,
+.favorite-button,
+.trust-facts {
+  border-radius: 10px;
+}
+
+.forum-category-grid {
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.forum-post-row {
+  transition:
+    background 160ms ease,
+    padding 160ms ease;
+}
+
+.forum-post-row:hover {
+  padding-inline: 26px;
+}
+
+.site-footer {
+  padding-top: 78px;
+  background:
+    radial-gradient(circle at 8% 100%, rgba(205, 229, 213, 0.08), transparent 24%),
+    #071f18;
+}
+
+.wordmark--footer .wordmark__mark {
+  color: var(--forest-deep);
+}
+
+.site-footer__grid a {
+  transition: color 150ms ease;
+}
+
+.site-footer__grid a:hover {
+  color: var(--mint);
+}
+

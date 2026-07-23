@@ -93,6 +93,7 @@ is private and supports:
 - acquisition and known owner history
 - current odometer
 - ride, service, inspection and component-change logs
+- date- and odometer-based maintenance reminders
 - documentation-presence markers without exposing files
 - connected ownership periods when a seller hands the registration to a buyer
 

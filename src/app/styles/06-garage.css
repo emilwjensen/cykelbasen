@@ -1,0 +1,643 @@
+.garage-page,
+.garage-detail {
+  padding-block: 76px 120px;
+}
+
+.garage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.garage-card {
+  padding: 30px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.garage-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 18px 45px rgba(20, 35, 29, 0.09);
+}
+
+.garage-card__top,
+.garage-card footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.garage-card__top strong {
+  color: var(--forest);
+}
+
+.garage-card h2 {
+  margin: 35px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.garage-card > p {
+  margin: 0 0 35px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.garage-card__maintenance {
+  margin: -18px 0 28px;
+  padding: 9px 11px;
+  background: var(--mint);
+  border-radius: 7px;
+  color: var(--forest);
+  font-size: var(--font-caption);
+  font-weight: 800;
+}
+
+.garage-card__maintenance.is-due {
+  background: #f6ded5;
+  color: #7d2e17;
+}
+
+.garage-card footer {
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.garage-detail__hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 45px;
+  margin: 28px 0 30px;
+  padding: 45px;
+  background: var(--forest);
+  color: var(--white);
+}
+
+.garage-detail__hero h1 {
+  margin: 10px 0 12px;
+  font-family: Georgia, serif;
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+}
+
+.garage-detail__hero > div > p:last-child {
+  margin: 0;
+  color: rgba(255, 254, 249, 0.65);
+}
+
+.garage-odometer {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+}
+
+.garage-odometer strong {
+  font-family: Georgia, serif;
+  font-size: 3rem;
+  font-weight: 400;
+}
+
+.garage-odometer span {
+  color: var(--mint);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.garage-sell-link {
+  margin-top: 18px;
+  color: var(--forest-deep);
+}
+
+.garage-facts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin-bottom: 65px;
+  border: 1px solid var(--line);
+}
+
+.garage-facts > div {
+  display: grid;
+  gap: 7px;
+  padding: 20px;
+}
+
+.garage-facts > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.garage-facts span {
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.garage-facts strong {
+  font-size: 0.82rem;
+}
+
+.maintenance-planner {
+  margin: 0 0 70px;
+  padding: 38px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.maintenance-planner .section-heading > p {
+  max-width: 430px;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--font-small);
+  line-height: 1.65;
+}
+
+.maintenance-planner__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(310px, 0.7fr);
+  gap: 30px;
+  align-items: start;
+}
+
+.maintenance-reminder-list {
+  display: grid;
+  gap: 10px;
+}
+
+.maintenance-reminder {
+  padding: 20px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--line);
+  border-radius: 9px;
+}
+
+.maintenance-reminder--due {
+  border-left-color: #b44725;
+}
+
+.maintenance-reminder--soon {
+  border-left-color: #c58522;
+}
+
+.maintenance-reminder--planned {
+  border-left-color: var(--forest);
+}
+
+.maintenance-reminder--completed {
+  opacity: 0.68;
+}
+
+.maintenance-reminder > header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.status--maintenance-due {
+  background: #f6ded5;
+  color: #7d2e17;
+}
+
+.status--maintenance-soon {
+  background: #f4dfb8;
+  color: #694411;
+}
+
+.status--maintenance-planned {
+  background: var(--mint);
+}
+
+.status--maintenance-completed {
+  background: var(--paper-deep);
+  color: var(--muted);
+}
+
+.maintenance-reminder h3 {
+  margin: 13px 0 8px;
+  font-family: Georgia, serif;
+  font-size: 1.38rem;
+  font-weight: 400;
+}
+
+.maintenance-reminder > p {
+  margin: 12px 0;
+  color: var(--muted);
+  font-size: var(--font-small);
+  line-height: 1.6;
+}
+
+.maintenance-reminder__targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.maintenance-reminder__targets span {
+  padding: 5px 8px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--forest);
+  font-size: var(--font-caption);
+  font-weight: 750;
+}
+
+.maintenance-reminder form {
+  margin-top: 16px;
+}
+
+.maintenance-reminder small {
+  display: block;
+  margin-top: 13px;
+  color: var(--muted);
+}
+
+.maintenance-reminder-empty {
+  padding: 35px;
+  background: var(--paper-deep);
+  color: var(--muted);
+  text-align: center;
+}
+
+.maintenance-reminder-empty p {
+  max-width: 360px;
+  margin: 7px auto 0;
+  font-size: var(--font-small);
+  line-height: 1.6;
+}
+
+.maintenance-reminder-form {
+  padding: 24px;
+  background: var(--forest-deep);
+  border-radius: 10px;
+  color: var(--white);
+}
+
+.maintenance-reminder-form h3 {
+  margin: 8px 0 20px;
+  font-family: Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+}
+
+.maintenance-reminder-form form {
+  display: grid;
+  gap: 13px;
+}
+
+.maintenance-reminder-form label {
+  display: grid;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.maintenance-reminder-form input,
+.maintenance-reminder-form select,
+.maintenance-reminder-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 11px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  color: var(--white);
+  color-scheme: dark;
+  font: inherit;
+  font-size: var(--font-small);
+  text-transform: none;
+}
+
+.maintenance-reminder-form select option {
+  color: var(--ink);
+}
+
+.maintenance-reminder-form__targets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.maintenance-reminder-form .form-help {
+  margin: -4px 0 2px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: var(--font-caption);
+}
+
+.garage-detail__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.7fr);
+  gap: 55px;
+  align-items: start;
+}
+
+.dashboard-heading__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.garage-side-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.garage-side-stack .garage-log-panel {
+  position: static;
+}
+
+.bike-transfer-panel {
+  padding: 28px;
+  background: var(--mint);
+  border: 1px solid #b8ddca;
+}
+
+.bike-transfer-panel h2 {
+  margin: 8px 0 14px;
+  font-family: Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 400;
+}
+
+.bike-transfer-panel > p:not(.eyebrow, .form-message) {
+  color: rgba(13, 44, 34, 0.72);
+  font-size: var(--font-small);
+  line-height: 1.65;
+}
+
+.bike-transfer-code {
+  display: grid;
+  gap: 9px;
+  margin-top: 18px;
+}
+
+.bike-transfer-code label {
+  display: grid;
+  gap: 7px;
+  color: var(--forest);
+  font-size: var(--font-caption);
+  font-weight: 750;
+}
+
+.bike-transfer-code input {
+  width: 100%;
+  padding: 12px;
+  background: var(--white);
+  border: 1px solid #9ccbb5;
+  color: var(--forest-deep);
+  font: inherit;
+  font-size: var(--font-caption);
+}
+
+.bike-transfer-code small {
+  color: rgba(13, 44, 34, 0.66);
+  font-size: var(--font-caption);
+  line-height: 1.5;
+}
+
+.transfer-accept-form {
+  max-width: 850px;
+}
+
+.bike-log-list {
+  position: relative;
+}
+
+.bike-log-list::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 5px;
+  width: 1px;
+  background: var(--line);
+}
+
+.bike-log-list > article {
+  position: relative;
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 20px;
+  padding-bottom: 34px;
+}
+
+.bike-log-list__marker {
+  position: relative;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  margin-top: 6px;
+  background: var(--accent);
+  border: 3px solid var(--paper);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.bike-log-list header,
+.bike-log-list__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 15px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+}
+
+.bike-log-list header span {
+  color: var(--accent-dark);
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.bike-log-list h3 {
+  margin: 8px 0;
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+.bike-log-list article p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: var(--font-small);
+  line-height: 1.65;
+}
+
+.bike-log-list__facts strong {
+  color: var(--forest);
+}
+
+.garage-log-panel {
+  position: sticky;
+  top: 24px;
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.garage-log-panel h2,
+.component-change-form h2,
+.component-editor-grid > section > h2 {
+  margin: 8px 0 22px;
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.garage-log-panel form,
+.component-change-form {
+  display: grid;
+  gap: 14px;
+}
+
+.garage-log-panel label,
+.component-change-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.garage-log-panel input,
+.garage-log-panel select,
+.garage-log-panel textarea,
+.component-change-form input,
+.component-change-form select,
+.component-change-form textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 11px;
+  background: var(--paper);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  text-transform: none;
+}
+
+.garage-log-panel__row,
+.component-change-form > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+}
+
+.garage-log-panel__row--two,
+.component-change-form > div {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.garage-log-check {
+  display: flex !important;
+  align-items: center;
+  grid-template-columns: auto 1fr;
+  flex-direction: row;
+  gap: 9px !important;
+  text-transform: none !important;
+}
+
+.garage-log-check input {
+  width: auto;
+  min-height: auto;
+}
+
+.component-editor-heading {
+  margin-top: 38px;
+}
+
+.component-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.7fr) minmax(0, 1fr);
+  gap: 45px;
+  align-items: start;
+}
+
+.component-change-form {
+  position: sticky;
+  top: 24px;
+}
+
+.component-editor-list {
+  display: grid;
+  gap: 12px;
+}
+
+.component-editor-list article {
+  padding: 22px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.text-button {
+  margin-top: 15px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: #9b351e;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-caption);
+  font-weight: 750;
+}
+
+.skeleton {
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, var(--paper-deep), #f8f6f0, var(--paper-deep));
+  background-size: 200% 100%;
+  animation: pulse 1.4s infinite linear;
+}
+
+.skeleton--heading {
+  width: 65%;
+  height: 150px;
+  margin-bottom: 40px;
+}
+
+.skeleton--filters {
+  height: 260px;
+  margin-bottom: 68px;
+}
+
+.skeleton--card {
+  aspect-ratio: 0.82;
+}
+
+@keyframes pulse {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+

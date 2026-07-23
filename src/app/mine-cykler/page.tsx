@@ -52,6 +52,22 @@ export default async function MyBikesPage() {
                 {bike.model_year ? ` · ${bike.model_year}` : ""}
                 {bike.frame_size_label ? ` · str. ${bike.frame_size_label}` : ""}
               </p>
+              {!bike.ownership_ended_on && bike.due_reminder_count > 0 && (
+                <div className="garage-card__maintenance is-due">
+                  {bike.due_reminder_count}{" "}
+                  {bike.due_reminder_count === 1
+                    ? "opgave er forfalden"
+                    : "opgaver er forfaldne"}
+                </div>
+              )}
+              {!bike.ownership_ended_on &&
+                bike.due_reminder_count === 0 &&
+                bike.open_reminder_count > 0 && (
+                  <div className="garage-card__maintenance">
+                    {bike.open_reminder_count} planlagte{" "}
+                    {bike.open_reminder_count === 1 ? "opgave" : "opgaver"}
+                  </div>
+                )}
               <footer>
                 <span>{bike.log_count} logposter</span>
                 <span>

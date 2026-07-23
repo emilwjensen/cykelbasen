@@ -81,6 +81,7 @@ content; moderators process the queue without direct database access.
 - [x] Purchase date, owner count and documentation indicators.
 - [x] Structured listing component history.
 - [x] Private “Mine cykler” area and bike logs.
+- [x] Date- and odometer-based maintenance planning with atomic log completion.
 - [x] Prefill a listing from a registered bike.
 - [x] Seller sold/archive actions with lifecycle audit.
 - [x] Privacy-safe ownership chain and seller-to-buyer registration transfer.

@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { createBikeLogAction } from "@/features/garage/actions";
+import {
+  completeBikeMaintenanceReminderAction,
+  createBikeLogAction,
+  createBikeMaintenanceReminderAction,
+} from "@/features/garage/actions";
 import { BikeTransferForm } from "@/features/garage/components/bike-transfer-form";
 import { getGarageBike } from "@/features/garage/queries";
 import { bikeLogTypes } from "@/features/garage/types";
+import type { BikeMaintenanceReminder } from "@/features/garage/types";
 import {
   categoryLabel,
   formatDate,
@@ -22,12 +27,40 @@ const componentLabels = Object.fromEntries(
   componentCategories.map((type) => [type.value, type.label]),
 );
 
+function reminderState(
+  reminder: BikeMaintenanceReminder,
+  currentOdometer: number,
+) {
+  if (reminder.completed_at) {
+    return { key: "completed", label: "Udført" } as const;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const soon = new Date();
+  soon.setDate(soon.getDate() + 30);
+  const soonDate = soon.toISOString().slice(0, 10);
+  const due =
+    (reminder.due_on !== null && reminder.due_on <= today) ||
+    (reminder.due_odometer_km !== null &&
+      reminder.due_odometer_km <= currentOdometer);
+  if (due) return { key: "due", label: "Forfalden" } as const;
+
+  const dueSoon =
+    (reminder.due_on !== null && reminder.due_on <= soonDate) ||
+    (reminder.due_odometer_km !== null &&
+      reminder.due_odometer_km <= currentOdometer + 500);
+  if (dueSoon) return { key: "soon", label: "Snart" } as const;
+
+  return { key: "planned", label: "Planlagt" } as const;
+}
+
 type MyBikePageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{
     oprettet?: string;
     logget?: string;
     overtaget?: string;
+    paamindelse?: string;
     fejl?: string;
   }>;
 };
@@ -78,10 +111,17 @@ export default async function MyBikePage({
         </div>
       </header>
 
-      {(query.oprettet || query.logget || query.overtaget) && (
+      {(query.oprettet ||
+        query.logget ||
+        query.overtaget ||
+        query.paamindelse) && (
         <p className="form-message form-message--success">
           {query.overtaget
             ? "Cyklen er overtaget, og ejerhistorikken er forbundet."
+            : query.paamindelse === "oprettet"
+              ? "Vedligeholdelsen er planlagt."
+              : query.paamindelse === "udfoert"
+                ? "Opgaven er afsluttet og gemt i cykelloggen."
             : query.oprettet
               ? "Cyklen er registreret."
               : "Logposten er tilføjet."}
@@ -89,7 +129,9 @@ export default async function MyBikePage({
       )}
       {query.fejl && (
         <p className="form-message form-message--error">
-          Logposten kunne ikke gemmes. Kontrollér felterne.
+          {query.fejl === "paamindelse"
+            ? "Vedligeholdelsesplanen kunne ikke gemmes. Vælg en dato eller kilometerstand."
+            : "Logposten kunne ikke gemmes. Kontrollér felterne."}
         </p>
       )}
 
@@ -111,6 +153,157 @@ export default async function MyBikePage({
           <strong>{bike.log_count} logposter</strong>
         </div>
       </div>
+
+      <section className="maintenance-planner" id="vedligehold">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Næste handling</p>
+            <h2>Vedligeholdelsesplan</h2>
+          </div>
+          <p>
+            Planlæg efter dato, kilometerstand eller begge dele. Når en opgave
+            afsluttes, oprettes en vedligeholdelsespost automatisk i loggen.
+          </p>
+        </div>
+
+        <div className="maintenance-planner__grid">
+          <div className="maintenance-reminder-list">
+            {bike.reminders.length ? (
+              bike.reminders.map((reminder) => {
+                const state = reminderState(
+                  reminder,
+                  bike.current_odometer_km,
+                );
+                return (
+                  <article
+                    className={`maintenance-reminder maintenance-reminder--${state.key}`}
+                    key={reminder.id}
+                  >
+                    <header>
+                      <span
+                        className={`status status--maintenance-${state.key}`}
+                      >
+                        {state.label}
+                      </span>
+                      {reminder.component_category && (
+                        <span>
+                          {componentLabels[reminder.component_category]}
+                        </span>
+                      )}
+                    </header>
+                    <h3>{reminder.title}</h3>
+                    <div className="maintenance-reminder__targets">
+                      {reminder.due_on && (
+                        <span>Dato {formatDate(reminder.due_on)}</span>
+                      )}
+                      {reminder.due_odometer_km !== null && (
+                        <span>
+                          Ved{" "}
+                          {reminder.due_odometer_km.toLocaleString("da-DK")} km
+                        </span>
+                      )}
+                    </div>
+                    {reminder.notes && <p>{reminder.notes}</p>}
+                    {reminder.completed_at ? (
+                      <small>
+                        Afsluttet {formatDate(reminder.completed_at)}
+                      </small>
+                    ) : bike.ownership_ended_on ? null : (
+                      <form
+                        action={completeBikeMaintenanceReminderAction.bind(
+                          null,
+                          bike.id,
+                          reminder.id,
+                        )}
+                      >
+                        <button className="button button--quiet" type="submit">
+                          Markér udført og log
+                        </button>
+                      </form>
+                    )}
+                  </article>
+                );
+              })
+            ) : (
+              <div className="maintenance-reminder-empty">
+                <strong>Ingen planlagte opgaver</strong>
+                <p>
+                  Tilføj eksempelvis kædeskift, bremsekontrol eller et årligt
+                  service.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {!bike.ownership_ended_on && (
+            <aside className="maintenance-reminder-form">
+              <p className="eyebrow">Planlæg fremad</p>
+              <h3>Ny påmindelse</h3>
+              <form
+                action={createBikeMaintenanceReminderAction.bind(null, bike.id)}
+              >
+                <label>
+                  Opgave
+                  <input
+                    maxLength={120}
+                    minLength={3}
+                    name="title"
+                    placeholder="Fx skift kæde"
+                    required
+                  />
+                </label>
+                <label>
+                  Komponent
+                  <select name="componentCategory">
+                    <option value="">Hele cyklen</option>
+                    {componentCategories.map((component) => (
+                      <option key={component.value} value={component.value}>
+                        {component.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <div className="maintenance-reminder-form__targets">
+                  <label>
+                    Senest dato
+                    <input
+                      min={new Date().toISOString().slice(0, 10)}
+                      name="dueOn"
+                      type="date"
+                    />
+                  </label>
+                  <label>
+                    Ved kilometerstand
+                    <input
+                      min={bike.current_odometer_km}
+                      name="dueOdometerKm"
+                      placeholder={`${(
+                        bike.current_odometer_km + 500
+                      ).toLocaleString("da-DK")} km`}
+                      type="number"
+                    />
+                  </label>
+                </div>
+                <p className="form-help">
+                  Mindst én deadline skal udfyldes.
+                </p>
+                <label>
+                  Noter
+                  <textarea
+                    maxLength={2_000}
+                    name="notes"
+                    placeholder="Dele, kontrolpunkter eller anden kontekst."
+                    rows={4}
+                  />
+                </label>
+                <button className="button button--accent" type="submit">
+                  Planlæg vedligeholdelse
+                </button>
+              </form>
+            </aside>
+          )}
+        </div>
+      </section>
 
       <section className="ownership-chain">
         <div className="section-heading">

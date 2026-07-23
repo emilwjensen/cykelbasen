@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
 import { getFavoriteListings } from "@/features/favorites/queries";
 import { ListingCard } from "@/features/listings/components/listing-card";
 import { requireUser } from "@/lib/auth/server";
@@ -36,17 +37,21 @@ export default async function FavoritesPage() {
           ))}
         </div>
       ) : (
-        <div className="empty-state">
-          <p className="eyebrow">Ingen favoritter endnu</p>
-          <h2>Saml de cykler, du overvejer.</h2>
+        <EmptyState
+          action={
+            <Link className="button button--dark" href="/cykler">
+              Se cykler til salg
+            </Link>
+          }
+          eyebrow="Ingen favoritter endnu"
+          icon="♡"
+          title="Saml de cykler, du overvejer."
+        >
           <p>
             Åbn en annonce og vælg “Gem som favorit”. Så finder du den her,
             mens den stadig er til salg.
           </p>
-          <Link className="button button--dark" href="/cykler">
-            Se cykler til salg
-          </Link>
-        </div>
+        </EmptyState>
       )}
     </div>
   );

@@ -467,6 +467,47 @@ set
   details = excluded.details,
   odometer_km = excluded.odometer_km;
 
+insert into public.bike_maintenance_reminders (
+  id,
+  bike_id,
+  owner_id,
+  title,
+  component_category,
+  due_on,
+  due_odometer_km,
+  notes
+)
+values
+  (
+    'e0000000-0000-4000-8000-000000000020',
+    '70000000-0000-4000-8000-000000000001',
+    'seed-seller-anna',
+    'Kontrollér kædeslid',
+    'chain',
+    null,
+    6800,
+    'Mål kæden og skift den, hvis den er over slidgrænsen.'
+  ),
+  (
+    'e0000000-0000-4000-8000-000000000021',
+    '70000000-0000-4000-8000-000000000001',
+    'seed-seller-anna',
+    'Sensommerservice',
+    null,
+    '2026-08-15',
+    7500,
+    'Kontrollér bremser, gear og alle kritiske bolte.'
+  )
+on conflict (id) do update
+set
+  title = excluded.title,
+  component_category = excluded.component_category,
+  due_on = excluded.due_on,
+  due_odometer_km = excluded.due_odometer_km,
+  notes = excluded.notes,
+  completed_at = null,
+  completed_log_id = null;
+
 update public.listings
 set
   status = 'published',

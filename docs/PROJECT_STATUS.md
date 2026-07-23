@@ -66,6 +66,8 @@ that workflow.
 - Register a bike with an optional one-way hash of its frame number.
 - Acquisition history, owner count and odometer.
 - Ride, maintenance, inspection, note and component-change logs.
+- Date- and odometer-based maintenance plans with overdue and upcoming states.
+- Atomic completion of a maintenance task into the private bike log.
 - Documentation-presence markers without public document paths.
 - Prefill a listing draft from a registered bike.
 - Owner isolation through RLS.

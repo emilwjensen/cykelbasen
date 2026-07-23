@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
 import { z } from "zod";
 import {
   ComparisonSelectionSync,
@@ -259,16 +260,20 @@ export default async function ComparisonPage({
           </div>
         </div>
       ) : (
-        <div className="empty-state">
-          <p className="eyebrow">Ingen cykler valgt</p>
-          <h2>Find dine kandidater på markedet.</h2>
+        <EmptyState
+          action={
+            <Link className="button button--dark" href="/cykler">
+              Se alle cykler
+            </Link>
+          }
+          eyebrow="Ingen cykler valgt"
+          icon="⇄"
+          title="Find dine kandidater på markedet."
+        >
           <p>
             Dine valg gemmes kun i denne browser og kræver ikke en konto.
           </p>
-          <Link className="button button--dark" href="/cykler">
-            Se alle cykler
-          </Link>
-        </div>
+        </EmptyState>
       )}
     </div>
   );

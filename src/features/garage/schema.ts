@@ -24,6 +24,12 @@ const pastDate = z
   .date()
   .refine((value) => value <= new Date().toISOString().slice(0, 10));
 
+const optionalDate = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim() ? value.trim() : undefined,
+  z.string().date().optional(),
+);
+
 export const garageBikeSchema = z.object({
   nickname: z.string().trim().min(2).max(80),
   category: z.enum(bikeCategories.map(({ value }) => value)),
@@ -61,6 +67,26 @@ export const bikeLogSchema = z.object({
   componentModel: optionalText(100),
   documentationAvailable: z.boolean(),
 });
+
+export const bikeMaintenanceReminderSchema = z
+  .object({
+    title: z.string().trim().min(3).max(120),
+    componentCategory: z
+      .enum(componentCategories.map(({ value }) => value))
+      .optional()
+      .or(z.literal("").transform(() => undefined)),
+    dueOn: optionalDate,
+    dueOdometerKm: optionalInteger(0, 1_000_000),
+    notes: optionalText(2_000),
+  })
+  .refine(
+    (value) =>
+      value.dueOn !== undefined || value.dueOdometerKm !== undefined,
+    {
+      message: "Vælg en dato eller kilometerstand.",
+      path: ["dueOn"],
+    },
+  );
 
 export const acceptBikeTransferSchema = z.object({
   token: z.string().trim().min(24).max(200),

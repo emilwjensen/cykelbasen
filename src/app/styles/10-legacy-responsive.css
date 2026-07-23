@@ -1,0 +1,318 @@
+@media (max-width: 1000px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+    gap: 55px;
+  }
+
+  .hero__panel {
+    max-width: 680px;
+  }
+
+  .listing-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filters__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .detail__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail__summary {
+    position: static;
+  }
+
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forum-hero,
+  .forum-category-hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .garage-detail__grid,
+  .maintenance-planner__grid,
+  .component-editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garage-log-panel,
+  .component-change-form {
+    position: static;
+  }
+}
+
+@media (max-width: 700px) {
+  .shell {
+    padding-inline: 18px;
+  }
+
+  .site-header__inner {
+    grid-template-columns: 1fr auto;
+    min-height: 68px;
+  }
+
+  .site-nav {
+    display: none;
+  }
+
+  .header-status {
+    font-size: var(--font-caption);
+  }
+
+  .header-actions {
+    gap: 10px;
+  }
+
+  .header-actions > a:first-child {
+    display: none;
+  }
+
+  .hero__grid {
+    min-height: auto;
+    padding-block: 70px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.9rem, 15vw, 4.2rem);
+  }
+
+  .hero__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .trust-strip__inner {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding-block: 12px;
+  }
+
+  .trust-strip__inner span {
+    padding: 9px 0;
+  }
+
+  .trust-strip__inner span + span {
+    border-top: 1px solid rgba(13, 44, 34, 0.2);
+    border-left: 0;
+  }
+
+  .section,
+  .process {
+    padding-block: 75px;
+  }
+
+  .section-heading,
+  .results-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .listing-grid,
+  .process__grid,
+  .site-footer__grid,
+  .detail__content {
+    grid-template-columns: 1fr;
+  }
+
+  .process__grid article + article {
+    padding-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: 0;
+  }
+
+  .filters__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .price-range-filter {
+    grid-column: auto;
+  }
+
+  .filters__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filters__sort {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .detail__grid {
+    gap: 34px;
+  }
+
+  .detail__content {
+    gap: 65px;
+    margin-top: 70px;
+  }
+
+  .site-footer__grid {
+    gap: 38px;
+  }
+
+  .site-footer__bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .auth-card,
+  .account-card,
+  .listing-form fieldset {
+    padding: 25px 20px;
+  }
+
+  .dashboard-heading,
+  .profile-warning,
+  .listing-form__submit {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .seller-listing {
+    grid-template-columns: 100px 1fr;
+  }
+
+  .seller-listing__actions {
+    grid-column: 1 / -1;
+  }
+
+  .form-grid--two,
+  .form-grid--three,
+  .check-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forum-page,
+  .forum-detail {
+    padding-block: 45px 85px;
+  }
+
+  .forum-hero,
+  .forum-category-hero {
+    margin-bottom: 55px;
+    padding: 30px 24px;
+  }
+
+  .forum-category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forum-section-heading--posts {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .forum-post-row {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 14px;
+    padding-inline: 0;
+  }
+
+  .forum-post-row__comments {
+    display: none;
+  }
+
+  .forum-editor,
+  .forum-post-detail {
+    padding: 24px 20px;
+  }
+
+  .forum-post-detail {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 14px;
+  }
+
+  .forum-login-callout {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .forum-comment {
+    gap: 10px;
+    padding-inline: 0;
+  }
+
+  .forum-comment--reply {
+    margin-left: -35px;
+    padding-inline: 15px;
+  }
+
+  .trust-facts,
+  .garage-facts {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trust-facts span:nth-child(3),
+  .garage-facts > div:nth-child(3) {
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+
+  .component-history__list,
+  .garage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .garage-detail__hero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 30px 24px;
+  }
+
+  .garage-odometer {
+    align-items: flex-start;
+  }
+
+  .garage-log-panel__row,
+  .garage-log-panel__row--two,
+  .maintenance-reminder-form__targets,
+  .component-change-form > div {
+    grid-template-columns: 1fr;
+  }
+
+  .maintenance-planner {
+    padding: 25px 18px;
+  }
+
+  .moderation-page {
+    padding-block: 48px 85px;
+  }
+
+  .moderation-tabs {
+    width: 100%;
+  }
+
+  .moderation-tabs a {
+    flex: 1;
+    padding-inline: 8px;
+    text-align: center;
+  }
+
+  .moderation-card__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .moderation-card__context,
+  .moderation-form,
+  .moderation-decision {
+    padding-inline: 20px;
+  }
+
+  .moderation-form > div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+

@@ -1,0 +1,127 @@
+.auth-shell {
+  display: grid;
+  place-items: center;
+  min-height: 720px;
+  padding-block: 70px;
+}
+
+.auth-card {
+  width: min(100%, 510px);
+  padding: 46px;
+  background: var(--white);
+  border: 1px solid var(--line);
+}
+
+.auth-card h1,
+.account-heading h1,
+.dashboard-heading h1,
+.editor-heading h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.7rem, 6vw, 4.8rem);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.auth-card h1 {
+  font-size: clamp(2.5rem, 5vw, 3.7rem);
+}
+
+.auth-card__intro {
+  margin: 18px 0 28px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.auth-card__switch {
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: var(--font-small);
+  text-align: center;
+}
+
+.auth-card__switch a {
+  color: var(--forest);
+  font-weight: 780;
+}
+
+.stacked-form {
+  display: grid;
+  gap: 19px;
+}
+
+.stacked-form label,
+.form-field {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stacked-form input,
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 13px;
+  background: var(--paper);
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 450;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.stacked-form input:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.stacked-form input:hover:not(:disabled),
+.form-field input:hover,
+.form-field select:hover,
+.form-field textarea:hover {
+  border-color: var(--line);
+}
+
+.stacked-form small,
+.form-field small {
+  color: var(--muted);
+  font-size: var(--font-caption);
+  font-weight: 450;
+  letter-spacing: normal;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+.form-message {
+  margin: 0 0 20px;
+  padding: 13px 15px;
+  background: var(--paper-deep);
+  color: var(--forest);
+  font-size: var(--font-small);
+  font-weight: 680;
+  line-height: 1.5;
+}
+
+.form-message--error {
+  background: #f6ded5;
+  color: #7d2e17;
+}
+
+.form-message--success {
+  background: var(--mint);
+  color: var(--forest-deep);
+}
+
+.field-error {
+  color: #a53b20 !important;
+}
+

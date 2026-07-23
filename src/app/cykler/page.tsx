@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { EmptyState } from "@/components/empty-state";
 import { ListingCard } from "@/features/listings/components/listing-card";
 import {
   ActiveFilterChips,
   ListingFilterForm,
 } from "@/features/listings/components/listing-filters";
 import { ListingPagination } from "@/features/listings/components/listing-pagination";
+import { ListingResultsToolbar } from "@/features/listings/components/listing-results-toolbar";
+import { getActiveListingFilters } from "@/features/listings/filter-state";
 import {
   getListingFilterOptions,
   getListings,
@@ -47,6 +50,7 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   const listings = result.items;
   const resultCount = result.total;
+  const hasActiveFilters = getActiveListingFilters(filters).length > 0;
   const queryString = new URLSearchParams(
     Object.entries(rawSearchParams).flatMap(([key, value]) => {
       if (!value) return [];
@@ -59,24 +63,39 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
 
   return (
     <div className="shell browse">
-      <header className="page-heading">
-        <p className="eyebrow">Markedsplads</p>
-        <h1>Find en cykel, der faktisk passer.</h1>
-        <p>
-          Filtrér på de specifikationer, der betyder noget på landevejen.
-        </p>
+      <header className="browse-header">
+        <div>
+          <p className="eyebrow">Markedsplads</p>
+          <h1>Find en cykel, der faktisk passer.</h1>
+          <p>
+            Sammenlign strukturerede specifikationer og filtrér dig frem uden
+            at lede gennem fritekst.
+          </p>
+        </div>
+        <ul aria-label="Fordele ved Cykelbasens marked">
+          <li>
+            <span aria-hidden="true">01</span>
+            <strong>Tydelige størrelser</strong>
+          </li>
+          <li>
+            <span aria-hidden="true">02</span>
+            <strong>Søgbare specifikationer</strong>
+          </li>
+          <li>
+            <span aria-hidden="true">03</span>
+            <strong>Godkendt ejerskab</strong>
+          </li>
+        </ul>
       </header>
 
       <ListingFilterForm filters={filters} options={filterOptions} />
       <ActiveFilterChips filters={filters} />
 
-      <div className="results-heading">
-        <p>
-          <strong>{resultCount}</strong>{" "}
-          {resultCount === 1 ? "cykel fundet" : "cykler fundet"}
-        </p>
-        <span>Kun publicerede annoncer med godkendt dokumentation</span>
-      </div>
+      <ListingResultsToolbar
+        filters={filters}
+        pageSize={result.pageSize}
+        resultCount={resultCount}
+      />
 
       {listings.length ? (
         <>
@@ -95,16 +114,29 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
           />
         </>
       ) : (
-        <div className="empty-state">
-          <p className="eyebrow">Ingen match</p>
-          <h2>Prøv at løsne et filter.</h2>
+        <EmptyState
+          action={
+            <Link
+              className="button button--dark"
+              href={hasActiveFilters ? "/cykler" : "/annoncer/ny"}
+            >
+              {hasActiveFilters ? "Nulstil filtre" : "Sælg en cykel"}
+            </Link>
+          }
+          eyebrow={hasActiveFilters ? "Ingen match" : "Ingen annoncer endnu"}
+          icon={hasActiveFilters ? "↺" : "+"}
+          title={
+            hasActiveFilters
+              ? "Prøv at løsne et filter."
+              : "Bliv den første cykel på markedet."
+          }
+        >
           <p>
-            Der er ingen publicerede cykler, som matcher alle dine valg endnu.
+            {hasActiveFilters
+              ? "Der er ingen publicerede cykler, som matcher alle dine valg endnu."
+              : "Nye annoncer bliver synlige, når ejerskabet er gennemgået og godkendt."}
           </p>
-          <Link className="button button--dark" href="/cykler">
-            Nulstil filtre
-          </Link>
-        </div>
+        </EmptyState>
       )}
     </div>
   );

@@ -39,6 +39,7 @@
 - Store only a hash of an optional frame number
 - Track current odometer
 - Add ride, service, inspection, note and component-change logs
+- Plan maintenance by date or odometer and complete it into the bike log
 - Prefill a sales listing from a registered bike
 
 ### Forum

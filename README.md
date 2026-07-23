@@ -79,6 +79,7 @@ godkendt udviklings-dokumentpost.
 - Struktureret historik for udskiftede komponenter
 - Privat “Mine cykler” med hash af stelnummer
 - Kilometer-, service-, tur- og komponentlogs
+- Vedligeholdelsesplaner efter dato eller kilometer med automatisk logning
 - Forudfyld salgsannonce fra en registreret cykel
 - Sammenhængende ejerperioder via sikker overdragelseskode
 - Adskilte private logs for hver ejer efter videresalg
