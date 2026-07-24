@@ -43,11 +43,7 @@ function SearchIcon() {
 
 function BikeIllustration() {
   return (
-    <svg
-      aria-hidden="true"
-      className="bike-illustration"
-      viewBox="0 0 680 390"
-    >
+    <svg aria-hidden="true" className="bike-illustration" viewBox="0 0 680 390">
       <g className="bike-illustration__wheels">
         <circle className="bike-illustration__tyre" cx="188" cy="254" r="96" />
         <circle className="bike-illustration__rim" cx="188" cy="254" r="88" />
@@ -64,10 +60,7 @@ function BikeIllustration() {
         <path d="M188 254 258 122 415 129 428 177 303 272 188 254Z" />
         <path d="M258 122 303 272" />
       </g>
-      <path
-        className="bike-illustration__frame-accent"
-        d="M275 178 287 218"
-      />
+      <path className="bike-illustration__frame-accent" d="M275 178 287 218" />
       <g className="bike-illustration__fork">
         <path d="M428 177c18 27 41 58 64 77" />
         <path d="M435 175c17 28 38 57 55 79" />
@@ -103,12 +96,12 @@ export default async function HomePage() {
           <div className="hero__copy">
             <p className="eyebrow">Danmarks specialiserede cykelmarked</p>
             <h1>
-              Den næste cykel.
-              <span>Uden tvivlen.</span>
+              Køb og sælg racercykler.
+              <span>Med tillid.</span>
             </h1>
             <p className="hero__lead">
-              Find brugte racer- og gravelcykler med sammenlignelige
-              specifikationer og ejerskab, der er godkendt før publicering.
+              Verificerede sælgere, dokumenteret ejerskab og strukturerede
+              specifikationer gør det nemmere at finde den rigtige cykel.
             </p>
 
             <form action="/cykler" className="hero-search">
@@ -151,7 +144,7 @@ export default async function HomePage() {
             <div className="hero-visual__top">
               <span>En bedre cykelhandel</span>
               <span className="hero-visual__status">
-                <span>✓</span> Kontrolleret
+                <span>✓</span> Verificeret annonce
               </span>
             </div>
             <div className="hero-visual__bike">
@@ -168,7 +161,7 @@ export default async function HomePage() {
             <div className="hero-visual__footer">
               <div>
                 <span>Før du tager kontakt</span>
-                <strong>Du kender cyklen</strong>
+                <strong>Du ved, hvad du køber</strong>
               </div>
               <span className="hero-visual__check">✓</span>
             </div>
@@ -178,13 +171,22 @@ export default async function HomePage() {
 
       <section aria-label="Cykelbasens principper" className="trust-strip">
         <div className="shell trust-strip__inner">
-          <span><i aria-hidden="true">✓</i> Ejerskab gennemgået</span>
-          <span><i aria-hidden="true">⌁</i> Specs du kan filtrere på</span>
-          <span><i aria-hidden="true">◎</i> Modereret i Danmark</span>
+          <span>
+            <i aria-hidden="true">✓</i> Dokumenteret ejerskab
+          </span>
+          <span>
+            <i aria-hidden="true">⌁</i> Strukturerede specifikationer
+          </span>
+          <span>
+            <i aria-hidden="true">◎</i> Modereret af mennesker
+          </span>
         </div>
       </section>
 
-      <section className="home-categories shell" aria-labelledby="categories-title">
+      <section
+        className="home-categories shell"
+        aria-labelledby="categories-title"
+      >
         <div className="section-heading">
           <div>
             <p className="eyebrow">Start med kørestilen</p>
@@ -206,7 +208,9 @@ export default async function HomePage() {
                 <h3>{category.label}</h3>
                 <p>{category.description}</p>
               </div>
-              <span className="category-card__arrow" aria-hidden="true">↗</span>
+              <span className="category-card__arrow" aria-hidden="true">
+                ↗
+              </span>
             </Link>
           ))}
         </div>
@@ -217,7 +221,7 @@ export default async function HomePage() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">Senest på markedet</p>
-              <h2>Nyankomne cykler</h2>
+              <h2>Nye opslag</h2>
             </div>
             <Link className="text-link" href="/cykler">
               Se alle cykler <span aria-hidden="true">→</span>
@@ -264,7 +268,10 @@ export default async function HomePage() {
               <span>01</span>
               <div>
                 <h3>Beskriv cyklen</h3>
-                <p>Faste felter gør størrelse, stand og udstyr let at sammenligne.</p>
+                <p>
+                  Faste felter gør størrelse, stand og udstyr let at
+                  sammenligne.
+                </p>
               </div>
               <strong aria-hidden="true">✓</strong>
             </li>
@@ -280,7 +287,9 @@ export default async function HomePage() {
               <span>03</span>
               <div>
                 <h3>Bliv synlig</h3>
-                <p>Først efter godkendelsen vises annoncen i søgning og filtre.</p>
+                <p>
+                  Først efter godkendelsen vises annoncen i søgning og filtre.
+                </p>
               </div>
               <strong aria-hidden="true">✓</strong>
             </li>
